@@ -71,9 +71,11 @@ bool Bool::operator!(){
 bool operator||(const Bool& lhs, const Bool& rhs){
     return (lhs.as_bool() || rhs.as_bool());
 }
-/*
-bool operator&&(const Bool& lhs, const Bool& rhs){}
-*/
+
+// -*-
+bool operator&&(const Bool& lhs, const Bool& rhs){
+    return (lhs.as_bool() && rhs.as_bool());
+}
 
 // --------------------------------------------------------------
 // --- Number: wrapper around f64, i64, and std::complex<f64> ---
