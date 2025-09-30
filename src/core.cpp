@@ -998,8 +998,13 @@ Str String::repr(void) const{
     return ss.str();
 }
 
+// -*-
+String operator+(const String& lhs, const String& rhs){
+    auto str = (lhs.str() + rhs.str());
+    return String(str);
+}
+
 /*
-bool operator+(const String& lhs, const String& rhs){}
 bool operator==(const String& lhs, const String& rhs){}
 bool operator!=(const String& lhs, const String& rhs){}
 bool operator<=(const String& lhs, const String& rhs){}
