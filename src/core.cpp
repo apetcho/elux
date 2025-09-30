@@ -261,9 +261,18 @@ f64 Number::as_float(void) const{
     return num;
 }
 
-/*
-Complex Number::as_complex(void) const{}
+// -*-
+Complex Number::as_complex(void) const{
+    if(this->is_integer() || this->is_float()){
+        auto x = this->as_float();
+        return std::complex<f64>(x, 0.0);
+    }
+    Complex z{};
+    this->get(z);
+    return z;
+}
 
+/*
 Number Number::operator-(){}
 
 Number operator+(const Number& lhs, const Number& rhs){}
