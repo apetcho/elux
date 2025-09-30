@@ -608,12 +608,27 @@ Number Number::log(void) const{
         Str msg(std::strerror(errno));
         throw Error(Error::Kind::ValueError, msg);
     }
-    
+
+    return Number(x);
+}
+
+// -*-
+Number Number::log2(void) const{
+    if(this->is_complex()){
+        throw Error(Error::Kind::TypeError, "`log2' is not implemented for complex numbers");
+    }
+    errno = 0;
+    std::feclearexcept(FE_ALL_EXCEPT);
+    [[maybe_unused]] auto x = std::log2(this->as_float());
+    if(errno!=0){
+        Str msg(std::strerror(errno));
+        throw Error(Error::Kind::ValueError, msg);
+    }
+
     return Number(x);
 }
 
 /*
-Number Number::log2(void) const{}
 Number Number::log10(void) const{}
 Number Number::log1p(void) const{}
 Number Number::exp(void) const{}
