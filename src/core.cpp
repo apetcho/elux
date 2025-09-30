@@ -1056,8 +1056,18 @@ String String::capitalize(void) const{
     return String(ans);
 }
 
+// -*-
+String String::upper(void) const{
+    auto ans = this->str();
+    std::transform(
+        ans.cbegin(), ans.cend(), ans.begin(),
+        [](int c){ return std::toupper(c); }
+    );
+
+    return String(ans);
+}
+
 /*
-String String::upper(void) const{}
 String String::lower(void) const{}
 String String::trim(void) const{}
 String String::ltrim(void) const{}
