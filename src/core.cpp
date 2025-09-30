@@ -972,10 +972,16 @@ bool operator!=(const Symbol& lhs, const Symbol& rhs){
 // --------------
 // -*- String -*-
 // --------------
-/*
-String::String() noexcept{}
-String::String(const Str& str) noexcept{}
+String::String() noexcept
+: m_str{}
+{}
 
+// -*-
+String::String(const Str& str) noexcept
+: m_str{str}
+{}
+
+/*
 Symbol String::type(void) const{}
 Str String::str(void) const{}
 Str String::repr(void) const{}
