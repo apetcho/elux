@@ -121,13 +121,42 @@ Number::Number(f64 x, f64 y) noexcept
     this->m_value = std::complex<f64>(x, y);
 }
 
-/*
-Number::Number(const Complex& z) noexcept{}
-Number::Number(const Number& number) noexcept{}
-Number::Number(Number&& number) noexcept{}
-Number& Number::operator=(const Number& number) noexcept{}
-Number& Number::operator=(Number&& number) noexcept{}
+// -*-
+Number::Number(const Complex& z) noexcept
+: Number{}{
+    this->m_kind = Kind::COMPLEX;
+    this->m_value = std::complex<f64>(z.real(), z.imag());
+}
 
+Number::Number(const Number& number) noexcept
+: m_kind{number.m_kind}
+, m_value{number.m_value}
+{}
+
+Number::Number(Number&& number) noexcept
+: m_kind{std::move(number.m_kind)}
+, m_value{std::move(number.m_value)}
+{}
+
+// -*-
+Number& Number::operator=(const Number& number) noexcept{
+    if(this != &number){
+        this->m_kind = number.m_kind;
+        this->m_value = number.m_value;
+    }
+    return *this;
+}
+
+// -*-
+Number& Number::operator=(Number&& number) noexcept{
+    if(this != &number){
+        this->m_kind = std::move(number.m_kind);
+        this->m_value = std::move(number.m_value);
+    }
+    return *this;
+}
+
+/*
 bool Number::is_integer(void) const{}
 bool Number::is_float(void) const{}
 bool Number::is_complex(void) const{}
