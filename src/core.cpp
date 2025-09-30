@@ -1104,9 +1104,12 @@ String String::rtrim(void) const{
     return String(ans);
 }
 
+// -*-
+String String::trim(void) const{
+    return this->ltrim().rtrim();
+}
 
 /*
-String String::trim(void) const{}
 String String::join(const Vec<String>& vec) const{}
 String String::replace(const String& old, const String& neo) const{}
 Vec<String> String::split(const String& delim){}
