@@ -294,14 +294,6 @@ Number operator+(const Number& lhs, const Number& rhs){
         auto n1 = lhs.as_integer();
         auto n2 = rhs.as_integer();
         return Number((n1+n2));
-    }else if((lhs.is_integer() && lhs.is_float()) || (lhs.is_float() && rhs.is_integer())){
-        auto x = lhs.as_float();
-        auto y = lhs.as_float();
-        return Number(x+y);
-    }else if(lhs.is_float() && rhs.is_float()){
-        auto x = lhs.as_float();
-        auto y = rhs.as_float();
-        return Number(x+y);
     }else if(!lhs.is_complex() && !rhs.is_complex()){
         auto x = lhs.as_float();
         auto y = rhs.as_float();
@@ -326,14 +318,6 @@ Number operator-(const Number& lhs, const Number& rhs){
         auto n1 = lhs.as_integer();
         auto n2 = rhs.as_integer();
         return Number((n1-n2));
-    }else if((lhs.is_integer() && lhs.is_float()) || (lhs.is_float() && rhs.is_integer())){
-        auto x = lhs.as_float();
-        auto y = lhs.as_float();
-        return Number(x-y);
-    }else if(lhs.is_float() && rhs.is_float()){
-        auto x = lhs.as_float();
-        auto y = rhs.as_float();
-        return Number(x-y);
     }else if(!lhs.is_complex() && !rhs.is_complex()){
         auto x = lhs.as_float();
         auto y = rhs.as_float();
@@ -358,14 +342,6 @@ Number operator*(const Number& lhs, const Number& rhs){
         auto n1 = lhs.as_integer();
         auto n2 = rhs.as_integer();
         return Number((n1*n2));
-    }else if((lhs.is_integer() && lhs.is_float()) || (lhs.is_float() && rhs.is_integer())){
-        auto x = lhs.as_float();
-        auto y = lhs.as_float();
-        return Number(x*y);
-    }else if(lhs.is_float() && rhs.is_float()){
-        auto x = lhs.as_float();
-        auto y = rhs.as_float();
-        return Number(x*y);
     }else if(!lhs.is_complex() && !rhs.is_complex()){
         auto x = lhs.as_float();
         auto y = rhs.as_float();
@@ -384,8 +360,46 @@ Number operator*(const Number& lhs, const Number& rhs){
     return Number((z1*z2));
 }
 
+// -*-
+Number operator/(const Number& lhs, const Number& rhs){
+    if(lhs.is_integer() && rhs.is_integer()){
+        auto n1 = lhs.as_integer();
+        auto n2 = rhs.as_integer();
+        if(n2==0){
+            throw Error(Error::Kind::ValueError, "division by zero");
+        }
+        return Number((n1/n2));
+    }else if(!lhs.is_complex() && !rhs.is_complex()){
+        auto x = lhs.as_float();
+        auto y = rhs.as_float();
+        if(y==0.0){
+            throw Error(Error::Kind::ValueError, "division by zero");
+        }
+        return Number((x/y));
+    }else if(lhs.is_complex() && (rhs.is_integer() || rhs.is_float())){
+        auto z = lhs.as_complex();
+        auto x = rhs.as_float();
+        if(x==0.0){
+            throw Error(Error::Kind::ValueError, "division by zero");
+        }
+        return Number(z/x);
+    }else if((lhs.is_integer() || lhs.is_float()) && rhs.is_complex()){
+        auto x = lhs.as_float();
+        auto z = rhs.as_complex();
+        if(std::norm(z)==0.0){
+            throw Error(Error::Kind::ValueError, "division by zero");
+        }
+        return Number(x/z);
+    }
+    auto z1 = lhs.as_complex();
+    auto z2 = rhs.as_complex();
+    if(std::norm(z2)==0.0){
+        throw Error(Error::Kind::ValueError, "division by zero");
+    }
+    return Number((z1/z2));
+}
+
 /*
-Number operator/(const Number& lhs, const Number& rhs){}
 Number operator%(const Number& lhs, const Number& rhs){}
 
 bool operator==(const Number& lhs, const Number& rhs){}
