@@ -246,8 +246,22 @@ i64 Number::as_integer(void) const{
     return static_cast<i64>(num);
 }
 
+// -*-
+f64 Number::as_float(void) const{
+    if(this->is_complex()){
+        throw Error(Error::Kind::TypeError, "complex number cannot convert to float");
+    }
+    if(this->is_integer()){
+        i64 num{};
+        this->get(num);
+        return static_cast<f64>(num);
+    }
+    f64 num{};
+    this->get(num);
+    return num;
+}
+
 /*
-f64 Number::as_float(void) const{}
 Complex Number::as_complex(void) const{}
 
 Number Number::operator-(){}
