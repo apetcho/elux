@@ -1029,9 +1029,12 @@ bool operator<(const String& lhs, const String& rhs){
     return (lhs.str() < rhs.str());
 }
 
-/*
-bool operator>(const String& lhs, const String& rhs){}
+// -*-
+bool operator>(const String& lhs, const String& rhs){
+    return !(lhs >= rhs);
+}
 
+/*
 i64 String::len(void) const{}
 String String::capitalize(void) const{}
 String String::upper(void) const{}
