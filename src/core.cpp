@@ -895,8 +895,15 @@ Number Number::erfc(void) const{
     return Number(std::erfc(this->as_float()));
 }
 
+// -*-
+Number Number::tgamma(void) const{
+    if(this->is_complex()){
+        throw Error(Error::Kind::TypeError, "`tgamma` is not supported for complex numbers");
+    }
+    return Number(std::tgamma(this->as_float()));
+}
+
 /*
-Number Number::tgamma(void) const{}
 Number Number::lgamma(void) const{}
 Number Number::isfinite(void) const{}
 Number Number::isinf(void) const{}
