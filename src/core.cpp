@@ -66,8 +66,12 @@ f64 Bool::as_float(void) const{
 bool Bool::operator!(){
     return !this->m_value;
 }
+
+// -*-
+bool operator||(const Bool& lhs, const Bool& rhs){
+    return (lhs.as_bool() || rhs.as_bool());
+}
 /*
-bool operator||(const Bool& lhs, const Bool& rhs){}
 bool operator&&(const Bool& lhs, const Bool& rhs){}
 */
 
