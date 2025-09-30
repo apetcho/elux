@@ -806,8 +806,15 @@ Number Number::asin(void) const{
     return Number(std::asin(this->as_float()));
 }
 
+// -*-
+Number Number::acos(void) const{
+    if(this->is_complex()){
+        return Number(std::acos(this->as_complex()));
+    }
+    return Number(std::acos(this->as_float()));
+}
+
 /*
-Number Number::acos(void) const{}
 Number Number::atan(void) const{}
 Number Number::atan2(void) const{}
 Number Number::sinh(void) const{}
