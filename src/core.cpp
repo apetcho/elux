@@ -160,8 +160,12 @@ bool Number::is_integer(void) const{
     return this->m_kind == Kind::INT;
 }
 
+// -*-
+bool Number::is_float(void) const{
+    return this->m_kind==Kind::FLOAT;
+}
+
 /*
-bool Number::is_float(void) const{}
 bool Number::is_complex(void) const{}
 Symbol Number::type(void) const{}
 Str Number::str(void) const{}
