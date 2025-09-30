@@ -879,8 +879,15 @@ Number Number::atanh(void) const{
     return Number(std::atanh(this->as_float()));
 }
 
+// -*-
+Number Number::erf(void) const{
+    if(this->is_complex()){
+        throw Error(Error::Kind::TypeError, "`erf` is not supported for complex numbers");
+    }
+    return Number(std::atanh(this->as_float()));
+}
+
 /*
-Number Number::erf(void) const{}
 Number Number::erfc(void) const{}
 Number Number::tgamma(void) const{}
 Number Number::lgamma(void) const{}
