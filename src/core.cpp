@@ -16,9 +16,15 @@ Symbol Object::type(void) const{
 // ------------
 // -*- Bool -*-
 // ------------
+Bool::Bool() noexcept
+: m_value{false}
+{}
+
+Bool::Bool(bool val) noexcept
+: m_value{val}
+{}
+
 /*
-Bool::Bool() noexcept{}
-Bool::Bool(bool val) noexcept{}
 Symbol Bool::type(void) const{}
 Str Bool::str(void) const{}
 Str Bool::repr(void) const{}
