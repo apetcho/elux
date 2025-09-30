@@ -718,8 +718,24 @@ Number Number::expm1(void) const{
     return Number(x);
 }
 
+// -*-
+Number Number::pow(const Number& rhs) const{
+    auto test = (
+        (!this->is_complex() && rhs.is_complex()) ||
+        (this->is_complex() && !rhs.is_complex()) ||
+        (this->is_complex() && rhs.is_complex())
+    );
+    if(test){
+        auto z1 = this->as_complex();
+        auto z2 = rhs.as_complex();
+        return Number(std::pow(z1, z2));
+    }
+    auto x = this->as_float();
+    auto y = rhs.as_float();
+    return Number(std::pow(x, y));
+}
+
 /*
-Number Number::pow(const Number& other) const{}
 Number Number::sqrt(void) const{}
 Number Number::cbrt(void) const{}
 Number Number::hypot(const Number& other) const{}
