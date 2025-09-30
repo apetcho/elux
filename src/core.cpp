@@ -272,9 +272,23 @@ Complex Number::as_complex(void) const{
     return z;
 }
 
-/*
-Number Number::operator-(){}
+// -*-
+Number Number::operator-(){
+    if(this->is_integer()){
+        i64 num{};
+        this->get(num);
+        return Number(-num);
+    }else if(this->is_float()){
+        f64 num{};
+        this->get(num);
+        return Number(-num);
+    }
+    Complex z{};
+    this->get(z);
+    return Number(-z);
+}
 
+/*
 Number operator+(const Number& lhs, const Number& rhs){}
 Number operator-(const Number& lhs, const Number& rhs){}
 Number operator*(const Number& lhs, const Number& rhs){}
