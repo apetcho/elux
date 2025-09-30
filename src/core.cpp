@@ -24,8 +24,12 @@ Bool::Bool(bool val) noexcept
 : m_value{val}
 {}
 
+// -*-
+Symbol Bool::type(void) const{
+    return Symbol("bool");
+}
+
 /*
-Symbol Bool::type(void) const{}
 Str Bool::str(void) const{}
 Str Bool::repr(void) const{}
 bool Bool::as_bool(void) const{}
