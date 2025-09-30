@@ -170,8 +170,17 @@ bool Number::is_complex(void) const{
     return this->m_kind==Kind::COMPLEX;
 }
 
+// -*-
+Symbol Number::type(void) const{
+    if(this->is_integer()){
+        return Symbol("integer");
+    }else if(this->is_float()){
+        return Symbol("float");
+    }
+    return Symbol("complex");
+}
+
 /*
-Symbol Number::type(void) const{}
 Str Number::str(void) const{}
 Str Number::repr(void) const{}
 
