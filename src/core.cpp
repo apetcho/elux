@@ -832,8 +832,15 @@ Number Number::atan2(const Number& rhs) const{
     return Number(std::atan2(y, x));
 }
 
+// -*-
+Number Number::sinh(void) const{
+    if(this->is_complex()){
+        return Number(std::sinh(this->as_complex()));
+    }
+    return Number(std::sinh(this->as_float()));
+}
+
 /*
-Number Number::sinh(void) const{}
 Number Number::cosh(void) const{}
 Number Number::tanh(void) const{}
 Number Number::asinh(void) const{}
