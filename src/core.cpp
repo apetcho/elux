@@ -822,8 +822,17 @@ Number Number::atan(void) const{
     return Number(std::atan(this->as_float()));
 }
 
+// -*-
+Number Number::atan2(const Number& rhs) const{
+    if(this->is_complex() || rhs.is_complex()){
+        throw Error(Error::Kind::TypeError, "`atan2` is not supported for complex numbers.");
+    }
+    auto y = this->as_float();
+    auto x = rhs.as_float();
+    return Number(std::atan2(y, x));
+}
+
 /*
-Number Number::atan2(void) const{}
 Number Number::sinh(void) const{}
 Number Number::cosh(void) const{}
 Number Number::tanh(void) const{}

@@ -313,7 +313,7 @@ public:
     Number asin(void) const;
     Number acos(void) const;
     Number atan(void) const;
-    Number atan2(void) const;
+    Number atan2(const Number& rhs) const;
     Number sinh(void) const;
     Number cosh(void) const;
     Number tanh(void) const;
