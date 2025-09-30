@@ -231,8 +231,22 @@ bool Number::as_bool(void) const{
     return true; // complex numbers always cnvert to true
 }
 
+// -*-
+i64 Number::as_integer(void) const{
+    if(this->is_complex()){
+        throw Error(Error::Kind::TypeError, "complex number cannot convert to integer");
+    }
+    if(this->is_integer()){
+        i64 num{};
+        this->get(num);
+        return num;
+    }
+    f64 num{};
+    this->get(num);
+    return static_cast<i64>(num);
+}
+
 /*
-i64 Number::as_integer(void) const{}
 f64 Number::as_float(void) const{}
 Complex Number::as_complex(void) const{}
 
