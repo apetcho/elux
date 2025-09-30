@@ -863,8 +863,15 @@ Number Number::asinh(void) const{
     return Number(std::asinh(this->as_float()));
 }
 
+// -*-
+Number Number::acosh(void) const{
+    if(this->is_complex()){
+        return Number(std::acosh(this->as_complex()));
+    }
+    return Number(std::acosh(this->as_float()));
+}
+
 /*
-Number Number::acosh(void) const{}
 Number Number::atanh(void) const{}
 Number Number::erf(void) const{}
 Number Number::erfc(void) const{}
