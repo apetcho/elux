@@ -494,8 +494,13 @@ Number Number::imag(void) const{
     return Number(this->as_float());
 }
 
+// -*-
+Number Number::arg(void) const{
+    auto z = this->as_complex();
+    return Number(std::arg(z));
+}
+
 /*
-Number Number::arg(void) const{}
 Number Number::norm(void) const{}
 Number Number::conj(void) const{}
 Number Number::polar(f64 rho, f64 theta) const{}
