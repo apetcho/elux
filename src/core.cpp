@@ -986,8 +986,12 @@ Symbol String::type(void) const{
     return Symbol("string");
 }
 
+// -*-
+Str String::str(void) const{
+    return this->m_str;
+}
+
 /*
-Str String::str(void) const{}
 Str String::repr(void) const{}
 
 bool operator+(const String& lhs, const String& rhs){}
