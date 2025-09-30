@@ -1024,8 +1024,12 @@ bool operator>=(const String& lhs, const String& rhs){
     return (lhs > rhs) || (lhs == rhs);
 }
 
+// -*-
+bool operator<(const String& lhs, const String& rhs){
+    return (lhs.str() < rhs.str());
+}
+
 /*
-bool operator<(const String& lhs, const String& rhs){}
 bool operator>(const String& lhs, const String& rhs){}
 
 i64 String::len(void) const{}
