@@ -991,9 +991,14 @@ Str String::str(void) const{
     return this->m_str;
 }
 
-/*
-Str String::repr(void) const{}
+// -*-
+Str String::repr(void) const{
+    std::stringstream ss;
+    ss << std::quoted(this->m_str);
+    return ss.str();
+}
 
+/*
 bool operator+(const String& lhs, const String& rhs){}
 bool operator==(const String& lhs, const String& rhs){}
 bool operator!=(const String& lhs, const String& rhs){}
