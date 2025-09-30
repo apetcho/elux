@@ -1067,9 +1067,48 @@ String String::upper(void) const{
     return String(ans);
 }
 
+// -*-
+String String::lower(void) const{
+    auto ans = this->str();
+    std::transform(
+        ans.cbegin(), ans.cend(), ans.begin(),
+        [](int c){ return std::tolower(c); }
+    );
+
+    return String(ans);
+}
+
+// -*-
+String String::ltrim(void) const{
+    auto ans = this->str();
+    ans.erase(
+        ans.begin(),
+        std::find_if(
+            ans.begin(), ans.end(),
+            [](int c) {return !std::isspace(c);}
+        )
+    );
+    return String(ans);
+}
+
 /*
-String String::lower(void) const{}
-String String::trim(void) const{}
+
+inline void ltrim(std::string &s) {
+    
+}
+
+inline void rtrim(std::string &s) {
+    s.erase(std::find_if(
+            s.rbegin(), s.rend(),
+            [](int ch) { return !std::isspace(ch); }
+        ).base(),
+        s.end(
+    ));
+}
+*/
+
+/*
+
 String String::ltrim(void) const{}
 String String::rtrim(void) const{}
 String String::join(const Vec<String>& vec) const{}
