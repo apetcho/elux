@@ -474,13 +474,25 @@ bool operator>(const Number& lhs, const Number& rhs){
     return !(lhs <= rhs);
 }
 
+// -*-
+// Number Number::real(void) const{
+// }
+
+// -*-
+Number Number::imag(void) const{
+    if(this->is_complex()){
+        Complex z{};
+        this->get(z);
+        return Number(z.imag());
+    }
+    return Number(this->as_float());
+}
+
 /*
-f64 Number::real(void) const;
-f64 Number::imag(void) const;
-f64 Number::arg(void) const;
-f64 Number::norm(void) const;
-Number Number::conj(void) const;
-Number Number::polar(f64 rho, f64 theta) const;
+Number Number::arg(void) const{}
+Number Number::norm(void) const{}
+Number Number::conj(void) const{}
+Number Number::polar(f64 rho, f64 theta) const{}
 
 Number Number::abs(void) const{}
 Number Number::min(const Number& other) const{}

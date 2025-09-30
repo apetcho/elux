@@ -283,10 +283,10 @@ public:
     friend bool operator<(const Number& lhs, const Number& rhs);
     friend bool operator>(const Number& lhs, const Number& rhs);
 
-    f64 real(void) const;
-    f64 imag(void) const;
-    f64 arg(void) const;
-    f64 norm(void) const;
+    Number real(void) const;
+    Number imag(void) const;
+    Number arg(void) const;
+    Number norm(void) const;
     Number conj(void) const;
     Number polar(f64 rho, f64 theta) const;
 
