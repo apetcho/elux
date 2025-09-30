@@ -774,8 +774,15 @@ Number Number::hypot(const Number& rhs) const{
     return Number(std::hypot(x, y));
 }
 
+// -*-
+Number Number::sin(void) const{
+    if(this->is_complex()){
+        return Number(std::sin(this->as_complex()));
+    }
+    return Number(std::sin(this->as_float()));
+}
+
 /*
-Number Number::sin(void) const{}
 Number Number::cos(void) const{}
 Number Number::tan(void) const{}
 Number Number::asin(void) const{}
