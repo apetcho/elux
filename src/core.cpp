@@ -665,8 +665,28 @@ Number Number::log1p(void) const{
     return Number(x);
 }
 
+// -*-
+Number Number::exp(void) const{
+    errno = 0;
+    std::feclearexcept(FE_ALL_EXCEPT);
+    if(this->is_complex()){
+        [[maybe_unused]] auto z = std::exp(this->as_complex());
+        if(errno!=0){
+            Str msg(std::strerror(errno));
+            throw Error(Error::Kind::ValueError, msg);
+        }
+        return Number(z);
+    }
+    [[maybe_unused]] auto x = std::exp(this->as_float());
+    if(errno!=0){
+        Str msg(std::strerror(errno));
+        throw Error(Error::Kind::ValueError, msg);
+    }
+
+    return Number(x);
+}
+
 /*
-Number Number::exp(void) const{}
 Number Number::exp2(void) const{}
 Number Number::expm1(void) const{}
 Number Number::pow(const Number& other) const{}
