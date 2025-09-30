@@ -848,8 +848,14 @@ Number Number::cosh(void) const{
     return Number(std::cos(this->as_float()));
 }
 
+Number Number::tanh(void) const{
+    if(this->is_complex()){
+        return Number(std::tanh(this->as_complex()));
+    }
+    return Number(std::tanh(this->as_float()));
+}
+
 /*
-Number Number::tanh(void) const{}
 Number Number::asinh(void) const{}
 Number Number::acosh(void) const{}
 Number Number::atanh(void) const{}
