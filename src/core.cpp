@@ -1109,8 +1109,25 @@ String String::trim(void) const{
     return this->ltrim().rtrim();
 }
 
+// -*-
+String String::join(const Vec<String>& vec) const{
+    if(vec.size()==0){
+        return String();
+    }
+    if(vec.size()==1){
+        return vec[0];
+    }
+    std::stringstream ss;
+    auto sep = this->str();
+    ss << vec[0].str();
+    for(size_t i=1; i < vec.size(); i++){
+        ss << sep << vec[i].str();
+    }
+
+    return String(ss.str());
+}
+
 /*
-String String::join(const Vec<String>& vec) const{}
 String String::replace(const String& old, const String& neo) const{}
 Vec<String> String::split(const String& delim){}
 i64 String::find(const String& needle) const{}
