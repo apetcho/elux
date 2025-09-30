@@ -4,6 +4,9 @@
 #include<limits>
 #include<sstream>
 #include<iomanip>
+#include<cstring>
+#include<cerrno>
+#include<cfenv>
 #include<cmath>
 
 // -*----------------------------------------------------------------*-
@@ -588,8 +591,28 @@ Number Number::round(void) const{
     return Number(std::round(this->as_float()));
 }
 
+// -*-
+Number Number::log(void) const{
+    errno = 0;
+    std::feclearexcept(FE_ALL_EXCEPT);
+    if(this->is_complex()){
+        [[maybe_unused]] auto z = std::log(this->as_complex());
+        if(errno!=0){
+            Str msg(std::strerror(errno));
+            throw Error(Error::Kind::ValueError, msg);
+        }
+        return Number(z);
+    }
+    [[maybe_unused]] auto x = std::log(this->as_float());
+    if(errno!=0){
+        Str msg(std::strerror(errno));
+        throw Error(Error::Kind::ValueError, msg);
+    }
+    
+    return Number(x);
+}
+
 /*
-Number Number::log(void) const{}
 Number Number::log2(void) const{}
 Number Number::log10(void) const{}
 Number Number::log1p(void) const{}
