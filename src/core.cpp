@@ -180,8 +180,31 @@ Symbol Number::type(void) const{
     return Symbol("complex");
 }
 
+// -*-
+Str Number::str(void) const{
+    std::stringstream stream;
+    if(this->is_integer()){
+        i64 num{};
+        this->get(num);
+        stream << num;
+    }else if(this->is_float()){
+        f64 num{};
+        this->get(num);
+        stream << num;
+    }else{
+        Complex z{};
+        this->get(z);
+        if(z.real()==0.0){
+            stream << z.imag() << "i";
+        }else{
+            stream << z.real() << " + " << z.imag() << "i";
+        }
+    }
+
+    return stream.str();
+}
+
 /*
-Str Number::str(void) const{}
 Str Number::repr(void) const{}
 
 bool Number::as_bool(void) const{}
