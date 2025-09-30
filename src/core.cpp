@@ -945,8 +945,12 @@ Symbol::Symbol(const Str& str) noexcept
 : m_str{str}
 {}
 
+// -*-
+Symbol Symbol::type(void) const{
+    return Symbol("symbol");
+}
+
 /*
-Symbol Symbol::type(void) const{}
 Str Symbol::str(void) const{}
 Str Symbol::repr(void) const{}
 
