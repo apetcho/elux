@@ -955,8 +955,11 @@ Str Symbol::str(void) const{
     return this->m_str;
 }
 
+Str Symbol::repr(void) const{
+    return this->m_str;
+}
+
 /*
-Str Symbol::repr(void) const{}
 
 bool operator==(const Symbol& lhs, const Symbol& rhs);
 bool operator!=(const Symbol& lhs, const Symbol& rhs);
