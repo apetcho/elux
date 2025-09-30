@@ -941,8 +941,11 @@ bool Number::isnan(void) const{
 // --------------
 // -*- Symbol -*-
 // --------------
+Symbol::Symbol(const Str& str) noexcept
+: m_str{str}
+{}
+
 /*
-Symbol::Symbol(const Str& str) noexcept{}
 Symbol Symbol::type(void) const{}
 Str Symbol::str(void) const{}
 Str Symbol::repr(void) const{}
