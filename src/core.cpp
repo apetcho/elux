@@ -903,8 +903,15 @@ Number Number::tgamma(void) const{
     return Number(std::tgamma(this->as_float()));
 }
 
+// -*-
+Number Number::lgamma(void) const{
+    if(this->is_complex()){
+        throw Error(Error::Kind::TypeError, "`lgamma` is not supported for complex numbers");
+    }
+    return Number(std::lgamma(this->as_float()));
+}
+
 /*
-Number Number::lgamma(void) const{}
 Number Number::isfinite(void) const{}
 Number Number::isinf(void) const{}
 Number Number::isnan(void) const{}
