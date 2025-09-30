@@ -500,8 +500,13 @@ Number Number::arg(void) const{
     return Number(std::arg(z));
 }
 
+// -*-
+Number Number::norm(void) const{
+    return Number(std::norm(this->as_complex()));
+}
+
+
 /*
-Number Number::norm(void) const{}
 Number Number::conj(void) const{}
 Number Number::polar(f64 rho, f64 theta) const{}
 
