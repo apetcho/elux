@@ -515,8 +515,16 @@ Number Number::polar(f64 rho, f64 theta) const{
     return Number(std::polar(rho, theta));
 }
 
+Number Number::abs(void) const{
+    if(this->is_complex()){
+        return Number(std::abs(this->as_complex()));
+    }else if(this->is_float()){
+        return Number(std::abs(this->as_float()));
+    }
+    return Number(std::abs(this->as_integer()));
+}
+
 /*
-Number Number::abs(void) const{}
 Number Number::min(const Number& other) const{}
 Number Number::max(const Number& other) const{}
 Number Number::floor(void) const{}
