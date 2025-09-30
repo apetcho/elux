@@ -914,7 +914,8 @@ Number Number::lgamma(void) const{
 // -*-
 bool Number::isfinite(void) const{
     if(this->is_complex()){
-        throw Error(Error::Kind::TypeError, "`isfinite` is not supported for complex numbers");
+        auto z = this->as_complex();
+        return (std::isfinite(z.real()) && std::isfinite(z.imag()));
     }
     return std::isfinite(this->as_float());
 }
@@ -922,14 +923,20 @@ bool Number::isfinite(void) const{
 // -*-
 bool Number::isinf(void) const{
     if(this->is_complex()){
-        throw Error(Error::Kind::TypeError, "`isinf` is not supported for complex numbers");
+        auto z = this->as_complex();
+        return (std::isinf(z.real()) || std::isinf(z.imag()));
     }
     return std::isinf(this->as_float());
 }
 
-/*
-bool Number::isnan(void) const{}
-*/
+// -*-
+bool Number::isnan(void) const{
+    if(this->is_complex()){
+        auto z = this->as_complex();
+        return (std::isnan(z.real()) || std::isnan(z.imag()));
+    }
+    return std::isinf(this->as_float());
+}
 
 // --------------
 // -*- Symbol -*-
