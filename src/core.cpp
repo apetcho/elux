@@ -415,8 +415,26 @@ Number operator%(const Number& lhs, const Number& rhs){
     return Number(std::fmod(x, y));
 }
 
+// -*-
+bool operator==(const Number& lhs, const Number& rhs){
+    if(lhs.is_complex() && rhs.is_complex()){
+        auto z1 = lhs.as_complex();
+        auto z2 = rhs.as_complex();
+        return (
+            (z1.real()==z2.real()) &&
+            (z1.imag()==z2.imag())
+        );
+    }else if(lhs.is_integer() && rhs.is_integer()){
+        return (lhs.as_integer()==rhs.as_integer());
+    }else if(!lhs.is_complex() && !rhs.is_complex()){
+        auto x = lhs.as_float();
+        auto y = rhs.as_float();
+        return x==y;
+    }
+    return false;
+}
+
 /*
-bool operator==(const Number& lhs, const Number& rhs){}
 bool operator!=(const Number& lhs, const Number& rhs){}
 bool operator<=(const Number& lhs, const Number& rhs){}
 bool operator>=(const Number& lhs, const Number& rhs){}
