@@ -1127,8 +1127,21 @@ String String::join(const Vec<String>& vec) const{
     return String(ss.str());
 }
 
+// -*-
+String String::replace(const String& old, const String& neo) const{
+    auto text = this->str();
+    auto _old = old.str();
+    auto _new = neo.str();
+    auto pos = text.find(_old);
+    if(pos!=Str::npos){
+        text.replace(pos, _old.length(), _new);
+    }
+
+    return String(text);
+}
+
+
 /*
-String String::replace(const String& old, const String& neo) const{}
 Vec<String> String::split(const String& delim){}
 i64 String::find(const String& needle) const{}
 String String::substr(i64 start=0, i64 end=Str::npos) const{}
