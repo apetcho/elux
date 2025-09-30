@@ -649,8 +649,23 @@ Number Number::log10(void) const{
     return Number(x);
 }
 
+// -*-
+Number Number::log1p(void) const{
+    if(this->is_complex()){
+        throw Error(Error::Kind::TypeError, "`log1p' is not implemented for complex numbers");
+    }
+    errno = 0;
+    std::feclearexcept(FE_ALL_EXCEPT);
+    [[maybe_unused]] auto x = std::log1p(this->as_float());
+    if(errno!=0){
+        Str msg(std::strerror(errno));
+        throw Error(Error::Kind::ValueError, msg);
+    }
+
+    return Number(x);
+}
+
 /*
-Number Number::log1p(void) const{}
 Number Number::exp(void) const{}
 Number Number::exp2(void) const{}
 Number Number::expm1(void) const{}
