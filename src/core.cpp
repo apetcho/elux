@@ -93,13 +93,35 @@ const Number Number::EPSILON = Number(std::numeric_limits<f64>::epsilon());
 const Number Number::PHI = Number(1.618033988749894);
 const Number Number::NaN = Number(std::numeric_limits<f64>::quiet_NaN());
 
+// -*-
+Number::Number() noexcept
+: m_kind{Kind::INT}
+, m_value{i64{}}
+{}
+
+// -*-
+Number::Number(f64 num) noexcept
+: Number{}
+{
+    this->m_kind = Kind::FLOAT;
+    this->m_value = num;
+}
+
+// -*-
+Number::Number(i64 num) noexcept
+: Number{}{
+    this->m_kind = Kind::INT;
+    this->m_value = num;
+}
+
+// -*-
+Number::Number(f64 x, f64 y) noexcept
+: Number{}{
+    this->m_kind = Kind::COMPLEX;
+    this->m_value = std::complex<f64>(x, y);
+}
+
 /*
-
-
-Number::Number() noexcept{}
-Number::Number(f64 num) noexcept{}
-Number::Number(i64 num) noexcept{}
-Number::Number(f64 x, f64 y) noexcept{}
 Number::Number(const Complex& z) noexcept{}
 Number::Number(const Number& number) noexcept{}
 Number::Number(Number&& number) noexcept{}
