@@ -884,11 +884,18 @@ Number Number::erf(void) const{
     if(this->is_complex()){
         throw Error(Error::Kind::TypeError, "`erf` is not supported for complex numbers");
     }
-    return Number(std::atanh(this->as_float()));
+    return Number(std::erf(this->as_float()));
+}
+
+// -*-
+Number Number::erfc(void) const{
+    if(this->is_complex()){
+        throw Error(Error::Kind::TypeError, "`erfc` is not supported for complex numbers");
+    }
+    return Number(std::erfc(this->as_float()));
 }
 
 /*
-Number Number::erfc(void) const{}
 Number Number::tgamma(void) const{}
 Number Number::lgamma(void) const{}
 Number Number::isfinite(void) const{}
