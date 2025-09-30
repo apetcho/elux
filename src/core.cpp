@@ -981,8 +981,12 @@ String::String(const Str& str) noexcept
 : m_str{str}
 {}
 
+// -*-
+Symbol String::type(void) const{
+    return Symbol("string");
+}
+
 /*
-Symbol String::type(void) const{}
 Str String::str(void) const{}
 Str String::repr(void) const{}
 
