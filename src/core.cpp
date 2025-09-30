@@ -580,8 +580,15 @@ Number Number::ceil(void) const{
     return Number(std::ceil(this->as_float()));
 }
 
+// -*-
+Number Number::round(void) const{
+    if(this->is_complex()){
+        throw Error(Error::Kind::TypeError, "`round` is not supported for complex numbers");
+    }
+    return Number(std::round(this->as_float()));
+}
+
 /*
-Number Number::round(void) const{}
 Number Number::log(void) const{}
 Number Number::log2(void) const{}
 Number Number::log10(void) const{}
