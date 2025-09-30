@@ -288,8 +288,23 @@ Number Number::operator-(){
     return Number(-z);
 }
 
+//-*-
+Number operator+(const Number& lhs, const Number& rhs){
+    if(lhs.is_integer() && rhs.is_integer()){
+        auto n1 = lhs.as_integer();
+        auto n2 = rhs.as_integer();
+        return Number((n1+n2));
+    }else if(!lhs.is_complex() && !rhs.is_complex()){
+        auto x = lhs.as_float();
+        auto y = rhs.as_float();
+        return Number((x+y));
+    }
+    auto z1 = lhs.as_complex();
+    auto z2 = rhs.as_complex();
+    return Number((z1+z2));
+}
+
 /*
-Number operator+(const Number& lhs, const Number& rhs){}
 Number operator-(const Number& lhs, const Number& rhs){}
 Number operator*(const Number& lhs, const Number& rhs){}
 Number operator/(const Number& lhs, const Number& rhs){}
@@ -301,6 +316,13 @@ bool operator<=(const Number& lhs, const Number& rhs){}
 bool operator>=(const Number& lhs, const Number& rhs){}
 bool operator<(const Number& lhs, const Number& rhs){}
 bool operator>(const Number& lhs, const Number& rhs){}
+
+f64 Number::real(void) const;
+f64 Number::imag(void) const;
+f64 Number::arg(void) const;
+f64 Number::norm(void) const;
+Number Number::conj(void) const;
+Number Number::polar(f64 rho, f64 theta) const;
 
 Number Number::abs(void) const{}
 Number Number::min(const Number& other) const{}
