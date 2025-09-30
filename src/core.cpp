@@ -751,7 +751,7 @@ Number Number::sqrt(void) const{
 // -*-
 Number Number::cbrt(void) const{
     if(this->is_complex()){
-        throw Error(Error::Kind::TypeError, "");
+        throw Error(Error::Kind::TypeError, "`cbrt` not supported for complex numbers");
     }
     auto x = this->as_float();
     errno = 0;
@@ -764,8 +764,17 @@ Number Number::cbrt(void) const{
     return Number(ans);
 }
 
+// -*-
+Number Number::hypot(const Number& rhs) const{
+    if(this->is_complex() || rhs.is_complex()){
+        throw Error(Error::Kind::TypeError, "`hypot` is not supported for complex numbers.");
+    }
+    auto x = this->as_float();
+    auto y = rhs.as_float();
+    return Number(std::hypot(x, y));
+}
+
 /*
-Number Number::hypot(const Number& other) const{}
 Number Number::sin(void) const{}
 Number Number::cos(void) const{}
 Number Number::tan(void) const{}
