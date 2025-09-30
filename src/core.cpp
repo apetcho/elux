@@ -34,8 +34,12 @@ Str Bool::str(void) const{
     return this->m_value ? "true" : "false";
 }
 
+// -*-
+Str Bool::repr(void) const{
+    return this->m_value ? "true" : "false";
+}
+
 /*
-Str Bool::repr(void) const{}
 bool Bool::as_bool(void) const{}
 i64 Bool::as_integer(void) const{}
 f64 Bool::as_float(void) const{}
