@@ -44,8 +44,16 @@ bool Bool::as_bool(void) const{
     return this->m_value;
 }
 
+// -*-
+i64 Bool::as_integer(void) const{
+    return (
+        this->m_value ?
+        static_cast<i64>(1) :
+        static_cast<i64>(0)
+    );
+}
+
 /*
-i64 Bool::as_integer(void) const{}
 f64 Bool::as_float(void) const{}
 bool Bool::operator!(){}
 bool operator||(const Bool& lhs, const Bool& rhs){}
