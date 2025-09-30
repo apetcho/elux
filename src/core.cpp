@@ -5,6 +5,7 @@
 #include<sstream>
 #include<iomanip>
 #include<cstring>
+#include<cctype>
 #include<cerrno>
 #include<cfenv>
 #include<cmath>
@@ -1039,8 +1040,23 @@ i64 String::len(void) const{
     return static_cast<i64>(this->str().length());
 }
 
+// -*-
+String String::capitalize(void) const{
+    auto ans = this->str();
+    bool first = false;
+    size_t idx = 0;
+    for(auto i=0; i < ans.length(); i++){
+        if(std::isalpha(ans[i])){
+            first = true;
+            idx = i;
+        }
+        if(first){ break; }
+    }
+    ans[idx] = std::toupper(ans[idx]);
+    return String(ans);
+}
+
 /*
-String String::capitalize(void) const{}
 String String::upper(void) const{}
 String String::lower(void) const{}
 String String::trim(void) const{}
