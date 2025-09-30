@@ -156,8 +156,11 @@ Number& Number::operator=(Number&& number) noexcept{
     return *this;
 }
 
+bool Number::is_integer(void) const{
+    return this->m_kind == Kind::INT;
+}
+
 /*
-bool Number::is_integer(void) const{}
 bool Number::is_float(void) const{}
 bool Number::is_complex(void) const{}
 Symbol Number::type(void) const{}
