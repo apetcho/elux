@@ -218,8 +218,20 @@ Str Number::repr(void) const{
     return stream.str();
 }
 
+bool Number::as_bool(void) const{
+    if(this->is_integer()){
+        i64 num{};
+        this->get(num);
+        return num==0;
+    }else if(this->is_float()){
+        f64 num{};
+        this->get(num);
+        return (num==0.0);
+    }
+    return true; // complex numbers always cnvert to true
+}
+
 /*
-bool Number::as_bool(void) const{}
 i64 Number::as_integer(void) const{}
 f64 Number::as_float(void) const{}
 Complex Number::as_complex(void) const{}
