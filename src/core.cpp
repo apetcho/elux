@@ -510,9 +510,12 @@ Number Number::conj(void) const{
     return Number(std::conj(this->as_complex()));
 }
 
-/*
-Number Number::polar(f64 rho, f64 theta) const{}
+// -*-
+Number Number::polar(f64 rho, f64 theta) const{
+    return Number(std::polar(rho, theta));
+}
 
+/*
 Number Number::abs(void) const{}
 Number Number::min(const Number& other) const{}
 Number Number::max(const Number& other) const{}
