@@ -564,8 +564,15 @@ Number Number::max(const Number& other) const{
     return Number(std::max(x, y));
 }
 
+// -*-
+Number Number::floor(void) const{
+    if(this->is_complex()){
+        throw Error(Error::Kind::TypeError, "`floor` is not supported for complex numbers");
+    }
+    return Number(std::floor(this->as_float()));
+}
+
 /*
-Number Number::floor(void) const{}
 Number Number::ceil(void) const{}
 Number Number::round(void) const{}
 Number Number::log(void) const{}
