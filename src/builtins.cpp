@@ -6,6 +6,11 @@
 namespace klx{
 // -
 
+/*
+void Lynx::initialize_prelude(void){}
+void Lynx::initialize_math_module(void){}
+*/
+
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::klx                                          -*-
 // -*----------------------------------------------------------------*-

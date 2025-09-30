@@ -23,7 +23,7 @@
 
 #define LYNX_KEYWORDS()                                     \
     LYNX_DEF(Cond, "cond")                                  \
-    LYNX_DEF(Define, "define")                              \
+    LYNX_DEF(Defvar, "defvar")                              \
     LYNX_DEF(For, "for")                                    \
     LYNX_DEF(Fun, "fun")                                    \
     LYNX_DEF(If, "if")                                      \
@@ -32,6 +32,8 @@
     LYNX_DEF(Let, "let")                                    \
     LYNX_DEF(Macro, "macro")                                \
     LYNX_DEF(Match, "match")                                \
+    LYNX_DEF(Case, "case")                                  \
+    LYNX_DEF(Default, "default")                            \
     LYNX_DEF(Progn, "progn")                                \
     LYNX_DEF(Quasiquote, "quasiquote") /* ` */              \
     LYNX_DEF(Quote, "quote") /* ' */                        \
@@ -120,6 +122,8 @@ private:
     Kind m_kind;
     Str m_msg;
     Self m_reason;
+
+    Str make_prefix(void);
 };
 
 // -----------
@@ -405,9 +409,11 @@ public:
     String join(const Vec<String>& vec) const;
     String replace(const String& old, const String& neo) const;
     Vec<String> split(const String& delim=String(" "));
-    bool contains(const String& needle) const;
     i64 find(const String& needle) const;
     String substr(i64 start=0, i64 end=Str::npos) const;
+    bool contains(const String& needle) const;
+    bool startswith(const String& prefix) const ;
+    bool endswith(const String& suffix) const;
 
 private:
     Str m_str;
@@ -440,15 +446,15 @@ public:
     Self head(void) const;
     List tail(void) const;
     Self last(void) const;
-    Self nth(void) const;
-    Self push(void);
+    Self nth(i64 idx) const;
+    List push(const Self& self);
     Self pop(void);
-    Self append(void);
-    Self insert(i64 idx, const Self& self);
-    Self remove(i64 idx);
+    List append(const Self& self);
+    List insert(i64 idx, const Self& self);
+    List remove(i64 idx);
+    List set(i64 idx, const Self& self);
     
-    friend bool operator+(const List& lhs, const List& rhs);
-
+    friend List operator+(const List& lhs, const List& rhs);
 
 private:
     using Value = std::list<Self>;
@@ -493,6 +499,7 @@ private:
 // ---------------
 class Closure final: public Object{
 public:
+    explicit Closure(const Vec<Symbol>& params, const Vec<Self>& body, const Env& captures) noexcept;
     explicit Closure(const Str& name, const Vec<Symbol>& params, const Vec<Self>& body, const Env& captures) noexcept;
     Closure(const Closure& closure) noexcept;
     Closure(Closure&& closure) noexcept;
@@ -564,6 +571,43 @@ private:
 // class Array final: public Object{};
 */
 
+// -------------------------------------------------------------------------------
+// Convenient functions to create shared pointer of Object and its derived classes
+// -------------------------------------------------------------------------------
+Self share(void);
+Self share(bool val);
+Self share(i64 num);
+Self share(f64 num);
+Self share(f64 x, f64 y);
+Self share(const Complex& z);
+Self share(const char* sym);
+Self share(const Str& str);
+Self share(const Vec<Self>& xs);
+Self share(const std::list<Self>& xs);
+Self share(const Str& name, CFun fun, i64 minArgc, i64 maxArgc);
+Self share(const Vec<Symbol>& params, const Vec<Self>& body, const Env& env);
+Self share(const Str& name, const Vec<Symbol>& params, const Vec<Self>& body, const Env& env, bool macro=false);
+
+// -------------------------------------------------------
+// Convenient operators for Object and its derived classes
+// -------------------------------------------------------
+Self operator+(const Self& lhs, const Self& rhs);
+Self operator-(const Self& lhs, const Self& rhs);
+Self operator*(const Self& lhs, const Self& rhs);
+Self operator/(const Self& lhs, const Self& rhs);
+Self operator%(const Self& lhs, const Self& rhs);
+
+bool operator==(const Self& lhs, const Self& rhs);
+bool operator!=(const Self& lhs, const Self& rhs);
+bool operator<=(const Self& lhs, const Self& rhs);
+bool operator>=(const Self& lhs, const Self& rhs);
+bool operator<(const Self& lhs, const Self& rhs);
+bool operator>(const Self& lhs, const Self& rhs);
+
+bool operator||(const Self& lhs, const Self& rhs);
+bool operator&&(const Self& lhs, const Self& rhs);
+
+// -*-
 // -*-
 enum class TokenKind{
 #define LYNX_DEF(tok, _) tok,
@@ -603,17 +647,20 @@ private:
     Kind m_kind;
     std::istringstream m_sstream;
     std::ifstream m_fstream;
+    i64 m_row;
+    i64 m_col;
 
     bool is_symbol_char(i32 c);
     bool is_syntax_quote(i32 c);
-    bool is_reserved_word(const Str& word);
     void skip_whitespace(void);
     void peek(i32 idx=0);
     void advance(i32 count=1);
 
     Token read_symbol(void);
-    Token read_f64_or_i64(void);
+    Token read_integer_or_float(void);
     Token read_string(void);
+    bool is_eos(void);
+    bool check_eos(i64 ptr);
 };
 
 // --------------
@@ -630,13 +677,15 @@ public:
     Parser& operator=(Parser&& parser) noexcept;
     ~Parser() = default;
 
-    Self parse(void);
+    Result parse(void);
 
 private:
     Tokenizer m_tokenizer;
+    i64 m_row;
+    i64 m_col;
 
-    Self parse_atom(void);
-    Self parse_list(void);
+    Result parse_atom(void);
+    Result parse_list(void);
 };
 
 // -*----------*-
@@ -644,6 +693,7 @@ private:
 // -*----------*-
 class Module final{
 public:
+    explicit Module(const Str& name, Env* env) noexcept;
     explicit Module(const Str& name, const fs::path& path, Env* env) noexcept;
     Module(const Module&) = delete;
     Module& operator=(const Module&) = delete;
@@ -669,6 +719,8 @@ class Lynx final{
 public:
     explicit Lynx() noexcept = default;
 
+    static Env lynxDocs;
+    static Env docstrs;
     static Env prelude;
     static std::map<Str, Module> libraries;
 
@@ -678,41 +730,327 @@ public:
     static void repl(void);
     static void run(const Vec<Str>& args);
 
-    void setup(void);
+    static void setup(void);
+
 
 private:
     Env m_runtime;
-    std::map<Str, Module> m_imported();
+    std::map<Str, Module> m_imported_libs;
 
-    Str make_key(const Module& mod);
+    static Str make_library_key(const Module& mymodule);
+    static void push_module(const Module& mymodule);
+    static void push_module(const Str& name, const Module& mymodule);
+    void import_module(const Str& module_name);
+    void import_module(const fs::path& module_path);
+
     static void initialize_prelude(void);
-    static void initialize_math_lib(void);
+    static void initialize_math_module(void);
+    /** @todo
+    static void initialize_datetime_module(void);
+    static void initialize_filesystem_module(void);
+    static void initialize_process_module(void);
+    static void initialize_thread_module(void);
+    static void initialize_hbird_module(void);
+    static void initialize_numerics_module(void);
+    static void initialize_json_module(void);
+    static void initialize_toml_module(void);
+    static void initialize_xml_module(void);
+    static void initialize_argparse_module(void);
+    */
 
     static bool check_argc(int argc, int expected, const Str& funcname, Error& err);
     static bool check_type(const Symbol& ty, const Self& self, Error& err);
+    static bool check_value(const Self& self, bool (*fn)(const Self&), Error& err);
+    static bool check_value(const Self& self, bool pred, Error& err);
 
-    bool is_keyword(const Str& word);
-    Self eval(const Self& self, Env& env);
+    static bool is_reserved_word(const Str& word);
+    static bool is_keyword(const Str& word);
+    static Self eval(const Self& self, Env& env);
 
     // -*-
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (cond
+     *      (testExpr1 expr1)
+     *      (testExpr2 expr2)
+     *      (...))
+     * 
+     * @note: At least, one test-expr must evaluate to true
+     */
     Result handle_cond(const Self& self, Env& env);
-    Result handle_define(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (defvar name "John McCarthy")
+     *  (defvar name "John McCarthy" "Creator of Lisp programming language")
+     */
+    Result handle_defvar(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (for (x '(1 2 3 4))
+     *      (print x))
+     */
     Result handle_for(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (fun hello(name)
+     *      (var msg (format "Hello {name}"))
+     *      (print msg))
+     * 
+     *  (fun add (x y)
+     *      "Computes the sum of `x' and `y'."
+     *      (+ x y))
+     */
     Result handle_fun(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return
+     * 
+     * @example
+     * 
+     *  (if (< 2 3) (println "2 is less than 3"))
+     * 
+     *  (if (> 2 3)
+     *      (print "2 is greater than 3")
+     *      (print "2 is less than 3"))
+     */
     Result handle_if(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (import math)
+     *  (import "./path/to/my/module.lynx")
+     * 
+     *  or
+     *  (declare-module snake "./snake-game.lynx")
+     *  (import snake)
+     */
     Result handle_import(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (lambda (x y)
+     *      (+ (* x x) (* y y) (* 2 x y)))
+     */
     Result handle_lambda(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (let ((lang "Lynx")
+     *        (creator "Eyram K. Apetcho")
+     *        (license "MIT License"))
+     *      (var msg (format "{lang} programming language\nCreator: {creator}\n{license}"))
+     *      (println msg))
+     */
     Result handle_let(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     *  (macro builder (what objs actions)
+     *      (var _what ,what)
+     *      (var _mapping (zip ,@objs ,@actions))
+     *      (println (format "Building {_what}"))
+     *      (for (entry _mapping)
+     *          (var arg (head entry))
+     *          (var fn (head (tail entry)))
+     *          (println (format "Applying {fn} on {arg}"))
+     *          (fn arg)))
+     */
     Result handle_macro(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (progn
+     *      (println "Hello World")
+     *      (var six (* 2 3))
+     *      (println (format "six = {six}"))
+     *      (println "Thank you"))
+     */
     Result handle_progn(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (quote x)
+     *  (quote (list 1 2 3 4))
+     *  (quote (range 10))
+     *  '(range 10)
+     */
     Result handle_quote(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (quasiquote x)  or `x
+     */
     Result handle_quasiquote(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (unquote x)   or ,x
+     */
     Result handle_unquote(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (unquote-splicing x)   or ,@x
+     */
     Result handle_unquote_splicing(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (match clause
+     *      (case term1 expr1)
+     *      (case term2 expr2)
+     *      (case term3 expr3)
+     *      ( ... )
+     *      (case termN exprN))
+     * 
+     *  (var lang "Lynx")
+     *  (match lang
+     *      (case "Python" (println "Python programming language"))
+     *      (case "C++" (println "C++ programming language"))
+     *      (case "Rust" (println "Rust programming language"))
+     *      (case "C" (println "C programming language"))
+     *      (case "JavaScript" (println "JavaScript programming language"))
+     *      (case "Lisp" (println "Lisp programming language"))
+     *      (case "Haskell" (println "Haskell programming language"))
+     *      (case "Java" (println "Java programming language"))
+     *      (case "Go" (println "Go programming language"))
+     *      (case "Scala" (println "Scala programming language"))
+     *      (case "Zig" (println "Zig programming language"))
+     *      (case "Ocaml" (println "Ocaml programming language"))
+     *      (default (println "Unsupported programming language")))
+     */
     Result handle_match(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (var lang "Rust")
+     */
     Result handle_var(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     * @example
+     * 
+     *  (var x 1)
+     *  (while (< x 10)
+     *      (println (format "x = {x}")))
+     */
     Result handle_while(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     * 
+     */
     Result eval_atom(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * @param self 
+     * @param env 
+     * @return 
+     */
     Result eval_list(const Self& self, Env& env);
 
 public:
@@ -779,22 +1117,31 @@ public:
     static Result fn_concat(const Vec<Self>& args);
 
     // Functions on list
-    static Result fn_head(const Vec<Self>& args);
-    static Result fn_tail(const Vec<Self>& args);
-    static Result fn_nth(const Vec<Self>& args);
-    static Result fn_insert(const Vec<Self>& args);
-    static Result fn_remove(const Vec<Self>& args);
-    static Result fn_push(const Vec<Self>& args);
-    static Result fn_pop(const Vec<Self>& args);
-    static Result fn_append(const Vec<Self>& args);
+    static Result fn_list_head(const Vec<Self>& args);
+    static Result fn_list_tail(const Vec<Self>& args);
+    static Result fn_list_nth(const Vec<Self>& args);
+    static Result fn_list_insert(const Vec<Self>& args);
+    static Result fn_list_remove(const Vec<Self>& args);
+    static Result fn_list_push(const Vec<Self>& args);
+    static Result fn_list_pop(const Vec<Self>& args);
+    static Result fn_list_append(const Vec<Self>& args);
+    static Result fn_list_set(const Vec<Self>& args);
 
     // Functions on string
-    static Result fn_capitalize(const Vec<Self>& args);
-    static Result fn_upper(const Vec<Self>& args);
-    static Result fn_lower(const Vec<Self>& args);
-    static Result fn_contains(const Vec<Self>& args);
-    static Result fn_find(const Vec<Self>& args);
-    static Result fn_(const Vec<Self>& args);
+    static Result fn_str_capitalize(const Vec<Self>& args);
+    static Result fn_str_upper(const Vec<Self>& args);
+    static Result fn_str_lower(const Vec<Self>& args);
+    static Result fn_str_contains(const Vec<Self>& args);
+    static Result fn_str_find(const Vec<Self>& args);
+    static Result fn_str_split(const Vec<Self>& args);
+    static Result fn_str_join(const Vec<Self>& args);
+    static Result fn_str_replace(const Vec<Self>& args);
+    static Result fn_str_substr(const Vec<Self>& args);
+    static Result fn_str_ltrim(const Vec<Self>& args);
+    static Result fn_str_rtrim(const Vec<Self>& args);
+    static Result fn_str_trim(const Vec<Self>& args);
+    static Result fn_str_startswith(const Vec<Self>& args);
+    static Result fn_str_endswith(const Vec<Self>& args);
 
     // Mathetical functions
     static Result fn_abs(const Vec<Self>& args);
@@ -838,6 +1185,8 @@ public:
     static Result fn_sleep(const Vec<Self>& args);
     static Result fn_timeit(const Vec<Self>& args);
     static Result fn_eval(const Vec<Self>& args);
+    static Result fn_declare_module(const Vec<Self>& args);
+    // static Result fn_help(const Vec<Self>& args);
 };
 
 
