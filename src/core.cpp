@@ -1,4 +1,7 @@
 #include "lynx.hpp"
+#include<limits>
+#include<sstream>
+#include<iomanip>
 
 // -*----------------------------------------------------------------*-
 // -*- begin::namespace::klx                                        -*-
@@ -80,16 +83,18 @@ bool operator&&(const Bool& lhs, const Bool& rhs){
 // --------------------------------------------------------------
 // --- Number: wrapper around f64, i64, and std::complex<f64> ---
 // --------------------------------------------------------------
+const Number Number::PI = Number(3.141592653589793);
+const Number Number::E = Number(2.718281828459045);
+const Number Number::FMAX = Number(std::numeric_limits<f64>::max());
+const Number Number::FMIN = Number(std::numeric_limits<f64>::min());
+const Number Number::IMAX = Number(std::numeric_limits<i64>::max());
+const Number Number::IMIN = Number(std::numeric_limits<i64>::min());
+const Number Number::EPSILON = Number(std::numeric_limits<f64>::epsilon());
+const Number Number::PHI = Number(1.618033988749894);
+const Number Number::NaN = Number(std::numeric_limits<f64>::quiet_NaN());
+
 /*
-Number Number::PI;
-Number Number::E;
-Number Number::FMAX;
-Number Number::FMIN;
-Number Number::IMAX;
-Number Number::IMIN;
-Number Number::EPSILON;
-Number Number::PHI;
-Number Number::NaN;
+
 
 Number::Number() noexcept{}
 Number::Number(f64 num) noexcept{}

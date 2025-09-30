@@ -2,10 +2,8 @@
 #define LYNX_HPP
 
 #include<filesystem>
-#include<iostream>
 #include<fstream>
 #include<sstream>
-#include<iomanip>
 #include<cstdint>
 #include<variant>
 #include<memory>
@@ -323,15 +321,15 @@ public:
     Number isinf(void) const;
     Number isnan(void) const;
 
-    static Number PI;
-    static Number E;
-    static Number FMAX;
-    static Number FMIN;
-    static Number IMAX;
-    static Number IMIN;
-    static Number EPSILON;
-    static Number PHI;
-    static Number NaN;
+    static const Number PI;
+    static const Number E;
+    static const Number FMAX;
+    static const Number FMIN;
+    static const Number IMAX;
+    static const Number IMIN;
+    static const Number EPSILON;
+    static const Number PHI;
+    static const Number NaN;
 
 private:
     enum class Kind {INT, FLOAT, COMPLEX };
