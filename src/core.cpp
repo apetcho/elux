@@ -204,9 +204,21 @@ Str Number::str(void) const{
     return stream.str();
 }
 
-/*
-Str Number::repr(void) const{}
+// -*-
+Str Number::repr(void) const{
+    if(this->is_integer() || this->is_float()){
+        return this->str();
+    }
+    std::stringstream stream;
+    Complex z{};
+    this->get(z);
+    auto x = z.real();
+    auto y = z.imag();
+    stream << "(complex " << x << " " << y << ")";
+    return stream.str();
+}
 
+/*
 bool Number::as_bool(void) const{}
 i64 Number::as_integer(void) const{}
 f64 Number::as_float(void) const{}
