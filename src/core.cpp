@@ -165,8 +165,12 @@ bool Number::is_float(void) const{
     return this->m_kind==Kind::FLOAT;
 }
 
+// -*-
+bool Number::is_complex(void) const{
+    return this->m_kind==Kind::COMPLEX;
+}
+
 /*
-bool Number::is_complex(void) const{}
 Symbol Number::type(void) const{}
 Str Number::str(void) const{}
 Str Number::repr(void) const{}
