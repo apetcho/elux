@@ -505,9 +505,12 @@ Number Number::norm(void) const{
     return Number(std::norm(this->as_complex()));
 }
 
+// -*-
+Number Number::conj(void) const{
+    return Number(std::conj(this->as_complex()));
+}
 
 /*
-Number Number::conj(void) const{}
 Number Number::polar(f64 rho, f64 theta) const{}
 
 Number Number::abs(void) const{}
