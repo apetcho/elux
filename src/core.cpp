@@ -2,6 +2,7 @@
 #include<limits>
 #include<sstream>
 #include<iomanip>
+#include<cmath>
 
 // -*----------------------------------------------------------------*-
 // -*- begin::namespace::klx                                        -*-
@@ -399,9 +400,22 @@ Number operator/(const Number& lhs, const Number& rhs){
     return Number((z1/z2));
 }
 
-/*
-Number operator%(const Number& lhs, const Number& rhs){}
+// -*-
+Number operator%(const Number& lhs, const Number& rhs){
+    if(lhs.is_complex() || rhs.is_complex()){
+        throw Error(Error::Kind::TypeError, "`%` is not supported for complex numbers.");
+    }
+    if(lhs.is_integer() && rhs.is_integer()){
+        auto x = lhs.as_integer();
+        auto y = rhs.as_integer();
+        return Number((x % y));
+    }
+    auto x = lhs.as_float();
+    auto y = rhs.as_float();
+    return Number(std::fmod(x, y));
+}
 
+/*
 bool operator==(const Number& lhs, const Number& rhs){}
 bool operator!=(const Number& lhs, const Number& rhs){}
 bool operator<=(const Number& lhs, const Number& rhs){}
