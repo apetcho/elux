@@ -324,9 +324,9 @@ public:
     Number erfc(void) const;
     Number tgamma(void) const;
     Number lgamma(void) const;
-    Number isfinite(void) const;
-    Number isinf(void) const;
-    Number isnan(void) const;
+    bool isfinite(void) const;
+    bool isinf(void) const;
+    bool isnan(void) const;
 
     static const Number PI;
     static const Number E;

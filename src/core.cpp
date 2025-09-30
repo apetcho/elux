@@ -911,8 +911,15 @@ Number Number::lgamma(void) const{
     return Number(std::lgamma(this->as_float()));
 }
 
+// -*-
+bool Number::isfinite(void) const{
+    if(this->is_complex()){
+        throw Error(Error::Kind::TypeError, "`isfinite` is not supported for complex numbers");
+    }
+    return std::isfinite(this->as_float());
+}
+
 /*
-Number Number::isfinite(void) const{}
 Number Number::isinf(void) const{}
 Number Number::isnan(void) const{}
 */
