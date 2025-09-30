@@ -950,8 +950,12 @@ Symbol Symbol::type(void) const{
     return Symbol("symbol");
 }
 
+// -*-
+Str Symbol::str(void) const{
+    return this->m_str;
+}
+
 /*
-Str Symbol::str(void) const{}
 Str Symbol::repr(void) const{}
 
 bool operator==(const Symbol& lhs, const Symbol& rhs);
