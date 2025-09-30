@@ -469,9 +469,12 @@ bool operator<(const Number& lhs, const Number& rhs){
     return (lhs.as_float() < rhs.as_float());
 }
 
-/*
-bool operator>(const Number& lhs, const Number& rhs){}
+// -*-
+bool operator>(const Number& lhs, const Number& rhs){
+    return !(lhs <= rhs);
+}
 
+/*
 f64 Number::real(void) const;
 f64 Number::imag(void) const;
 f64 Number::arg(void) const;
