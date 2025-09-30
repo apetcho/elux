@@ -1,4 +1,6 @@
 #include "lynx.hpp"
+
+#include<algorithm>
 #include<limits>
 #include<sstream>
 #include<iomanip>
@@ -524,8 +526,26 @@ Number Number::abs(void) const{
     return Number(std::abs(this->as_integer()));
 }
 
+// -*-
+Number Number::min(const Number& other) const{
+    if(this->is_complex() || other.is_complex()){
+        auto _ty1 = this->type().str();
+        auto _ty2 = other.type().str();
+        std::stringstream ss;
+        ss << "`min' cannot be applied between `" << _ty1 << "' and `";
+        ss << _ty2 << "' objects";
+        throw Error(Error::Kind::TypeError, ss.str());
+    }else if(this->is_integer() || other.is_integer()){
+        auto x = this->as_integer();
+        auto y = other.as_integer();
+        return Number(std::min(x, y));
+    }
+    auto x = this->as_float();
+    auto y = other.as_float();
+    return Number(std::min(x, y));
+}
+
 /*
-Number Number::min(const Number& other) const{}
 Number Number::max(const Number& other) const{}
 Number Number::floor(void) const{}
 Number Number::ceil(void) const{}
