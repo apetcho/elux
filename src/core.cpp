@@ -294,6 +294,14 @@ Number operator+(const Number& lhs, const Number& rhs){
         auto n1 = lhs.as_integer();
         auto n2 = rhs.as_integer();
         return Number((n1+n2));
+    }else if((lhs.is_integer() && lhs.is_float()) || (lhs.is_float() && rhs.is_integer())){
+        auto x = lhs.as_float();
+        auto y = lhs.as_float();
+        return Number(x+y);
+    }else if(lhs.is_float() && rhs.is_float()){
+        auto x = lhs.as_float();
+        auto y = rhs.as_float();
+        return Number(x+y);
     }else if(!lhs.is_complex() && !rhs.is_complex()){
         auto x = lhs.as_float();
         auto y = rhs.as_float();
@@ -318,6 +326,14 @@ Number operator-(const Number& lhs, const Number& rhs){
         auto n1 = lhs.as_integer();
         auto n2 = rhs.as_integer();
         return Number((n1-n2));
+    }else if((lhs.is_integer() && lhs.is_float()) || (lhs.is_float() && rhs.is_integer())){
+        auto x = lhs.as_float();
+        auto y = lhs.as_float();
+        return Number(x-y);
+    }else if(lhs.is_float() && rhs.is_float()){
+        auto x = lhs.as_float();
+        auto y = rhs.as_float();
+        return Number(x-y);
     }else if(!lhs.is_complex() && !rhs.is_complex()){
         auto x = lhs.as_float();
         auto y = rhs.as_float();
@@ -329,7 +345,7 @@ Number operator-(const Number& lhs, const Number& rhs){
     }else if((lhs.is_integer() || lhs.is_float()) && rhs.is_complex()){
         auto x = lhs.as_float();
         auto z = rhs.as_complex();
-        return Number(z-x);
+        return Number(x-z);
     }
     auto z1 = lhs.as_complex();
     auto z2 = rhs.as_complex();
