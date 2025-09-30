@@ -919,9 +919,16 @@ bool Number::isfinite(void) const{
     return std::isfinite(this->as_float());
 }
 
+// -*-
+bool Number::isinf(void) const{
+    if(this->is_complex()){
+        throw Error(Error::Kind::TypeError, "`isinf` is not supported for complex numbers");
+    }
+    return std::isinf(this->as_float());
+}
+
 /*
-Number Number::isinf(void) const{}
-Number Number::isnan(void) const{}
+bool Number::isnan(void) const{}
 */
 
 // --------------
