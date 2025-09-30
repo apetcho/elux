@@ -1034,8 +1034,12 @@ bool operator>(const String& lhs, const String& rhs){
     return !(lhs >= rhs);
 }
 
+// -*-
+i64 String::len(void) const{
+    return static_cast<i64>(this->str().length());
+}
+
 /*
-i64 String::len(void) const{}
 String String::capitalize(void) const{}
 String String::upper(void) const{}
 String String::lower(void) const{}
