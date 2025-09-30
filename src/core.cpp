@@ -1091,26 +1091,22 @@ String String::ltrim(void) const{
     return String(ans);
 }
 
-/*
-
-inline void ltrim(std::string &s) {
-    
-}
-
-inline void rtrim(std::string &s) {
-    s.erase(std::find_if(
-            s.rbegin(), s.rend(),
+// -*-
+String String::rtrim(void) const{
+    auto ans = this->str();
+    ans.erase(std::find_if(
+            ans.rbegin(), ans.rend(),
             [](int ch) { return !std::isspace(ch); }
         ).base(),
-        s.end(
+        ans.end(
     ));
+
+    return String(ans);
 }
-*/
+
 
 /*
-
-String String::ltrim(void) const{}
-String String::rtrim(void) const{}
+String String::trim(void) const{}
 String String::join(const Vec<String>& vec) const{}
 String String::replace(const String& old, const String& neo) const{}
 Vec<String> String::split(const String& delim){}
