@@ -964,9 +964,10 @@ bool operator==(const Symbol& lhs, const Symbol& rhs){
     return (lhs.str() == rhs.str());
 }
 
-/*
-bool operator!=(const Symbol& lhs, const Symbol& rhs);
-*/
+// -*-
+bool operator!=(const Symbol& lhs, const Symbol& rhs){
+    return !(lhs == rhs);
+}
 
 // --------------
 // -*- String -*-
