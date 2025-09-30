@@ -748,8 +748,23 @@ Number Number::sqrt(void) const{
     return Number(x);
 }
 
+// -*-
+Number Number::cbrt(void) const{
+    if(this->is_complex()){
+        throw Error(Error::Kind::TypeError, "");
+    }
+    auto x = this->as_float();
+    errno = 0;
+    std::feclearexcept(FE_ALL_EXCEPT);
+    auto ans = std::cbrt(x);
+    if(errno != 0){
+        Str msg(std::strerror(errno));
+        throw Error(Error::Kind::ValueError, msg);
+    }
+    return Number(ans);
+}
+
 /*
-Number Number::cbrt(void) const{}
 Number Number::hypot(const Number& other) const{}
 Number Number::sin(void) const{}
 Number Number::cos(void) const{}
