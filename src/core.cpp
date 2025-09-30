@@ -475,8 +475,14 @@ bool operator>(const Number& lhs, const Number& rhs){
 }
 
 // -*-
-// Number Number::real(void) const{
-// }
+Number Number::real(void) const{
+    if(this->is_complex()){
+        Complex z{};
+        this->get(z);
+        return Number(z.real());
+    }
+    return Number(this->as_float());
+}
 
 // -*-
 Number Number::imag(void) const{
