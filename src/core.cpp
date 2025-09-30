@@ -735,8 +735,20 @@ Number Number::pow(const Number& rhs) const{
     return Number(std::pow(x, y));
 }
 
+// -*-
+Number Number::sqrt(void) const{
+    if(this->is_complex()){
+        auto z = this->as_complex();
+        return Number(std::sqrt(z));
+    }
+    auto x = this->as_float();
+    if(x < 0){
+        throw Error(Error::Kind::ValueError, "square of negative number.");
+    }
+    return Number(x);
+}
+
 /*
-Number Number::sqrt(void) const{}
 Number Number::cbrt(void) const{}
 Number Number::hypot(const Number& other) const{}
 Number Number::sin(void) const{}
