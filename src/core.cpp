@@ -1019,8 +1019,12 @@ bool operator<=(const String& lhs, const String& rhs){
     return ((lhs < rhs) || (lhs == rhs));
 }
 
+// -*-
+bool operator>=(const String& lhs, const String& rhs){
+    return (lhs > rhs) || (lhs == rhs);
+}
+
 /*
-bool operator>=(const String& lhs, const String& rhs){}
 bool operator<(const String& lhs, const String& rhs){}
 bool operator>(const String& lhs, const String& rhs){}
 
