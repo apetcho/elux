@@ -197,8 +197,12 @@ Result& Result::operator=(Result&& result) noexcept{
     return *this;
 }
 
+// -*-
+bool Result::is_ok(void) const{
+    return this->m_kind == Kind::Ok;
+}
+
 /*
-bool Result::is_ok(void) const{}
 Self Result::ok(void) const{}
 Error Result::err(void) const{}
 */
