@@ -1949,9 +1949,26 @@ Self operator+(const Self& lhs, const Self& rhs){
     throw Error(Error::Kind::TypeError, ss.str());
 }
 
-/*
-Self operator-(const Self& lhs, const Self& rhs){}
+// -*-
+Self operator-(const Self& lhs, const Self& rhs){
+    if(!(lhs->is_number() && rhs->is_number())){
+        std::stringstream ss;
+        ss << "`-' is supported only for number types.";
+        throw Error(Error::Kind::TypeError, ss.str());
+    }
+    auto xnum = *dynamic_cast<Number*>(lhs.get());
+    auto ynum = *dynamic_cast<Number*>(rhs.get());
+    auto num = xnum - ynum;
+    if(num.is_integer()){
+        return share(num.as_integer());
+    }else if(num.is_float()){
+        return share(num.as_float());
+    }
 
+    return share(num.as_complex());
+}
+
+/*
 Self operator*(const Self& lhs, const Self& rhs){}
 Self operator/(const Self& lhs, const Self& rhs){}
 Self operator%(const Self& lhs, const Self& rhs){}
