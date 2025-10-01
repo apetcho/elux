@@ -1354,14 +1354,28 @@ Self List::nth(i64 idx) const{
 }
 
 // -*-
+/*
+Pre: xs = (1, 2, 3)
+(pust xs 6)
+Post: xs = (6, 1, 2, 3)
+*/
 List List::push(const Self& self){
-    auto vec = this->as_vector();
-    vec.push_back(self);
-    return List(vec);
+    auto xs = this->as_list();
+    xs.insert(xs.begin(), self);
+    return List(xs);
+}
+
+// -*-
+Self List::pop(void){
+    if(this->len()==0){
+        throw Error(Error::Kind::ValueError, "cannot `pop' an empty list.");
+    }
+    auto self = this->m_value.back();
+    this->m_value.pop_back();
+    return self;
 }
 
 /*
-Self List::pop(void){}
 List List::append(const Self& self){}
 List List::insert(i64 idx, const Self& self){}
 List List::remove(i64 idx){}
