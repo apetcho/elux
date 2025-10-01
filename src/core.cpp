@@ -1389,7 +1389,9 @@ List List::append(const Self& self){
 
 // -*-
 List List::insert(i64 idx, const Self& self){
-    if(0){}
+    if(idx < 0 || idx > this->len()){
+        throw Error(Error::Kind::ValueError, "`insert': index out of range");
+    }
     auto xs = this->as_list();
     auto ptr = xs.begin();
     ptr = std::next(ptr, static_cast<int>(idx));
@@ -1397,8 +1399,23 @@ List List::insert(i64 idx, const Self& self){
     return List(xs);
 }
 
+// -*-
+List List::remove(i64 idx){
+    if(this->len()){
+        throw Error(Error::Kind::ValueError, "`remove': cannot remove from an empty list");
+    }
+    if(idx < 0 || idx >= this->len()){
+        throw Error(Error::Kind::ValueError, "`remove': index out of range");
+    }
+    auto xs = this->as_list();
+    auto ptr = xs.begin();
+    auto i = static_cast<int>(idx);
+    ptr = std::next(ptr, i);
+    xs.erase(ptr);
+    return List(xs);
+}
+
 /*
-List List::remove(i64 idx){}
 List List::set(i64 idx, const Self& self){}
     
 List operator+(const List& lhs, const List& rhs){}
