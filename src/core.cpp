@@ -1860,8 +1860,12 @@ Self share(i64 num){
     return std::make_shared<Number>(num);
 }
 
+// -*-
+Self share(f64 num){
+    return std::make_shared<Number>(num);
+}
+
 /*
-Self share(f64 num){}
 Self share(f64 x, f64 y){}
 Self share(const Complex& z){}
 Self share(const char* sym){}
