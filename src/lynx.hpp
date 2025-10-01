@@ -212,6 +212,13 @@ public:
     virtual Symbol type(void) const;
     virtual Str str(void) const{ return "nil"; }
     virtual Str repr(void) const{ return "nil"; }
+
+    // Helpful for `defvar' special form.
+    const bool& immutable(void) const{ return this->m_immutable; }
+    bool& immutable(void){ return this->m_immutable; }
+
+protected:
+    bool m_immutable{false};
 };
 
 
