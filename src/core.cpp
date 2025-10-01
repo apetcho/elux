@@ -1311,8 +1311,12 @@ Vec<Self> List::as_vector(void) const{
     return Vec<Self>(this->m_value.cbegin(), this->m_value.cend());
 }
 
+// -*-
+i64 List::len(void) const{
+    return static_cast<i64>(this->m_value.size());
+}
+
 /*
-i64 List::len(void) const{}
 Self List::head(void) const{}
 List List::tail(void) const{}
 Self List::last(void) const{}
