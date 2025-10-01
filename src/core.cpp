@@ -1375,8 +1375,19 @@ Self List::pop(void){
     return self;
 }
 
+// -*-
 /*
-List List::append(const Self& self){}
+Pre: xs = (1, 2, 3)
+(append xs 6)
+Post: xs = (1, 2, 3, 6)
+*/
+List List::append(const Self& self){
+    auto xs = this->as_list();
+    xs.push_back(self);
+    return List(xs);
+}
+
+/*
 List List::insert(i64 idx, const Self& self){}
 List List::remove(i64 idx){}
 List List::set(i64 idx, const Self& self){}
