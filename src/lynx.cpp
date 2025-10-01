@@ -133,8 +133,21 @@ void Env::put(const Str& key, const Self& val){
     this->m_bindings[key] = val;
 }
 
+// -*-
+[[maybe_unused]] Self Env::update(const Str& key, const Self& val){
+    if(!this->contains(key)){
+        std::stringstream ss;
+        ss << "unbound identifier `" << key << "'. Cannot be updated.";
+        throw Error(Error::Kind::RuntimeError, ss.str());
+    }
+    if(this->m_bindings.find(key) != this->m_bindings.end()){
+        this->m_bindings[key] = val;
+    }
+
+    return this->m_parent->update(key, val);
+}
+
 /*
-[[maybe_unused]] Self Env::update(const Str& key, const Self& val){}
 Self Env::get(const Str& key) const{}
 const Env* Env::parent(void) const{}
 Env* Env::parent(void){}
