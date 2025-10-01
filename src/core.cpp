@@ -1606,11 +1606,13 @@ Closure& Closure::operator=(Closure&& closure) noexcept{
     return *this;
 }
 
+// -*-
+Symbol Closure::type(void) const{
+    Str ty{};
+    ty = this->is_lambda() ? "lambda" : "function";
+    return Symbol(ty);
+}
 /*
-bool Closure::is_callable(void) const{}
-bool Closure::is_lambda(void) const{}
-bool Closure::is_function(void) const{}
-Symbol Closure::type(void) const{}
 Str Closure::str(void) const{}
 Str Closure::repr(void) const{}
 
