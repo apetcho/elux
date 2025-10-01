@@ -667,12 +667,15 @@ public:
 
 private:
     enum class Kind{STR, FILE};
+    // using Stream = std::variant<std::istringstream, std::ifstream>;
     Kind m_kind;
     std::istringstream m_sstream;
     std::ifstream m_fstream;
     i64 m_row;
     i64 m_col;
 
+    bool is_string_stream(void){ return this->m_kind==Kind::STR; }
+    bool is_file_stream(void){ return this->m_kind==Kind::FILE; }
     bool is_symbol_char(i32 c);
     bool is_syntax_quote(i32 c);
     void skip_whitespace(void);

@@ -5,13 +5,25 @@
 // -*----------------------------------------------------------------*-
 namespace klx{
 // -*-
-
-/*
 // -*-------------*-
 // -*- Tokenizer -*-
 // -*-------------*-
-Tokenizer::Tokenizer(std::istringstream&& stream) noexcept{}
-Tokenizer::Tokenizer(std::ifstream&& stream) noexcept{}
+Tokenizer::Tokenizer(std::istringstream&& stream) noexcept{
+    this->m_kind = Kind::STR;
+    this->m_sstream = std::move(stream);
+    this->m_row = 1;
+    this->m_col = 0;
+}
+
+// -*-
+Tokenizer::Tokenizer(std::ifstream&& stream) noexcept{
+    this->m_kind = Kind::FILE;
+    this->m_fstream = std::move(stream);
+    this->m_row = 1;
+    this->m_col = 0;
+}
+
+/*
 Tokenizer::Tokenizer(Tokenizer&& tokenizer) noexcept{}
 Tokenizer& Tokenizer::operator=(Tokenizer&& tokenizer) noexcept{}
 
