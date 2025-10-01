@@ -1301,8 +1301,12 @@ Str List::repr(void) const{
     return ss.str();
 }
 
+// -*-
+std::list<Self> List::as_list(void) const{
+    return this->m_value;
+}
+
 /*
-std::list<Self> List::as_list(void) const{}
 Vec<Self> List::as_vector(void) const{}
 
 i64 List::len(void) const{}
