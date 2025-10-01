@@ -1211,14 +1211,19 @@ bool String::contains(const String& needle) const{
 
 // -*-
 bool String::startswith(const String& prefix) const{
+    if(prefix.len() > this->len()){ return false; }
     auto text = this->str();
     auto key = prefix.str();
     return (key == text.substr(key.length()));
 }
 
-/*
-bool String::endswith(const String& suffix) const{}
-*/
+// -*-
+bool String::endswith(const String& suffix) const{
+    if(this->len() < suffix.len()){ return false; }
+    auto start = this->len() - suffix.len();
+    return (this->str().substr(start)==suffix.str());
+}
+
 
 // ------------
 // -*- List -*-
