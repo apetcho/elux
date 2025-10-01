@@ -438,8 +438,13 @@ void Lynx::run(const Str& filename, const Vec<Str>& args, Env& env){
     }
 }
 
+// -*-
+void Lynx::setup(void){
+    Lynx::initialize_prelude();
+    Lynx::initialize_math_module();
+}
+
 /*
-void Lynx::setup(void);
 Result Lynx::eval(const Self& self, Env& env);
 
 Str Lynx::readfile(const Str& filename){
