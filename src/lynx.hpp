@@ -561,7 +561,7 @@ public:
     Str repr(void) const override;
 
     i64 argc(void) const;
-    Self expand(const Vec<Self>& args) const;
+    Result expand(const Vec<Self>& args) const;
     Result operator()(const Vec<Self>& args);
     const Str& name(void) const{ return this->m_name; }
     const Vec<Symbol>& params(void) const{ return this->m_params; }
@@ -777,6 +777,7 @@ private:
     static bool is_reserved_word(const Str& word);
     static bool is_keyword(const Str& word);
 
+    static Vec<Symbol> captured_symbols(const Vec<Self>& body);
     // -*-
 
     /**
@@ -901,6 +902,17 @@ private:
      *      (println msg))
      */
     Result handle_let(const Self& self, Env& env);
+
+    /**
+     * @brief 
+     * 
+     * @param self 
+     * @param env 
+     * @return
+     * 
+     * @example
+     */
+    Result handle_expand(const Self& self, Env& env);
 
     /**
      * @brief 

@@ -1714,10 +1714,14 @@ Result Closure::operator()(const Vec<Self>& args){
 // -------------
 // --- Macro ---
 // -------------
+Macro::Macro(const Str& name, const Vec<Symbol>& params, const Vec<Self>& body, const Env& captures) noexcept
+: m_name{name}
+, m_params{params}
+, m_body{body}
+, m_env{captures}
+{}
+
 /*
-class Macro:: final: public Object{
-public:
-Macro::Macro(const Str& name, const Vec<Symbol>& params, const Vec<Self>& body, const Env& captures) noexcept{}
 Macro::Macro(const Macro& macro) noexcept{}
 Macro::Macro(Closure&& macro) noexcept{}
 Macro& Macro::operator=(const Macro& macro) noexcept{}
@@ -1728,7 +1732,7 @@ Str Macro::str(void) const{}
 Str Macro::repr(void) const{}
 
 i64 Macro::argc(void) const{}
-Self Macro::expand(const Vec<Self>& args) const{}
+Result Macro::expand(const Vec<Self>& args) const{}
 Result operator()(const Vec<Self>& args){}
 */
 

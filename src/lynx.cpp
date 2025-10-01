@@ -76,6 +76,8 @@ void Lynx::repl(void){}
 void Lynx::run(const Vec<Str>& args){}
 void Lynx::setup(void){}
 
+Result Lynx::eval(const Self& self, Env& env){}
+
 Str Lynx::make_library_key(const Module& mymodule){}
 void Lynx::push_module(const Module& mymodule){}
 void Lynx::push_module(const Str& name, const Module& mymodule){}
@@ -90,7 +92,7 @@ bool Lynx::check_value(const Self& self, bool pred, Error& err){}
 
 bool Lynx::is_reserved_word(const Str& word){}
 bool Lynx::is_keyword(const Str& word){}
-Self Lynx::eval(const Self& self, Env& env){}
+Vec<Symbol> Lynx::captured_symbols(const Vec<Self>& body){}
 
 Result Lynx::handle_cond(const Self& self, Env& env){}
 Result Lynx::handle_defvar(const Self& self, Env& env){}
