@@ -23,8 +23,16 @@ Tokenizer::Tokenizer(std::ifstream&& stream) noexcept{
     this->m_col = 0;
 }
 
+// -*-
+Tokenizer::Tokenizer(Tokenizer&& tokenizer) noexcept
+: m_kind{std::move(tokenizer.m_kind)}
+, m_sstream{std::move(tokenizer.m_sstream)}
+, m_fstream{std::move(tokenizer.m_fstream)}
+, m_row{std::move(tokenizer.m_row)}
+, m_col{std::move(tokenizer.m_col)}
+{}
+
 /*
-Tokenizer::Tokenizer(Tokenizer&& tokenizer) noexcept{}
 Tokenizer& Tokenizer::operator=(Tokenizer&& tokenizer) noexcept{}
 
 Token Tokenizer::token(void){}
