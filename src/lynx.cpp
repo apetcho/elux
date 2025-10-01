@@ -202,8 +202,14 @@ bool Result::is_ok(void) const{
     return this->m_kind == Kind::Ok;
 }
 
+// -*-
+Self Result::ok(void) const{
+    Self self = nullptr;
+    self = std::get<Self>(this->m_value);
+    return self;
+}
+
 /*
-Self Result::ok(void) const{}
 Error Result::err(void) const{}
 */
 
