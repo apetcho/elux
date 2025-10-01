@@ -115,8 +115,20 @@ Env::Env(const Env& env) noexcept
 , m_parent{env.m_parent}
 {}
 
+// -*-
+bool Env::contains(const Str& key) const{
+    auto entry = this->m_bindings.find(key);
+    if(entry != this->m_bindings.end()){
+        return true;
+    }else{
+        if(this->m_parent == nullptr){
+            return false;
+        }
+        return this->m_parent->contains(key);
+    }
+}
+
 /*
-bool Env::contains(const Str& key) const{}
 void Env::put(const Str& key, const Self& val){}
 [[maybe_unused]] Self Env::update(const Str& key, const Self& val){}
 Self Env::get(const Str& key) const{}
