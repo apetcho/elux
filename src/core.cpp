@@ -1236,8 +1236,12 @@ List::List(const std::list<Self>& xs) noexcept
 : m_value{std::list<Self>(xs.cbegin(), xs.cend())}
 {}
 
+// -*-
+bool List::is_nil(void) const{
+    return (this->m_value.size()==0);
+}
+
 /*
-bool List::is_nil(void) const{}
 bool List::is_list(void) const{}
 Symbol List::type(void) const{}
 Str List::str(void) const{}
