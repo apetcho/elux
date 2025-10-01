@@ -1415,9 +1415,20 @@ List List::remove(i64 idx){
     return List(xs);
 }
 
+// -*-
+List List::set(i64 idx, const Self& self){
+    if(idx < 0 || idx >= this->len()){
+        throw Error(Error::Kind::ValueError, "`remove': index out of range");
+    }
+    auto xs = this->as_list();
+    auto ptr = xs.begin();
+    auto i = static_cast<int>(idx);
+    ptr = std::next(ptr, i);
+    *ptr = self;
+    return List(xs);
+}
+
 /*
-List List::set(i64 idx, const Self& self){}
-    
 List operator+(const List& lhs, const List& rhs){}
 */
 
