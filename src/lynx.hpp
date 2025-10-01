@@ -548,7 +548,7 @@ class Macro final: public Object{
 public:
     explicit Macro(const Str& name, const Vec<Symbol>& params, const Vec<Self>& body, const Env& captures) noexcept;
     Macro(const Macro& macro) noexcept;
-    Macro(Closure&& macro) noexcept;
+    Macro(Macro&& macro) noexcept;
     Macro& operator=(const Macro& macro) noexcept;
     Macro& operator=(Macro&& macro) noexcept;
     ~Macro() = default;

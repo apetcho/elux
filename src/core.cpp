@@ -1721,9 +1721,23 @@ Macro::Macro(const Str& name, const Vec<Symbol>& params, const Vec<Self>& body, 
 , m_env{captures}
 {}
 
+// -*-
+Macro::Macro(const Macro& macro) noexcept
+: m_name{macro.m_name}
+, m_params{macro.m_params}
+, m_body{macro.m_body}
+, m_env{macro.m_env}
+{}
+
+// -*-
+Macro::Macro(Macro&& macro) noexcept
+: m_name{std::move(macro.m_name)}
+, m_params{std::move(macro.m_params)}
+, m_body{std::move(macro.m_body)}
+, m_env{std::move(macro.m_env)}
+{}
+
 /*
-Macro::Macro(const Macro& macro) noexcept{}
-Macro::Macro(Closure&& macro) noexcept{}
 Macro& Macro::operator=(const Macro& macro) noexcept{}
 Macro& Macro::operator=(Macro&& macro) noexcept{}
 
