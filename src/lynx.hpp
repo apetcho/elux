@@ -728,9 +728,6 @@ private:
 
     Result parse_atom(const Token& token);
     Result parse_list(void);
-    bool match(const Str& word, const Token& token);
-    bool match(TokenKind expectedKind, const Token& token);
-    void expect(TokenKind expectedKind, const Token& token);
 
     void update_position(void){
         this->m_tokenizer.update_position();
@@ -833,6 +830,8 @@ public:
 
 private:
     static Vec<Symbol> captured_symbols(const Vec<Self>& body);
+    static bool match(const Symbol& type, const Self& Self);
+    static void expect(const Symbol& type, const Self& Self);
     // -*-
 
     /**

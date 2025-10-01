@@ -125,12 +125,19 @@ Result Parser::parse_list(void){
     // ')' has been already read.
     return Result(share(vec));
 }
-/*
-bool Parser::match(const Str& word, const Token& token){}
-bool Parser::match(TokenKind expectedKind, const Token& token){}
-void Parser::expect(TokenKind expectedKind, const Token& token){}
 
-*/
+// -*-
+bool Parser::is_atom(const Token& token){
+    return (
+        token.kind==TokenKind::Ident ||
+        token.kind==TokenKind::FLOAT ||
+        token.kind==TokenKind::INTEGER ||
+        token.kind==TokenKind::STRING ||
+        token.kind==TokenKind::False ||
+        token.kind==TokenKind::True ||
+        token.kind==TokenKind::Nil
+    );
+}
 
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::klx                                          -*-
