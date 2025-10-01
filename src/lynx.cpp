@@ -234,8 +234,13 @@ Module::Module(const Str& name, const fs::path& path, Env* env) noexcept
     *this->m_env.parent() = *env;
 }
 
+Module::Module(Module&& other) noexcept
+: m_name{std::move(other.m_name)}
+, m_path{std::move(other.m_path)}
+, m_env{std::move(other.m_env)}
+{}
+
 /*
-Module::Module(Module&& other) noexcept;
 Module::Module& operator=(Module&& other) noexcept;
 const Symbol& Module::name(void) const;
 const fs::path& Module::path(void) const;
