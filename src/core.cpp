@@ -1545,9 +1545,24 @@ Result Builtin::operator()(const Vec<Self>& args){
 // ---------------
 // --- Closure ---
 // ---------------
+Closure::Closure(const Vec<Symbol>& params, const Vec<Self>& body, const Env& captures) noexcept
+: m_kind{Kind::LAMBDA}
+, m_name{}
+, m_params{params}
+, m_body{body}
+, m_env{Env(captures)}
+{}
+
+// -*-
+Closure::Closure(const Str& name, const Vec<Symbol>& params, const Vec<Self>& body, const Env& captures) noexcept
+: m_kind{Kind::FUNC}
+, m_name{name}
+, m_params{params}
+, m_body{body}
+, m_env{Env(captures)}
+{}
+
 /*
-Closure::Closure(const Vec<Symbol>& params, const Vec<Self>& body, const Env& captures) noexcept;
-Closure::Closure(const Str& name, const Vec<Symbol>& params, const Vec<Self>& body, const Env& captures) noexcept{}
 Closure::Closure(const Closure& closure) noexcept{}
 Closure::Closure(Closure&& closure) noexcept{}
 Closure& Closure::operator=(const Closure& closure) noexcept{}
