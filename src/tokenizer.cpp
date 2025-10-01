@@ -79,6 +79,10 @@ bool Tokenizer::is_syntax_quote(i32 c){
 // -*-
 void Tokenizer::skip_whitespace(void){
     while(std::isspace(this->peek()) && !this->is_eos()){
+        if(this->peek() == '\n'){
+            this->m_row += 1;
+            this->m_col = 1;
+        }
         this->advance();
     }
 }
