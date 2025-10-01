@@ -44,6 +44,8 @@
 #define LYNX_TOKENS()               \
     LYNX_DEF(Invalid, "INVALID")    \
     LYNX_DEF(Eof, "EOF")            \
+    LYNX_DEF(LParen, "(")           \
+    LYNX_DEF(RParen, ")")           \
     LYNX_DEF(Nil, "nil")            \
     LYNX_DEF(True, "true")          \
     LYNX_DEF(False, "false")        \
@@ -700,7 +702,6 @@ private:
     Token read_string(void);
     bool next_is_number(i32 c);
     bool is_eos(void);
-    bool check_eos(i64 ptr);
 };
 
 // --------------

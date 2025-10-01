@@ -248,11 +248,29 @@ Token Tokenizer::read_integer_or_float(void){
     return result;
 }
 
+// -*-
+Token Tokenizer::read_string(void){
+    Token result{};
+    result.row = this->m_row;
+    result.col = this->m_col;
+    this->advance(); // skip the opening double-quote
+    Str text{};
+    auto c = this->peek();
+    text += static_cast<char>(c);
+    while(c != '"' && !this->is_eos()){
+        //! @note: maybe we need to handle escape-characters appropriately here
+        this->advance();
+        c = this->peek();
+        text += static_cast<char>(c);
+    }
+    this->advance(); // skip the closing double-quote
+
+    return result;
+}
+
 /*
-Token Tokenizer::read_string(void){}
 
 bool Tokenizer::is_eos(void){}
-bool Tokenizer::check_eos(i64 ptr){}
 */
 
 
