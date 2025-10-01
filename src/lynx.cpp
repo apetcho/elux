@@ -252,8 +252,12 @@ Module& Module::operator=(Module&& other) noexcept{
     return *this;
 }
 
+// -*-
+Symbol Module::name(void) const{
+    return Symbol(this->m_name);
+}
+
 /*
-const Symbol& Module::name(void) const;
 const fs::path& Module::path(void) const;
 const Env& Module::env(void) const;
 

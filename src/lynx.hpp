@@ -715,7 +715,7 @@ public:
     Module(Module&& other) noexcept;
     Module& operator=(Module&& other) noexcept;
     ~Module() = default;
-    const Symbol& name(void) const;
+    Symbol name(void) const;
     const fs::path& path(void) const;
     const Env& env(void) const;
 
