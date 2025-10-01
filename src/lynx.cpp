@@ -224,6 +224,7 @@ Module::Module(const Str& name, Env* env) noexcept
 , m_path{fs::path("@lynx")} // for builtin modules
 , m_env{Env()}{
     *this->m_env.parent() = *env;
+    this->initialize();
 }
 
 // -*-
@@ -232,6 +233,7 @@ Module::Module(const Str& name, const fs::path& path, Env* env) noexcept
 , m_path{path}
 , m_env{Env()}{
     *this->m_env.parent() = *env;
+    this->initialize();
 }
 
 Module::Module(Module&& other) noexcept
@@ -240,8 +242,17 @@ Module::Module(Module&& other) noexcept
 , m_env{std::move(other.m_env)}
 {}
 
+// -*-
+Module& Module::operator=(Module&& other) noexcept{
+    if(this != &other){
+        this->m_name = std::move(other.m_name);
+        this->m_path = std::move(other.m_path);
+        this->m_env = std::move(other.m_env);
+    }
+    return *this;
+}
+
 /*
-Module::Module& operator=(Module&& other) noexcept;
 const Symbol& Module::name(void) const;
 const fs::path& Module::path(void) const;
 const Env& Module::env(void) const;
