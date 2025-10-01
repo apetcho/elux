@@ -1855,8 +1855,12 @@ Self share(bool val){
     return std::make_shared<Bool>(val);
 }
 
+// -*-
+Self share(i64 num){
+    return std::make_shared<Number>(num);
+}
+
 /*
-Self share(i64 num){}
 Self share(f64 num){}
 Self share(f64 x, f64 y){}
 Self share(const Complex& z){}
