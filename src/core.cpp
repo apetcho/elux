@@ -1506,8 +1506,12 @@ Str Builtin::repr(void) const{
     return ss.str();
 }
 
+// -*-
+i64 Builtin::min_argc(void) const{
+    return this->m_minArgc;
+}
+
 /*
-i64 Builtin::min_argc(void) const{}
 i64 Builtin::max_argc(void) const{}
 const Str& Builtin::name(void) const{}
 
