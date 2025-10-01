@@ -262,9 +262,12 @@ const fs::path& Module::path(void) const{
     return this->m_path;
 }
 
-/*
-const Env& Module::env(void) const;
+// -*-
+const Env& Module::env(void) const{
+    return this->m_env;
+}
 
+/*
 void Module::initialize(void);
 */
 
@@ -280,8 +283,8 @@ std::map<Str, Module> Lynx::libraries;
 
 const Env& Lynx::runtime(void) const;
 Env& Lynx::runtime(void);
-void Lynx::repl(void);
-void Lynx::run(const Vec<Str>& args);
+void Lynx::repl(Env& env);
+void Lynx::run(const Str& filename, const Vec<Str>& args, Env& env);
 void Lynx::setup(void);
 Result Lynx::eval(const Self& self, Env& env);
 

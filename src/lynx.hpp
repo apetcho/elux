@@ -742,8 +742,8 @@ public:
     const Env& runtime(void) const;
     Env& runtime(void);
 
-    static void repl(void);
-    static void run(const Vec<Str>& args);
+    static void repl(Env& env);
+    static void run(const Str& filename, const Vec<Str>& args, Env& env);
 
     static void setup(void);
 
