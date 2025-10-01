@@ -1880,8 +1880,12 @@ Self share(const char* sym){
     return std::make_shared<Symbol>(sym);
 }
 
+// -*-
+Self share(const Str& str){
+    return std::make_shared<String>(str);
+}
+
 /*
-Self share(const Str& str){}
 Self share(const Vec<Self>& xs){}
 Self share(const std::list<Self>& xs){}
 Self share(const Str& name, CFun fun, i64 minArgc, i64 maxArgc){}
