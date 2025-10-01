@@ -2055,12 +2055,17 @@ bool operator==(const Self& lhs, const Self& rhs){
     return false;
 }
 
+// -*-
 bool operator!=(const Self& lhs, const Self& rhs){
     return !(lhs == rhs);
 }
 
+// -*-
+bool operator<=(const Self& lhs, const Self& rhs){
+    return !(lhs > rhs);
+}
+
 /*
-bool operator<=(const Self& lhs, const Self& rhs){}
 bool operator>=(const Self& lhs, const Self& rhs){}
 bool operator<(const Self& lhs, const Self& rhs){}
 bool operator>(const Self& lhs, const Self& rhs){}
