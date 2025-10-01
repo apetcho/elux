@@ -32,8 +32,18 @@ Tokenizer::Tokenizer(Tokenizer&& tokenizer) noexcept
 , m_col{std::move(tokenizer.m_col)}
 {}
 
+// -*-
+Tokenizer& Tokenizer::operator=(Tokenizer&& tokenizer) noexcept{
+    if(this != &tokenizer){
+        this->m_kind = std::move(tokenizer.m_kind);
+        this->m_sstream = std::move(tokenizer.m_sstream);
+        this->m_fstream = std::move(tokenizer.m_fstream);
+        this->m_row = std::move(tokenizer.m_row);
+        this->m_col = std::move(tokenizer.m_col);
+    }
+    return *this;
+}
 /*
-Tokenizer& Tokenizer::operator=(Tokenizer&& tokenizer) noexcept{}
 
 Token Tokenizer::token(void){}
 
