@@ -172,8 +172,8 @@ public:
     explicit Result(Error&& err) noexcept;
     Result(Result&& result) noexcept;
     Result& operator=(Result&& result) noexcept;
-    Result(const Result&) = delete;
-    Result& operator=(const Result&) = delete;
+    Result(const Result&) = default;
+    Result& operator=(const Result&) = default;
     ~Result() = default;
     bool is_ok(void) const;
     Self ok(void) const;

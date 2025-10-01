@@ -1,5 +1,6 @@
 #include "lynx.hpp"
 
+#include<iostream>
 #include<stack>
 
 // -*----------------------------------------------------------------*-
@@ -303,8 +304,66 @@ Env& Lynx::runtime(void){
     return this->m_runtime;
 }
 
+static Str _my_highlight(const Str& str){
+    Str msg{"\x1b[91m"};
+    msg += str;
+    msg += "\x1b[m";
+    return msg;
+};
+
+// -*-
+void Lynx::repl(Env& env){
+    Env ctx(&env);
+    i64 id = 0;
+    auto _lynx_prompt = [](i64& idx){
+        idx++;
+        std::cout << "\x1b[92mlynx::\x1b[93m" << idx << "\x1b[m>> ";
+    };
+
+    auto highlight = [](const Str& str){
+        Str msg{"\x1b[91m"};
+        msg += str;
+        msg += "\x1b[m";
+        return msg;
+    };
+    auto checkError = [](const Result& result){
+        if(result.is_ok()){
+            return false;
+        }
+        auto msg = result.err().describe();
+        auto pos = msg.find(":");
+        Str prefix{};
+        if(pos != Str::npos){
+            prefix = _my_highlight(msg.substr(0, pos));
+            msg = msg.substr(pos);
+        }
+        std::cerr << prefix << "\n" << msg << std::endl;
+        return true;
+    };
+    //! @todo implement help() :: {:?, :h, :help }
+    //! @todo implement show() :: {:s, :show }
+    //! @todo implement quit() :: {:q, :quit, :exit }
+    while(true){
+        _lynx_prompt(id);
+        auto src = input();
+        if(src==":q" || src == ":quit" || src==":bye"){
+            std::exit(EXIT_SUCCESS);
+        }
+        std::istringstream stream(src);
+        Parser parser(std::move(stream));
+        auto result = parser.parse();
+        if(!checkError(result)){
+            auto self = result.ok();
+            result = Lynx::eval(self, ctx);
+            if(!checkError(result)){
+                self = result.ok();
+                std::cout << self->str() << std::endl;
+            }
+        }
+    }
+}
+
 /*
-void Lynx::repl(Env& env){}
 void Lynx::run(const Str& filename, const Vec<Str>& args, Env& env);
 void Lynx::setup(void);
 Result Lynx::eval(const Self& self, Env& env);
