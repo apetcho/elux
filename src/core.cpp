@@ -1701,15 +1701,16 @@ Result Closure::operator()(const Vec<Self>& args){
         Error err(Error::Kind::SyntaxError, ss.str());
         return Result(std::move(err));
     }
-    auto ctx = this->m_env;
+    // auto ctx = this->m_env;
     // assumes each element in `args' has been already evaluated.
     for(auto i=0; i < args.size(); i++){
         auto key = this->m_params[i].str();
         auto val = args[i];
-        ctx.put(key, val);
+        this->m_env.put(key, val);
+
     }
     auto self = share(this->m_body);
-    return Lynx::eval(self, ctx);
+    return Lynx::eval(self, this->m_env);
 }
 
 // -------------
@@ -1819,21 +1820,27 @@ Result Macro::expand(const Vec<Self>& args) const{
         Error err(Error::Kind::SyntaxError, ss.str());
         return Result(std::move(err));
     }
-    auto ctx = this->m_env;
+    // auto& ctx = this->m_env;
     for(int i=0; i < args.size(); ++i){
         auto key = this->m_params[i].str();
         auto val = args[i];
-        ctx.put(key, val);
+        this->m_env.put(key, val);
     }
 
-    auto self = List(this->m_body);
+    auto self = share(this->m_body);
 
-    return Lynx::expand(self, ctx);
+    return Lynx::expand(self, this->m_env);
 }
 
-/*
-Result operator()(const Vec<Self>& args){}
-*/
+// -*-
+Result Macro::operator()(const Vec<Self>& args){
+    auto result = this->expand(args);
+    if(!result.is_ok()){
+        return std::move(result);
+    }
+    auto self = result.ok();
+    return Lynx::eval(self, this->m_env);
+}
 
 // -------------------------------------------------------------------------------
 // Convenient functions to create shared pointer of Object and its derived classes
