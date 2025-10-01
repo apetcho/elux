@@ -172,9 +172,19 @@ Env* Env::parent(void){
 // --------------
 // -*- Result -*-
 // --------------
+Result::Result(Self&& self) noexcept
+: m_kind{Kind::Ok}
+, m_value{std::move(self)}
+{}
+
+// -*-
+Result::Result(Error&& err) noexcept
+: m_kind{Kind::Err}
+, m_value{std::move(err)}
+{}
+
+
 /*
-Result::Result(Self&& self) noexcept{}
-Result::Result(Error&& err) noexcept{}
 Result::Result(Result&& result) noexcept{}
 Result& Result::operator=(Result&& result) noexcept{}
 bool Result::is_ok(void) const{}

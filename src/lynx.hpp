@@ -171,6 +171,7 @@ public:
 private:
     using Value = std::variant<Self, Error>;
     enum class Kind {Ok, Err};
+    Kind m_kind;
     Value m_value;
 };
 
