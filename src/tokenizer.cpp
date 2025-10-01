@@ -99,8 +99,31 @@ void Tokenizer::skip_comment(void){
     }
 }
 
+// -*-
+i32 Tokenizer::peek(i32 idx){
+    i32 c{};
+    if(this->is_string_stream()){
+        if(idx==0){
+            c = this->m_sstream.peek();
+        }else{
+            this->m_sstream.seekg(idx, std::ios_base::cur);
+            c = this->m_sstream.peek();
+            this->m_sstream.seekg((-idx), std::ios_base::cur);
+        }
+    }else{
+        if(idx==0){
+            c = this->m_fstream.peek();
+        }else{
+            this->m_fstream.seekg(idx, std::ios_base::cur);
+            c = this->m_fstream.peek();
+            this->m_fstream.seekg((-idx), std::ios_base::cur);
+        }
+    }
+
+    return c;
+}
+
 /*
-void Tokenizer::peek(i32 idx){}
 void Tokenizer::advance(i32 count){}
 
 Token Tokenizer::read_identifier(void){}
