@@ -48,9 +48,31 @@ Error::Error(Error&& err) noexcept
 , m_prefix{std::move(err.m_prefix)}
 {}
 
+// -*-
+Error& Error::operator=(const Error& err) noexcept{
+    if(this != &err){
+        this->m_kind = err.m_kind;
+        this->m_msg = err.m_msg;
+        this->m_reason = err.m_reason;
+        this->m_prefix = err.m_prefix;
+    }
+
+    return *this;
+}
+
+// -*-
+Error& Error::operator=(Error&& err) noexcept{
+    if(this != &err){
+        this->m_kind = std::move(err.m_kind);
+        this->m_msg = std::move(err.m_msg);
+        this->m_reason = std::move(err.m_reason);
+        this->m_prefix = std::move(err.m_prefix);
+    }
+
+    return *this;
+}
+
 /*
-Error& Error::operator=(const Error& err) noexcept{}
-Error& Error::operator=(Error&& err) noexcept;
 Str Error::describe(void) const{}
 const Str& Error::prefix(void) const{}
 Str& Error::prefix(void){}
