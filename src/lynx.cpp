@@ -276,7 +276,12 @@ void Module::initialize(void){
     Lynx::run(filename, args, this->m_env);    
 }
 
-// void initialize(const Dict& dict);
+// -*-
+void Module::initialize(const Dict& dict){
+    for(const auto& [key, val]: dict){
+        this->m_env.put(key, val);
+    }
+}
 
 // -----------------------------
 // -*- Lynx: the interpreter -*-
