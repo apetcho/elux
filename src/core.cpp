@@ -1186,8 +1186,15 @@ Vec<String> String::split(const String& delim){
     return result;
 }
 
+// -*-
+i64 String::find(const String& needle) const{
+    auto text = this->str();
+    auto key = needle.str();
+    auto pos = text.find(key);
+    return (pos==Str::npos) ? -1 : static_cast<i64>(pos);
+}
+
 /*
-i64 String::find(const String& needle) const{}
 String String::substr(i64 start=0, i64 end=Str::npos) const{}
 bool String::contains(const String& needle) const{}
 bool String::startswith(const String& prefix) const{}
