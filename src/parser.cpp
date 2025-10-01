@@ -7,19 +7,35 @@
 namespace klx{
 // -
 
-/*
 // --------------
 // -*- Parser -*-
 // --------------
-Parser::Parser(std::istringstream&& stream) noexcept;
-Parser::Parser(std::ifstream&& stream) noexcept;
-Parser::Parser(Parser&& parser) noexcept;
-Parser& Parser::operator=(Parser&& parser) noexcept;
+Parser::Parser(std::istringstream&& stream) noexcept
+: m_tokenizer{Tokenizer(std::move(stream))}
+{
+    this->m_row = this->m_tokenizer.m_row;
+    this->m_col = this->m_tokenizer.m_col;
+}
 
-Result Parser::parse(void);
+// -*-
+Parser::Parser(std::ifstream&& stream) noexcept
+: m_tokenizer{Tokenizer(std::move(stream))}
+{
+    this->m_row = this->m_tokenizer.m_row;
+    this->m_col = this->m_tokenizer.m_col;
+}
 
-Result Parser::parse_atom(void);
-Result Parser::parse_list(void);
+/*
+Parser::Parser(Parser&& parser) noexcept{}
+Parser& Parser::operator=(Parser&& parser) noexcept{}
+
+Result Parser::parse(void){}
+
+Result Parser::parse_atom(void){}
+Result Parser::parse_list(void){}
+bool Parser::match(const Str& word, const Token& token){}
+bool Parser::match(TokenKind expectedKind, const Token& token){}
+void Parser::expect(TokenKind expectedKind, const Token& token){}
 
 */
 

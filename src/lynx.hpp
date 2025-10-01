@@ -702,6 +702,7 @@ private:
     Token read_string(void);
     bool next_is_number(i32 c);
     bool is_eos(void);
+    friend class Parser;
 };
 
 // --------------
@@ -727,6 +728,15 @@ private:
 
     Result parse_atom(void);
     Result parse_list(void);
+    bool match(const Str& word, const Token& token);
+    bool match(TokenKind expectedKind, const Token& token);
+    void expect(TokenKind expectedKind, const Token& token);
+    
+    void update_position(void){
+        this->m_tokenizer.update_position();
+        this->m_row = this->m_tokenizer.m_row;
+        this->m_col = this->m_tokenizer.m_col;
+    }
 };
 
 // -*----------*-
