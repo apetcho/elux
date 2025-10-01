@@ -1763,8 +1763,27 @@ Symbol Macro::type(void) const{
     return Symbol("macro");
 }
 
+// -*-
+Str Macro::str(void) const{
+    std::stringstream ss;
+    ss << "(macro " << this->m_name;
+        Vec<Self> vec{};
+    if(this->m_params.size()==0){
+        ss << "()";
+    }else{
+        for(const auto& p: this->m_params){
+            auto sym = p.repr();
+            auto cstr = sym.c_str();
+            vec.push_back(share(cstr));
+        }
+    }
+    ss << List(vec).str() << "\n";
+    ss << List(this->m_body).str() << ")";
+
+    return ss.str();
+}
+
 /*
-Str Macro::str(void) const{}
 Str Macro::repr(void) const{}
 
 i64 Macro::argc(void) const{}
