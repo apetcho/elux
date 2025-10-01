@@ -207,8 +207,48 @@ Token Tokenizer::read_identifier(void){
     return Token(kind, ident, row, col);
 }
 
+// -*-
+Token Tokenizer::read_integer_or_float(void){
+    auto row = this->m_row;
+    auto col = this->m_col;
+    auto c = this->peek();
+    auto isNum = (
+        std::isdigit(c) || 
+        (c=='-' && std::isdigit(this->peek(1))) ||
+        (c=='+' && std::isdigit(this->peek(1)))
+    );
+    Token result;
+    auto tok = this->read_identifier();
+    result.row = row;
+    result.col = col;
+    result.lexeme = tok.lexeme;
+    if(isNum){
+        auto lexme = tok.lexeme;
+        size_t len{};
+        bool _floating_{false};
+        _floating_ = (
+            lexme.find(".") || lexme.find("e") || lexme.find("E")
+        );
+        if(_floating_){
+            [[maybe_unused]] auto num = std::stod(lexme, &len);
+            if(len==lexme.length()){
+                result.kind = TokenKind::FLOAT;
+            }
+        }else{
+            size_t len{};
+            [[maybe_unused]] auto num = std::stoll(lexme, &len);
+            if(len==lexme.length()){
+                result.kind = TokenKind::INTEGER;
+            }
+        }
+    }else{
+        result.kind = TokenKind::Ident;
+    }
+
+    return result;
+}
+
 /*
-Token Tokenizer::read_integer_or_float(void){}
 Token Tokenizer::read_string(void){}
 
 bool Tokenizer::is_eos(void){}
