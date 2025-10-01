@@ -1490,9 +1490,15 @@ Symbol Builtin::type(void) const{
     return Symbol("builtin");
 }
 
-/*
+// -*-
+Str Builtin::str(void) const{
+    std::stringstream ss;
+    ss << "<builtin::" << this->name() << " at 0x";
+    ss << std::hex << this->m_cfun << ">";
+    return ss.str();
+}
 
-Str Builtin::str(void) const{}
+/*
 Str Builtin::repr(void) const{}
 
 i64 Builtin::min_argc(void) const{}
