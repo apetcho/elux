@@ -25,8 +25,14 @@ Parser::Parser(std::ifstream&& stream) noexcept
     this->m_col = this->m_tokenizer.m_col;
 }
 
+// -*-
+Parser::Parser(Parser&& parser) noexcept
+: m_tokenizer{std::move(parser.m_tokenizer)}
+, m_row{std::move(parser.m_row)}
+, m_col{std::move(parser.m_col)}
+{}
+
 /*
-Parser::Parser(Parser&& parser) noexcept{}
 Parser& Parser::operator=(Parser&& parser) noexcept{}
 
 Result Parser::parse(void){}
