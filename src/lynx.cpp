@@ -159,10 +159,15 @@ Self Env::get(const Str& key) const{
     return this->m_parent->get(key);
 }
 
-/*
-const Env* Env::parent(void) const{}
-Env* Env::parent(void){}
-*/
+// -*-
+const Env* Env::parent(void) const{
+    return this->m_parent;
+}
+
+// -*-
+Env* Env::parent(void){
+    return this->m_parent;
+}
 
 // --------------
 // -*- Result -*-
