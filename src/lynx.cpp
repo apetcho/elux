@@ -209,9 +209,12 @@ Self Result::ok(void) const{
     return self;
 }
 
-/*
-Error Result::err(void) const{}
-*/
+// -*-
+Error Result::err(void) const{
+    Error error;
+    error = std::get<Error>(this->m_value);
+    return error;
+}
 
 // -*----------*-
 // --- Module ---
