@@ -64,6 +64,25 @@ Token Tokenizer::token(void){
 }
 
 // -*-
+TokenKind Tokenizer::token_kind_by_word(const Str& word){
+    std::map<Str, TokenKind> _my_words_ = {
+#define LYNX_DEF(tok, w)  {w, TokenKind::tok},
+        LYNX_KEYWORDS()
+#undef LYNX_DEF
+    };
+    _my_words_["true"] = TokenKind::True;
+    _my_words_["false"] = TokenKind::False;
+    _my_words_["nil"] = TokenKind::Nil;
+
+    auto entry = _my_words_.find(word);
+    if(entry != _my_words_.end()){
+        return entry->second;
+    }
+
+    return TokenKind::Invalid;
+}
+
+// -*-
 bool Tokenizer::is_symbol_char(i32 c){
     static const Str sym = ":_-+%*/!#$&=?`',@";
     auto pos = sym.find(c);
@@ -178,6 +197,9 @@ Token Tokenizer::read_identifier(void){
     TokenKind kind;
     if(Lynx::is_reserved_word(ident)){
         kind = Tokenizer::token_kind_by_word(ident);
+        if(kind == TokenKind::Invalid){
+            kind = TokenKind::Ident;
+        }
     }else{
         kind = TokenKind::Ident;
     }
