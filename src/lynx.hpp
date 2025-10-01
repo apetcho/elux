@@ -44,7 +44,18 @@
 #define LYNX_TOKENS()               \
     LYNX_DEF(Invalid, "INVALID")    \
     LYNX_DEF(Eof, "EOF")            \
-    LYNX_DEF(Plus, "+")             \
+    LYNX_DEF(Nil, "nil")            \
+    LYNX_DEF(True, "true")          \
+    LYNX_DEF(False, "false")        \
+    LYNX_KEYWORDS()                 \
+    LYNX_DEF(INTEGER, "INTEGER")    \
+    LYNX_DEF(FLOAT, "FLOAT")        \
+    LYNX_DEF(STRING, "STRING")      \
+    LYNX_DEF(Ident, "IDENTIFIER")
+
+
+/*
+LYNX_DEF(Plus, "+")             \
     LYNX_DEF(Minus, "-")            \
     LYNX_DEF(Div, "/")              \
     LYNX_DEF(Mul, "*")              \
@@ -58,15 +69,7 @@
     LYNX_DEF(Greater, ">")          \
     LYNX_DEF(GreaterEq, ">=")       \
     LYNX_DEF(NotEq, "!=")           \
-    LYNX_DEF(Nil, "nil")            \
-    LYNX_DEF(True, "true")          \
-    LYNX_DEF(False, "false")        \
-    LYNX_KEYWORDS()                 \
-    LYNX_DEF(INTEGER, "INTEGER")    \
-    LYNX_DEF(FLOAT, "FLOAT")        \
-    LYNX_DEF(STRING, "STRING")      \
-    LYNX_DEF(Ident, "IDENTIFIER")
-
+*/
 
 // -*-
 namespace fs = std::filesystem;
@@ -670,6 +673,8 @@ public:
 
     Token token(void);
 
+    static TokenKind token_kind_by_word(const Str& word);
+
 private:
     enum class Kind{STR, FILE};
     // using Stream = std::variant<std::istringstream, std::ifstream>;
@@ -800,6 +805,7 @@ private:
     static void initialize_argparse_module(void);
     */
 
+public:
     static bool check_argc(int argc, int expected, const Str& funcname, Error& err);
     static bool check_type(const Symbol& ty, const Self& self, Error& err);
     static bool check_value(const Self& self, bool (*fn)(const Self&), Error& err);
@@ -808,6 +814,7 @@ private:
     static bool is_reserved_word(const Str& word);
     static bool is_keyword(const Str& word);
 
+private:
     static Vec<Symbol> captured_symbols(const Vec<Self>& body);
     // -*-
 

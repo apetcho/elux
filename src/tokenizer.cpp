@@ -165,8 +165,27 @@ void Tokenizer::update_position(void){
     }
 }
 
+// -*-
+Token Tokenizer::read_identifier(void){
+    auto row = this->m_row;
+    auto col = this->m_col;
+    Str ident{};
+    auto c = this->peek();
+    while(this->is_symbol_char(c)){
+        ident += static_cast<char>(c);
+        this->advance();
+    }
+    TokenKind kind;
+    if(Lynx::is_reserved_word(ident)){
+        kind = Tokenizer::token_kind_by_word(ident);
+    }else{
+        kind = TokenKind::Ident;
+    }
+
+    return Token(kind, ident, row, col);
+}
+
 /*
-Token Tokenizer::read_identifier(void){}
 Token Tokenizer::read_integer_or_float(void){}
 Token Tokenizer::read_string(void){}
 
