@@ -1,5 +1,7 @@
 #include "lynx.hpp"
 
+#include<stack>
+
 // -*----------------------------------------------------------------*-
 // -*- begin::namespace::klx                                        -*-
 // -*----------------------------------------------------------------*-
@@ -286,15 +288,23 @@ void Module::initialize(const Dict& dict){
 // -----------------------------
 // -*- Lynx: the interpreter -*-
 // -----------------------------
-/*
 Env Lynx::lynxDocs;
 Env Lynx::docstrs;
 Env Lynx::prelude;
 std::map<Str, Module> Lynx::libraries;
 
-const Env& Lynx::runtime(void) const;
-Env& Lynx::runtime(void);
-void Lynx::repl(Env& env);
+// -*-
+const Env& Lynx::runtime(void) const{
+    return this->m_runtime;
+}
+
+// -*-
+Env& Lynx::runtime(void){
+    return this->m_runtime;
+}
+
+/*
+void Lynx::repl(Env& env){}
 void Lynx::run(const Str& filename, const Vec<Str>& args, Env& env);
 void Lynx::setup(void);
 Result Lynx::eval(const Self& self, Env& env);
@@ -323,6 +333,47 @@ Str Lynx::readfile(const Str& filename){
     fin.close();
     return result;
 }
+
+
+
+Str Lynx::input(void){
+    std::stack<char> parens{};
+    char c{};
+    std::cin >> c;
+    Str src{};
+    Str indent(4, ' ');
+    if(c=='('){
+        parens.push(c);
+        std::cin.unget();
+        bool first = true;
+        while(!parens.empty()){
+            if(first){
+                parens.pop();
+                first = false;
+            }
+            Str line{};
+            std::getline(std::cin >> std::ws, line);
+            src += line + "\n";
+            for(int i=0; i < line.length(); i++){
+                c = line[i];
+                if(c == ')'){ parens.pop(); }
+                else if(c=='('){ parens.push(c); }
+            }
+            auto level = parens.size();
+            if(level != 0){
+                // if(!first){ std::cout << "...."; }
+                for(int k=0; k < level; k++){
+                    std::cout << indent;
+                }
+            }
+        }
+    }else{
+        std::cin.unget();
+        std::getline(std::cin >> std::ws, src);
+    }
+    return src;
+}
+
 Str Lynx::make_library_key(const Module& mymodule);
 void Lynx::push_module(const Module& mymodule);
 void Lynx::push_module(const Str& name, const Module& mymodule);
