@@ -1866,12 +1866,16 @@ Self share(f64 num){
 }
 
 // -*-
-Self share(f64 x, f64 y)Self share(f64 num){
+Self share(f64 x, f64 y){
     return std::make_shared<Number>(x, y);
 }
 
+// -*-
+Self share(const Complex& z){
+    return std::make_shared<Number>(z);
+}
+
 /*
-Self share(const Complex& z){}
 Self share(const char* sym){}
 Self share(const Str& str){}
 Self share(const Vec<Self>& xs){}
