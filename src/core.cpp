@@ -1194,8 +1194,14 @@ i64 String::find(const String& needle) const{
     return (pos==Str::npos) ? -1 : static_cast<i64>(pos);
 }
 
+// -*-
+String String::substr(i64 start, i64 end) const{
+    auto text = this->str();
+    auto ans = text.substr(start, end);
+    return String(ans);
+}
+
 /*
-String String::substr(i64 start=0, i64 end=Str::npos) const{}
 bool String::contains(const String& needle) const{}
 bool String::startswith(const String& prefix) const{}
 bool String::endswith(const String& suffix) const{}
