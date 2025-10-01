@@ -1387,8 +1387,17 @@ List List::append(const Self& self){
     return List(xs);
 }
 
+// -*-
+List List::insert(i64 idx, const Self& self){
+    if(0){}
+    auto xs = this->as_list();
+    auto ptr = xs.begin();
+    ptr = std::next(ptr, static_cast<int>(idx));
+    xs.insert(ptr, self);
+    return List(xs);
+}
+
 /*
-List List::insert(i64 idx, const Self& self){}
 List List::remove(i64 idx){}
 List List::set(i64 idx, const Self& self){}
     
