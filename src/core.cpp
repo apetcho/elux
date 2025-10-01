@@ -1498,9 +1498,15 @@ Str Builtin::str(void) const{
     return ss.str();
 }
 
-/*
-Str Builtin::repr(void) const{}
+// -*-
+Str Builtin::repr(void) const{
+    std::stringstream ss;
+    ss << "<builtin::" << this->name() << " at 0x";
+    ss << std::hex << this->m_cfun << ">";
+    return ss.str();
+}
 
+/*
 i64 Builtin::min_argc(void) const{}
 i64 Builtin::max_argc(void) const{}
 const Str& Builtin::name(void) const{}
