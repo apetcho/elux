@@ -757,6 +757,7 @@ private:
     Env m_runtime;
     std::map<Str, Module> m_imported_libs;
 
+    static Str readfile(const Str& filename);
     static Str make_library_key(const Module& mymodule);
     static void push_module(const Module& mymodule);
     static void push_module(const Str& name, const Module& mymodule);

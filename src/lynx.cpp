@@ -219,9 +219,22 @@ Error Result::err(void) const{
 // -*----------*-
 // --- Module ---
 // -*----------*-
+Module::Module(const Str& name, Env* env) noexcept
+: m_name{name}
+, m_path{fs::path("@lynx")} // for builtin modules
+, m_env{Env()}{
+    *this->m_env.parent() = *env;
+}
+
+// -*-
+Module::Module(const Str& name, const fs::path& path, Env* env) noexcept
+: m_name{name}
+, m_path{path}
+, m_env{Env()}{
+    *this->m_env.parent() = *env;
+}
+
 /*
-Module::Module(const Str& name, Env* env) noexcept;
-Module::Module(const Str& name, const fs::path& path, Env* env) noexcept;
 Module::Module(Module&& other) noexcept;
 Module::Module& operator=(Module&& other) noexcept;
 const Symbol& Module::name(void) const;
@@ -248,6 +261,30 @@ void Lynx::run(const Vec<Str>& args);
 void Lynx::setup(void);
 Result Lynx::eval(const Self& self, Env& env);
 
+Str Lynx::readfile(const Str& filename){
+    if(!fs::exists(fs::path(filename))){
+        std::stringstream ss;
+        ss << "file '" << filename << "' not found";
+        throw Error(Error::Kind::RuntimeError, ss.str());
+    }
+    std::ifstream fin(filename);
+    Str result{};
+    if(!fin.is_open()){
+        std::stringstream ss;
+        ss << "error opening the file '" << filename << "'";
+        throw Error(Error::Kind::RuntimeError, ss.str());
+    }
+    fin.seekg(0, std::ios::end);
+    result.reserve(fin.tellg());
+    fin.seekg(0, std::ios::beg);
+    result.assign(
+        std::istreambuf_iterator<char>(fin),
+        std::istreambuf_iterator<char>()
+    );
+
+    fin.close();
+    return result;
+}
 Str Lynx::make_library_key(const Module& mymodule);
 void Lynx::push_module(const Module& mymodule);
 void Lynx::push_module(const Str& name, const Module& mymodule);
