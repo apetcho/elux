@@ -1428,9 +1428,15 @@ List List::set(i64 idx, const Self& self){
     return List(xs);
 }
 
-/*
-List operator+(const List& lhs, const List& rhs){}
-*/
+// -*-
+List operator+(const List& lhs, const List& rhs){
+    auto vec = lhs.as_vector();
+    auto xs = rhs.as_vector();
+    for(const auto x: xs){
+        vec.push_back(x);
+    }
+    return List(vec);
+}
 
 // ---------------
 // -*- Builtin -*-
