@@ -137,6 +137,7 @@ private:
 class Env final{
 public:
     explicit Env() noexcept = default;
+    explicit Env(Env *env) noexcept;
     Env(const Env& env) noexcept;
     ~Env() = default;
     bool contains(const Str& key) const;
@@ -708,7 +709,7 @@ private:
 // -*----------*-
 class Module final{
 public:
-    explicit Module(const Str& name, Env* env) noexcept;
+    explicit Module(const Str& name, const Dict& dict, Env* env) noexcept;
     explicit Module(const Str& name, const fs::path& path, Env* env) noexcept;
     Module(const Module&) = delete;
     Module& operator=(const Module&) = delete;
@@ -725,6 +726,7 @@ private:
     Env m_env;
 
     void initialize(void);
+    void initialize(const Dict& dict);
 };
 
 // -----------------------------

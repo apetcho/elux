@@ -110,6 +110,11 @@ Str Error::make_prefix(void){
 // -----------
 // -*- Env -*-
 // -----------
+Env::Env(Env *env) noexcept
+: m_bindings{}
+, m_parent{env}
+{}
+
 Env::Env(const Env& env) noexcept
 : m_bindings{env.m_bindings}
 , m_parent{env.m_parent}
@@ -219,20 +224,18 @@ Error Result::err(void) const{
 // -*----------*-
 // --- Module ---
 // -*----------*-
-Module::Module(const Str& name, Env* env) noexcept
+Module::Module(const Str& name, const Dict& dict, Env* env) noexcept
 : m_name{name}
 , m_path{fs::path("@lynx")} // for builtin modules
-, m_env{Env()}{
-    *this->m_env.parent() = *env;
-    this->initialize();
+, m_env{Env(env)}{
+    this->initialize(dict);
 }
 
 // -*-
 Module::Module(const Str& name, const fs::path& path, Env* env) noexcept
 : m_name{name}
 , m_path{path}
-, m_env{Env()}{
-    *this->m_env.parent() = *env;
+, m_env{Env(env)}{
     this->initialize();
 }
 
@@ -267,10 +270,13 @@ const Env& Module::env(void) const{
     return this->m_env;
 }
 
-/*
-void Module::initialize(void);
-*/
+void Module::initialize(void){
+    Vec<Str> args{};
+    auto filename = this->m_path.string();
+    Lynx::run(filename, args, this->m_env);    
+}
 
+// void initialize(const Dict& dict);
 
 // -----------------------------
 // -*- Lynx: the interpreter -*-
