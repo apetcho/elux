@@ -731,11 +731,16 @@ private:
     bool match(const Str& word, const Token& token);
     bool match(TokenKind expectedKind, const Token& token);
     void expect(TokenKind expectedKind, const Token& token);
-    
+
     void update_position(void){
         this->m_tokenizer.update_position();
         this->m_row = this->m_tokenizer.m_row;
         this->m_col = this->m_tokenizer.m_col;
+    }
+
+    // -*-
+    Token next_token(void){
+        return this->m_tokenizer.token();
     }
 };
 

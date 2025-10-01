@@ -43,8 +43,14 @@ Parser& Parser::operator=(Parser&& parser) noexcept{
     return *this;
 }
 
+// -*-
+Result Parser::parse(void){
+    
+
+    return Result(share());
+}
+
 /*
-Result Parser::parse(void){}
 
 Result Parser::parse_atom(void){}
 Result Parser::parse_list(void){}
