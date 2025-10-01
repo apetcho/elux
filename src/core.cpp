@@ -1758,8 +1758,12 @@ Macro& Macro::operator=(Macro&& macro) noexcept{
     return *this;
 }
 
+// -*-
+Symbol Macro::type(void) const{
+    return Symbol("macro");
+}
+
 /*
-Symbol Macro::type(void) const{}
 Str Macro::str(void) const{}
 Str Macro::repr(void) const{}
 
