@@ -1441,10 +1441,29 @@ List operator+(const List& lhs, const List& rhs){
 // ---------------
 // -*- Builtin -*-
 // ---------------
+Builtin::Builtin(const Str& name, CFun cfun, i32 minArgc, i32 maxArgc) noexcept
+: m_name{name}
+, m_cfun{cfun}
+, m_minArgc{minArgc}
+, m_maxArgc{maxArgc}
+{}
+
+Builtin::Builtin(const Builtin& builtin) noexcept
+: m_name{builtin.m_name}
+, m_cfun{builtin.m_cfun}
+, m_minArgc{builtin.m_minArgc}
+, m_maxArgc{builtin.m_maxArgc}
+{}
+
+// -*-
+Builtin::Builtin(Builtin&& builtin) noexcept
+: m_name{std::move(builtin.m_name)}
+, m_cfun{std::move(builtin.m_cfun)}
+, m_minArgc{std::move(builtin.m_minArgc)}
+, m_maxArgc{std::move(builtin.m_maxArgc)}
+{}
+
 /*
-Builtin::Builtin(const Str& name, CFun cfun, i32 minArgc, i32 maxArgc) noexcept{}
-Builtin::Builtin(const Builtin& builtin) noexcept{}
-Builtin::Builtin(Builtin&& builtin) noexcept{}
 Builtin& Builtin::operator=(const Builtin& builtin) noexcept{}
 Builtin& Builtin::operator=(Builtin&& builtin) noexcept{}
 
