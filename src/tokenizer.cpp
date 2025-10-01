@@ -87,8 +87,19 @@ void Tokenizer::skip_whitespace(void){
     }
 }
 
+// -*-
+void Tokenizer::skip_comment(void){
+    auto c = this->peek();
+    if(c==';'){
+        while(c!='\n' && !this->is_eos()){
+            this->advance();
+        }
+        this->m_row += 1;
+        this->m_col = 1;
+    }
+}
+
 /*
-void Tokenizer::skip_comment(void){}
 void Tokenizer::peek(i32 idx){}
 void Tokenizer::advance(i32 count){}
 
