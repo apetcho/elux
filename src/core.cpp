@@ -1209,8 +1209,14 @@ bool String::contains(const String& needle) const{
     return (pos==Str::npos) ? false : true;
 }
 
+// -*-
+bool String::startswith(const String& prefix) const{
+    auto text = this->str();
+    auto key = prefix.str();
+    return (key == text.substr(key.length()));
+}
+
 /*
-bool String::startswith(const String& prefix) const{}
 bool String::endswith(const String& suffix) const{}
 */
 
