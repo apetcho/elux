@@ -1623,7 +1623,7 @@ Str Closure::str(void) const{
             ss << "()";
         }else{
             for(const auto& p: this->m_params){
-                auto sym = p.repr();
+                auto sym = p.str();
                 auto cstr = sym.c_str();
                 vec.push_back(share(cstr));
             }
@@ -1638,7 +1638,7 @@ Str Closure::str(void) const{
             ss << "()";
         }else{
             for(const auto& p: this->m_params){
-                auto sym = p.repr();
+                auto sym = p.str();
                 auto cstr = sym.c_str();
                 vec.push_back(share(cstr));
             }
@@ -1772,7 +1772,7 @@ Str Macro::str(void) const{
         ss << "()";
     }else{
         for(const auto& p: this->m_params){
-            auto sym = p.repr();
+            auto sym = p.str();
             auto cstr = sym.c_str();
             vec.push_back(share(cstr));
         }
@@ -1783,9 +1783,27 @@ Str Macro::str(void) const{
     return ss.str();
 }
 
-/*
-Str Macro::repr(void) const{}
+// -*-
+Str Macro::repr(void) const{
+    std::stringstream ss;
+    ss << "(macro " << this->m_name;
+        Vec<Self> vec{};
+    if(this->m_params.size()==0){
+        ss << "()";
+    }else{
+        for(const auto& p: this->m_params){
+            auto sym = p.repr();
+            auto cstr = sym.c_str();
+            vec.push_back(share(cstr));
+        }
+    }
+    ss << List(vec).repr() << "\n";
+    ss << List(this->m_body).repr() << ")";
 
+    return ss.str();
+}
+
+/*
 i64 Macro::argc(void) const{}
 Result Macro::expand(const Vec<Self>& args) const{}
 Result operator()(const Vec<Self>& args){}
