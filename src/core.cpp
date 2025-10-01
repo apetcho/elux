@@ -1803,8 +1803,12 @@ Str Macro::repr(void) const{
     return ss.str();
 }
 
+// -*-
+i64 Macro::argc(void) const{
+    return static_cast<i64>(this->m_params.size());
+}
+
 /*
-i64 Macro::argc(void) const{}
 Result Macro::expand(const Vec<Self>& args) const{}
 Result operator()(const Vec<Self>& args){}
 */
