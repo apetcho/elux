@@ -1316,8 +1316,16 @@ i64 List::len(void) const{
     return static_cast<i64>(this->m_value.size());
 }
 
+// -*-
+Self List::head(void) const{
+    if(this->len()==0){
+        throw Error(Error::Kind::ValueError, "cannot get `head' of an empty list");
+    }
+    auto self = this->m_value.front();
+    return self;
+}
+
 /*
-Self List::head(void) const{}
 List List::tail(void) const{}
 Self List::last(void) const{}
 Self List::nth(i64 idx) const{}
