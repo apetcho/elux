@@ -72,8 +72,19 @@ Error& Error::operator=(Error&& err) noexcept{
     return *this;
 }
 
+// -*-
+Str Error::describe(void) const{
+    std::stringstream ss;
+    ss << this->m_prefix << ":\n" << this->m_msg;
+    if(this->m_reason != nullptr){
+        ss << "\n";
+        ss << this->m_reason->str();
+    }
+
+    return ss.str();
+}
+
 /*
-Str Error::describe(void) const{}
 const Str& Error::prefix(void) const{}
 Str& Error::prefix(void){}
 Str Error::make_prefix(void){}
