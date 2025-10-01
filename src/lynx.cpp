@@ -9,15 +9,38 @@ namespace klx{
 // -------------
 // -*- Error -*-
 // -------------
+Error::Error(const Str& msg) noexcept
+: m_kind{Kind::FatalError}
+, m_msg{msg}
+, m_reason{nullptr}{
+    this->m_prefix = this->make_prefix();
+}
+
+// -*-
+Error::Error(Kind kind, const Str& msg) noexcept
+: m_kind{kind}
+, m_msg{msg}
+, m_reason{nullptr}{
+    this->m_prefix = this->make_prefix();
+}
+
+// -*-
+Error::Error(Kind kind, const Str& msg, const Self& self) noexcept
+: m_kind{kind}
+, m_msg{msg}
+, m_reason{self}{
+    this->m_prefix = this->make_prefix();
+}
+
+
 /*
-Error::Error(const Str& mgs) noexcept{}
-Error::Error(Kind kind, const Str& msg) noexcept{}
-Error::Error(Kind kind, const Str& msg, const Self& self) noexcept{}
 Error::Error(const Error& err) noexcept{}
 Error& Error::operator=(const Error& err) noexcept{}
 Error::Error(Error&& err) noexcept;
 Error& Error::operator=(Error&& err) noexcept;
 Str Error::describe(void) const{}
+const Str& Error::prefix(void) const{}
+Str& Error::prefix(void){}
 Str Error::make_prefix(void){}
 */
 
@@ -70,20 +93,18 @@ Env Lynx::docstrs;
 Env Lynx::prelude;
 std::map<Str, Module> Lynx::libraries;
 
-const Env& Lynx::runtime(void) const{}
-Env& Lynx::runtime(void){}
-void Lynx::repl(void){}
-void Lynx::run(const Vec<Str>& args){}
-void Lynx::setup(void){}
+const Env& Lynx::runtime(void) const;
+Env& Lynx::runtime(void);
+void Lynx::repl(void);
+void Lynx::run(const Vec<Str>& args);
+void Lynx::setup(void);
+Result Lynx::eval(const Self& self, Env& env);
 
-Result Lynx::eval(const Self& self, Env& env){}
-
-Str Lynx::make_library_key(const Module& mymodule){}
-void Lynx::push_module(const Module& mymodule){}
-void Lynx::push_module(const Str& name, const Module& mymodule){}
-void Lynx::import_module(const Str& module_name){}
-void Lynx::import_module(const fs::path& module_path){}
-
+Str Lynx::make_library_key(const Module& mymodule);
+void Lynx::push_module(const Module& mymodule);
+void Lynx::push_module(const Str& name, const Module& mymodule);
+void Lynx::import_module(const Str& module_name);
+void Lynx::import_module(const fs::path& module_path);
 
 bool Lynx::check_argc(int argc, int expected, const Str& funcname, Error& err){}
 bool Lynx::check_type(const Symbol& ty, const Self& self, Error& err){}
@@ -248,7 +269,6 @@ Result Lynx::fn_timeit(const Vec<Self>& args){}
 Result Lynx::fn_eval(const Vec<Self>& args){}
 Result Lynx::fn_declare_module(const Vec<Self>& args){}
 Result Lynx::fn_help(const Vec<Self>& args){}
-
 */
 
 // -*----------------------------------------------------------------*-

@@ -119,10 +119,14 @@ public:
 
     Str describe(void) const;
 
+    const Str& prefix(void) const;
+    Str& prefix(void);
+
 private:
     Kind m_kind;
     Str m_msg;
     Self m_reason;
+    Str m_prefix{};
 
     Str make_prefix(void);
 };
@@ -727,7 +731,7 @@ private:
 // -----------------------------
 class Lynx final{
 public:
-    explicit Lynx() noexcept = default;
+    // explicit Lynx() noexcept = default;
 
     static Env lynxDocs;
     static Env docstrs;
