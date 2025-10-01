@@ -1737,10 +1737,28 @@ Macro::Macro(Macro&& macro) noexcept
 , m_env{std::move(macro.m_env)}
 {}
 
-/*
-Macro& Macro::operator=(const Macro& macro) noexcept{}
-Macro& Macro::operator=(Macro&& macro) noexcept{}
+// -*-
+Macro& Macro::operator=(const Macro& macro) noexcept{
+    if(this != &macro){
+        this->m_name = macro.m_name;
+        this->m_params = macro.m_params;
+        this->m_body = macro.m_body;
+        this->m_env = macro.m_env;
+    }
+    return *this;
+}
 
+Macro& Macro::operator=(Macro&& macro) noexcept{
+    if(this != &macro){
+        this->m_name = std::move(macro.m_name);
+        this->m_params = std::move(macro.m_params);
+        this->m_body = std::move(macro.m_body);
+        this->m_env = std::move(macro.m_env);
+    }
+    return *this;
+}
+
+/*
 Symbol Macro::type(void) const{}
 Str Macro::str(void) const{}
 Str Macro::repr(void) const{}
