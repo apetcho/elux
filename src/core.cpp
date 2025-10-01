@@ -1251,8 +1251,32 @@ Symbol List::type(void) const{
     return Symbol("list");
 }
 
+// -*-
+Str List::str(void) const{
+    auto const N = this->m_value.size();
+    if(N==0){ return "nil"; }
+    if(N==1){
+        Str result{"("};
+        result += this->m_value.back()->str();
+        result += ")";
+        return result;
+    }
+    std::stringstream ss;
+    int idx = 0;
+    auto start = this->m_value.cbegin();
+    ss << "(";
+    auto ptr = std::next(start, idx);
+    ss << (*ptr)->str();
+
+    while(++idx < N){
+        ptr = std::next(start, idx);
+        ss << " " << (*ptr)->str();
+    }
+    ss << ")";
+    return ss.str();
+}
+
 /*
-Str List::str(void) const{}
 Str List::repr(void) const{}
 
 std::list<Self> List::as_list(void) const{}
