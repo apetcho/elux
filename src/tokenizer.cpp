@@ -79,10 +79,6 @@ bool Tokenizer::is_syntax_quote(i32 c){
 // -*-
 void Tokenizer::skip_whitespace(void){
     while(std::isspace(this->peek()) && !this->is_eos()){
-        if(this->peek() == '\n'){
-            this->m_row += 1;
-            this->m_col = 1;
-        }
         this->advance();
     }
 }
@@ -94,8 +90,9 @@ void Tokenizer::skip_comment(void){
         while(c!='\n' && !this->is_eos()){
             this->advance();
         }
-        this->m_row += 1;
-        this->m_col = 1;
+        if(c == '\n'){
+            this->advance();
+        }
     }
 }
 
@@ -106,27 +103,29 @@ i32 Tokenizer::peek(i32 idx){
         if(idx==0){
             c = this->m_sstream.peek();
         }else{
+            auto pos = this->m_sstream.tellg();
             for(int i=0; i < idx; i++){
+                this->advance();
                 if(this->m_sstream.eof()){
                     return EOF;
                 }
-                this->m_sstream.seekg(1, std::ios_base::cur);
             }
             c = this->m_sstream.peek();
-            this->m_sstream.seekg((-idx), std::ios_base::cur);
+            this->m_sstream.seekg(pos, std::ios_base::beg);
         }
     }else{
         if(idx==0){
             c = this->m_fstream.peek();
         }else{
+            auto pos = this->m_fstream.tellg();
             for(int i=0; i < idx; i++){
+                this->advance();
                 if(this->m_fstream.eof()){
                     return EOF;
                 }
-                this->m_fstream.seekg(1, std::ios_base::cur);
             }
             c = this->m_fstream.peek();
-            this->m_fstream.seekg((-idx), std::ios_base::cur);
+            this->m_fstream.seekg(pos, std::ios_base::beg);
         }
     }
 
@@ -135,12 +134,14 @@ i32 Tokenizer::peek(i32 idx){
 
 // -*-
 void Tokenizer::advance(i32 count){
+    i32 c{};
     if(this->is_string_stream()){
         for(int i=0; i < count; i++){
             if(this->m_sstream.eof()){
                 break;
             }
             this->m_sstream.seekg(1, std::ios_base::cur);
+            this->update_position();
         }
     }else{
         for(int i=0; i < count; i++){
@@ -148,12 +149,23 @@ void Tokenizer::advance(i32 count){
                 break;
             }
             this->m_fstream.seekg(1, std::ios_base::cur);
+            this->update_position();
         }
     }
 }
 
-/*
+// -*-
+void Tokenizer::update_position(void){
+    auto c = this->peek();
+    if(c == '\n'){
+        this->m_row += 1;
+        this->m_col = 1;
+    }else{
+        this->m_col += 1;
+    }
+}
 
+/*
 Token Tokenizer::read_identifier(void){}
 Token Tokenizer::read_integer_or_float(void){}
 Token Tokenizer::read_string(void){}

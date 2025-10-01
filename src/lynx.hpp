@@ -687,6 +687,7 @@ private:
     void skip_comment(void);
     i32 peek(i32 idx=0);
     void advance(i32 count=1);
+    void update_position(void);
 
     Token read_syntax_quote(void);
     Token read_identifier(void);
