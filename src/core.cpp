@@ -1336,8 +1336,15 @@ List List::tail(void) const{
     return List(Vec<Self>(ptr, end));
 }
 
+Self List::last(void) const{
+    if(this->len()==0){
+        throw Error(Error::Kind::ValueError, "cannot get `last' of an empty list");
+    }
+    auto self = this->m_value.back();
+    return self;
+}
+
 /*
-Self List::last(void) const{}
 Self List::nth(i64 idx) const{}
 List List::push(const Self& self){}
 Self List::pop(void){}
