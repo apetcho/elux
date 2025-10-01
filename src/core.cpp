@@ -1276,9 +1276,32 @@ Str List::str(void) const{
     return ss.str();
 }
 
-/*
-Str List::repr(void) const{}
+// -*-
+Str List::repr(void) const{
+    auto const N = this->m_value.size();
+    if(N==0){ return "nil"; }
+    if(N==1){
+        Str result{"("};
+        result += this->m_value.back()->repr();
+        result += ")";
+        return result;
+    }
+    std::stringstream ss;
+    int idx = 0;
+    auto start = this->m_value.cbegin();
+    ss << "(";
+    auto ptr = std::next(start, idx);
+    ss << (*ptr)->repr();
 
+    while(++idx < N){
+        ptr = std::next(start, idx);
+        ss << " " << (*ptr)->repr();
+    }
+    ss << ")";
+    return ss.str();
+}
+
+/*
 std::list<Self> List::as_list(void) const{}
 Vec<Self> List::as_vector(void) const{}
 
