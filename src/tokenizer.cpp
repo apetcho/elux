@@ -123,8 +123,20 @@ i32 Tokenizer::peek(i32 idx){
     return c;
 }
 
+// -*-
+void Tokenizer::advance(i32 count){
+    if(this->is_string_stream()){
+        for(int i=0; i < count; i++){
+            this->m_sstream.seekg(1, std::ios_base::cur);
+        }
+    }else{
+        for(int i=0; i < count; i++){
+            this->m_fstream.seekg(1, std::ios_base::cur);
+        }
+    }
+}
+
 /*
-void Tokenizer::advance(i32 count){}
 
 Token Tokenizer::read_identifier(void){}
 Token Tokenizer::read_integer_or_float(void){}
