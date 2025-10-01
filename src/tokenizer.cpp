@@ -284,10 +284,10 @@ Token Tokenizer::read_string(void){
     return result;
 }
 
-/*
-
-bool Tokenizer::is_eos(void){}
-*/
+// -*-
+bool Tokenizer::is_eos(void){
+    return this->peek() == EOF;
+}
 
 
 // -*----------------------------------------------------------------*-
