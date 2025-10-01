@@ -2032,9 +2032,6 @@ Self operator%(const Self& lhs, const Self& rhs){
 
 // -*-
 bool operator==(const Self& lhs, const Self& rhs){
-    if(lhs->is_list() && rhs->is_list()){
-        return false;
-    }
     if(lhs->is_number() && rhs->is_number()){
         auto xnum = *dynamic_cast<Number*>(lhs.get());
         auto ynum = *dynamic_cast<Number*>(rhs.get());
@@ -2046,7 +2043,7 @@ bool operator==(const Self& lhs, const Self& rhs){
         return (xstr == ystr);
     }
 
-    if(lhs->is_string() && rhs->is_string()){
+    if(lhs->is_symbol() && rhs->is_symbol()){
         auto xsym = *dynamic_cast<Symbol*>(lhs.get());
         auto ysym = *dynamic_cast<Symbol*>(rhs.get());
         return (xsym == ysym);
@@ -2070,8 +2067,24 @@ bool operator>=(const Self& lhs, const Self& rhs){
     return (lhs > rhs) || (lhs == rhs);
 }
 
+bool operator<(const Self& lhs, const Self& rhs){
+    if(lhs->is_number() && rhs->is_number()){
+        auto xnum = *dynamic_cast<Number*>(lhs.get());
+        auto ynum = *dynamic_cast<Number*>(rhs.get());
+        return (xnum < ynum);
+    }
+    if(lhs->is_string() && rhs->is_string()){
+        auto xstr = *dynamic_cast<String*>(lhs.get());
+        auto ystr = *dynamic_cast<String*>(rhs.get());
+        return (xstr < ystr);
+    }
+
+    std::stringstream ss;
+    ss << "`<' is not applicable between types `";
+    ss << lhs->type().str() << "' and `" << rhs->type().str() << "'";
+    throw Error(Error::Kind::TypeError, ss.str());
+}
 /*
-bool operator<(const Self& lhs, const Self& rhs){}
 bool operator>(const Self& lhs, const Self& rhs){}
 
 bool operator||(const Self& lhs, const Self& rhs){}
