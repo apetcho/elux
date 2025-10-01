@@ -1353,8 +1353,14 @@ Self List::nth(i64 idx) const{
     return (*ptr);
 }
 
+// -*-
+List List::push(const Self& self){
+    auto vec = this->as_vector();
+    vec.push_back(self);
+    return List(vec);
+}
+
 /*
-List List::push(const Self& self){}
 Self List::pop(void){}
 List List::append(const Self& self){}
 List List::insert(i64 idx, const Self& self){}
