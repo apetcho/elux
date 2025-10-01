@@ -1201,8 +1201,15 @@ String String::substr(i64 start, i64 end) const{
     return String(ans);
 }
 
+// -*-
+bool String::contains(const String& needle) const{
+    auto text = this->str();
+    auto key = needle.str();
+    auto pos = text.find(key);
+    return (pos==Str::npos) ? false : true;
+}
+
 /*
-bool String::contains(const String& needle) const{}
 bool String::startswith(const String& prefix) const{}
 bool String::endswith(const String& suffix) const{}
 */
