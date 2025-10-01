@@ -94,9 +94,18 @@ Str& Error::prefix(void){
     return this->m_prefix;
 }
 
-/*
-Str Error::make_prefix(void){}
-*/
+// -*-
+Str Error::make_prefix(void){
+    std::map<Error::Kind, Str> emap = {
+        {Error::Kind::FatalError, "Error"},
+        {Error::Kind::RuntimeError, "RuntimeError"},
+        {Error::Kind::SyntaxError, "SyntaxError"},
+        {Error::Kind::TypeError, "TypeError"},
+        {Error::Kind::ValueError, "ValueError"},
+    };
+    auto entry = emap.find(this->m_kind);
+    return entry->second;
+}
 
 // -----------
 // -*- Env -*-
