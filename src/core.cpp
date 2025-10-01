@@ -2084,8 +2084,13 @@ bool operator<(const Self& lhs, const Self& rhs){
     ss << lhs->type().str() << "' and `" << rhs->type().str() << "'";
     throw Error(Error::Kind::TypeError, ss.str());
 }
+
+// -*-
+bool operator>(const Self& lhs, const Self& rhs){
+    return !(lhs <= rhs);
+}
+
 /*
-bool operator>(const Self& lhs, const Self& rhs){}
 
 bool operator||(const Self& lhs, const Self& rhs){}
 bool operator&&(const Self& lhs, const Self& rhs){}
