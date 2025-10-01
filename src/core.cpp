@@ -1580,11 +1580,33 @@ Closure::Closure(Closure&& closure) noexcept
 , m_env{std::move(closure.m_env)}
 {}
 
+// -*-
+Closure& Closure::operator=(const Closure& closure) noexcept{
+    if(this != &closure){
+        this->m_kind = closure.m_kind;
+        this->m_name = closure.m_name;
+        this->m_params = closure.m_params;
+        this->m_body = closure.m_body;
+        this->m_env = closure.m_env;
+    }
+
+    return *this;
+}
+
+// -*-
+Closure& Closure::operator=(Closure&& closure) noexcept{
+    if(this != &closure){
+        this->m_kind = std::move(closure.m_kind);
+        this->m_name = std::move(closure.m_name);
+        this->m_params = std::move(closure.m_params);
+        this->m_body = std::move(closure.m_body);
+        this->m_env = std::move(closure.m_env);
+    }
+
+    return *this;
+}
+
 /*
-
-Closure& Closure::operator=(const Closure& closure) noexcept{}
-Closure& Closure::operator=(Closure&& closure) noexcept{}
-
 bool Closure::is_callable(void) const{}
 bool Closure::is_lambda(void) const{}
 bool Closure::is_function(void) const{}
