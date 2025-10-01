@@ -52,6 +52,22 @@ Token Tokenizer::token(void){
     auto c = this->peek();
     if(c==EOF){
         return Token(TokenKind::Eof, "", -1, -1);
+    }else if(c=='('){
+        Token token;
+        token.kind = TokenKind::LParen;
+        token.row = this->m_row;
+        token.col = this->m_col;
+        token.lexeme = "(";
+        this->advance();
+        return token;
+    }else if(c==')'){
+        Token token;
+        token.kind = TokenKind::RParen;
+        token.row = this->m_row;
+        token.col = this->m_col;
+        token.lexeme = ")";
+        this->advance();
+        return token;
     }else if(this->is_syntax_quote(c)){
         return this->read_syntax_quote();
     }else if(c=='"'){
