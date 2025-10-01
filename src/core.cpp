@@ -1485,9 +1485,13 @@ Builtin& Builtin::operator=(Builtin&& builtin) noexcept{
     return *this;
 }
 
+// -*-
+Symbol Builtin::type(void) const{
+    return Symbol("builtin");
+}
+
 /*
 
-Symbol Builtin::type(void) const{}
 Str Builtin::str(void) const{}
 Str Builtin::repr(void) const{}
 
