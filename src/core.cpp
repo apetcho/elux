@@ -1306,9 +1306,12 @@ std::list<Self> List::as_list(void) const{
     return this->m_value;
 }
 
-/*
-Vec<Self> List::as_vector(void) const{}
+// -*-
+Vec<Self> List::as_vector(void) const{
+    return Vec<Self>(this->m_value.cbegin(), this->m_value.cend());
+}
 
+/*
 i64 List::len(void) const{}
 Self List::head(void) const{}
 List List::tail(void) const{}
