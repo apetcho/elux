@@ -1228,10 +1228,15 @@ bool String::endswith(const String& suffix) const{
 // ------------
 // -*- List -*-
 // ------------
-/*
-List::List(const Vec<Self>& xs) noexcept{}
-List::List(const std::list<Self>& xs) noexcept{}
+List::List(const Vec<Self>& xs) noexcept
+: m_value{std::list<Self>(xs.cbegin(), xs.cend())}
+{}
 
+List::List(const std::list<Self>& xs) noexcept
+: m_value{std::list<Self>(xs.cbegin(), xs.cend())}
+{}
+
+/*
 bool List::is_nil(void) const{}
 bool List::is_list(void) const{}
 Symbol List::type(void) const{}
