@@ -112,6 +112,8 @@ public:
     explicit Error(Kind kind, const Str& msg, const Self& self) noexcept;
     Error(const Error& err) noexcept;
     Error& operator=(const Error& err) noexcept;
+    Error(Error&& err) noexcept;
+    Error& operator=(Error&& err) noexcept;
     ~Error() = default;
 
     Str describe(void) const;

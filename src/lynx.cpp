@@ -15,6 +15,8 @@ Error::Error(Kind kind, const Str& msg) noexcept{}
 Error::Error(Kind kind, const Str& msg, const Self& self) noexcept{}
 Error::Error(const Error& err) noexcept{}
 Error& Error::operator=(const Error& err) noexcept{}
+Error::Error(Error&& err) noexcept;
+Error& Error::operator=(Error&& err) noexcept;
 Str Error::describe(void) const{}
 Str Error::make_prefix(void){}
 */

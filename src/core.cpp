@@ -1521,9 +1521,26 @@ const Str& Builtin::name(void) const{
     return this->m_name;
 }
 
-/*
-Result Builtin::operator()(const Vec<Self>& args){}
-*/
+// -*-
+Result Builtin::operator()(const Vec<Self>& args){
+    auto argc = args.size();
+    if(this->min_argc() != -1 && this->min_argc() > argc){
+        std::stringstream ss;
+        ss << "`" << this->name() << "': not enough arguments. Expect at least ";
+        ss << this->min_argc() << " got " << argc;
+        auto err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+    if(this->max_argc() != -1 && this->max_argc() > argc){
+        std::stringstream ss;
+        ss << "`" << this->name() << "': too many arguments. Expect at most ";
+        ss << this->min_argc() << " got " << argc;
+        auto err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+
+    return this->m_cfun(args);
+}
 
 // ---------------
 // --- Closure ---
