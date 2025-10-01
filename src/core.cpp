@@ -1907,7 +1907,13 @@ Self share(const Vec<Symbol>& params, const Vec<Self>& body, const Env& env){
 
 
 /*
-Self share(const Str& name, const Vec<Symbol>& params, const Vec<Self>& body, const Env& env, bool macro){}
+Self share(const Str& name, const Vec<Symbol>& params, const Vec<Self>& body, const Env& env, bool macro){
+    if(macro){
+        return std::make_shared<Macro>(name, params, body, env);
+    }
+    return std::make_shared<Closure>(name, params, body, env);
+}
+
 */
 
 // -------------------------------------------------------
