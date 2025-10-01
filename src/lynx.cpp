@@ -153,7 +153,7 @@ Self Env::get(const Str& key) const{
         return nullptr;
     }
     if(this->m_bindings.find(key) != this->m_bindings.end()){
-        auto self = this->m_bindings[key];
+        auto self = this->m_bindings.at(key);
         return self;
     }
     return this->m_parent->get(key);
