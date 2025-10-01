@@ -76,8 +76,14 @@ bool Tokenizer::is_syntax_quote(i32 c){
     return sym.find(c) != Str::npos;
 }
 
+// -*-
+void Tokenizer::skip_whitespace(void){
+    while(std::isspace(this->peek()) && !this->is_eos()){
+        this->advance();
+    }
+}
+
 /*
-void Tokenizer::skip_whitespace(void){}
 void Tokenizer::skip_comment(void){}
 void Tokenizer::peek(i32 idx){}
 void Tokenizer::advance(i32 count){}
