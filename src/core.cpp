@@ -1325,8 +1325,18 @@ Self List::head(void) const{
     return self;
 }
 
+// -*-
+List List::tail(void) const{
+    if(this->len()==0){
+        return List(Vec<Self>());
+    }
+
+    auto ptr = std::next(this->m_value.cbegin(), 1);
+    auto end = this->m_value.cend();
+    return List(Vec<Self>(ptr, end));
+}
+
 /*
-List List::tail(void) const{}
 Self List::last(void) const{}
 Self List::nth(i64 idx) const{}
 List List::push(const Self& self){}
