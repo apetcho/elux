@@ -147,8 +147,19 @@ void Env::put(const Str& key, const Self& val){
     return this->m_parent->update(key, val);
 }
 
+// -*-
+Self Env::get(const Str& key) const{
+    if(!this->contains(key)){
+        return nullptr;
+    }
+    if(this->m_bindings.find(key) != this->m_bindings.end()){
+        auto self = this->m_bindings[key];
+        return self;
+    }
+    return this->m_parent->get(key);
+}
+
 /*
-Self Env::get(const Str& key) const{}
 const Env* Env::parent(void) const{}
 Env* Env::parent(void){}
 */
