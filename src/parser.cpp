@@ -32,9 +32,18 @@ Parser::Parser(Parser&& parser) noexcept
 , m_col{std::move(parser.m_col)}
 {}
 
-/*
-Parser& Parser::operator=(Parser&& parser) noexcept{}
+// -*-
+Parser& Parser::operator=(Parser&& parser) noexcept{
+    if(this != &parser){
+        this->m_tokenizer = std::move(parser.m_tokenizer);
+        this->m_row = std::move(parser.m_row);
+        this->m_col = std::move(parser.m_col);
+    }
 
+    return *this;
+}
+
+/*
 Result Parser::parse(void){}
 
 Result Parser::parse_atom(void){}
