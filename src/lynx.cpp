@@ -183,9 +183,12 @@ Result::Result(Error&& err) noexcept
 , m_value{std::move(err)}
 {}
 
+Result::Result(Result&& result) noexcept
+: m_kind{std::move(result.m_kind)}
+, m_value{std::move(result.m_value)}
+{}
 
 /*
-Result::Result(Result&& result) noexcept{}
 Result& Result::operator=(Result&& result) noexcept{}
 bool Result::is_ok(void) const{}
 Self Result::ok(void) const{}
