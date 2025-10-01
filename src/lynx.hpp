@@ -742,6 +742,7 @@ private:
     Token next_token(void){
         return this->m_tokenizer.token();
     }
+    bool is_atom(const Token& token);
 };
 
 // -*----------*-

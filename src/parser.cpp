@@ -93,8 +93,39 @@ Result Parser::parse_atom(const Token& token){
     return Result(share(token.lexeme.c_str()));
 }
 
+// -*-
+Result Parser::parse_list(void){
+    Vec<Self> vec{};
+    auto token = this->next_token();
+    while(token.kind!=TokenKind::RParen){
+        if(token.kind==TokenKind::Eof){
+            std::stringstream ss;
+            ss << "malformed s-expression. Missing ')' at ";
+            ss << "row: " << this->m_row << ", column: " << this->m_col;
+            Error error(Error::Kind::SyntaxError, ss.str());
+            return Result(std::move(error));
+        }
+        if(this->is_atom(token)){
+            auto ans = this->parse_atom(token);
+            if(ans.is_ok()){
+                vec.push_back(ans.ok());
+            }else{
+                return Result(std::move(ans.err()));
+            }
+        }else if(token.kind==TokenKind::LParen){
+            auto ans = this->parse_list();
+            if(ans.is_ok()){
+                vec.push_back(ans.ok());
+            }else{
+                return Result(std::move(ans.err()));
+            }
+        }
+        token = this->next_token();
+    }
+    // ')' has been already read.
+    return Result(share(vec));
+}
 /*
-Result Parser::parse_list(void){}
 bool Parser::match(const Str& word, const Token& token){}
 bool Parser::match(TokenKind expectedKind, const Token& token){}
 void Parser::expect(TokenKind expectedKind, const Token& token){}
