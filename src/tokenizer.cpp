@@ -106,7 +106,12 @@ i32 Tokenizer::peek(i32 idx){
         if(idx==0){
             c = this->m_sstream.peek();
         }else{
-            this->m_sstream.seekg(idx, std::ios_base::cur);
+            for(int i=0; i < idx; i++){
+                if(this->m_sstream.eof()){
+                    return EOF;
+                }
+                this->m_sstream.seekg(1, std::ios_base::cur);
+            }
             c = this->m_sstream.peek();
             this->m_sstream.seekg((-idx), std::ios_base::cur);
         }
@@ -114,7 +119,12 @@ i32 Tokenizer::peek(i32 idx){
         if(idx==0){
             c = this->m_fstream.peek();
         }else{
-            this->m_fstream.seekg(idx, std::ios_base::cur);
+            for(int i=0; i < idx; i++){
+                if(this->m_fstream.eof()){
+                    return EOF;
+                }
+                this->m_fstream.seekg(1, std::ios_base::cur);
+            }
             c = this->m_fstream.peek();
             this->m_fstream.seekg((-idx), std::ios_base::cur);
         }
@@ -127,10 +137,16 @@ i32 Tokenizer::peek(i32 idx){
 void Tokenizer::advance(i32 count){
     if(this->is_string_stream()){
         for(int i=0; i < count; i++){
+            if(this->m_sstream.eof()){
+                break;
+            }
             this->m_sstream.seekg(1, std::ios_base::cur);
         }
     }else{
         for(int i=0; i < count; i++){
+            if(this->m_fstream.eof()){
+                break;
+            }
             this->m_fstream.seekg(1, std::ios_base::cur);
         }
     }
