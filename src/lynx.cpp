@@ -84,9 +84,17 @@ Str Error::describe(void) const{
     return ss.str();
 }
 
+// -*-
+const Str& Error::prefix(void) const{
+    return this->m_prefix;
+}
+
+// -*-
+Str& Error::prefix(void){
+    return this->m_prefix;
+}
+
 /*
-const Str& Error::prefix(void) const{}
-Str& Error::prefix(void){}
 Str Error::make_prefix(void){}
 */
 
