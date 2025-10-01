@@ -2006,9 +2006,31 @@ Self operator/(const Self& lhs, const Self& rhs){
     return share(num.as_complex());
 }
 
-/*
-Self operator%(const Self& lhs, const Self& rhs){}
+// -*-
+Self operator%(const Self& lhs, const Self& rhs){
+    auto isScalar = [](const Self& self){
+        auto ans = (
+            self->is_number() &&
+            (self->is_integer() || self->is_float())
+        );
+        return ans;
+    };
 
+    if(!(isScalar(lhs) && isScalar(rhs))){
+        std::stringstream ss;
+        ss << "`%' is supported only for scalars.";
+        throw Error(Error::Kind::TypeError, ss.str());
+    }
+    auto xnum = *dynamic_cast<Number*>(lhs.get());
+    auto ynum = *dynamic_cast<Number*>(rhs.get());
+    auto num = xnum % ynum;
+    if(num.is_integer()){
+        return share(num.as_integer());
+    }
+    return share(num.as_float());
+}
+
+/*
 bool operator==(const Self& lhs, const Self& rhs){}
 bool operator!=(const Self& lhs, const Self& rhs){}
 bool operator<=(const Self& lhs, const Self& rhs){}
