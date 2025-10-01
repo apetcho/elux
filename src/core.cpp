@@ -1344,8 +1344,16 @@ Self List::last(void) const{
     return self;
 }
 
+// -*-
+Self List::nth(i64 idx) const{
+    if(idx < 0 || idx >= this->len()){
+        throw Error(Error::Kind::ValueError, "`nth': index out of range");
+    }
+    auto ptr = std::next(this->m_value.cbegin(), idx);
+    return (*ptr);
+}
+
 /*
-Self List::nth(i64 idx) const{}
 List List::push(const Self& self){}
 Self List::pop(void){}
 List List::append(const Self& self){}
