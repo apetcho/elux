@@ -1511,8 +1511,12 @@ i64 Builtin::min_argc(void) const{
     return this->m_minArgc;
 }
 
+// -*-
+i64 Builtin::max_argc(void) const{
+    return this->m_maxArgc;
+}
+
 /*
-i64 Builtin::max_argc(void) const{}
 const Str& Builtin::name(void) const{}
 
 Result Builtin::operator()(const Vec<Self>& args){}
