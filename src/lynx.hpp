@@ -107,6 +107,7 @@ public:
         FatalError,
     };
 
+    Error() = default;
     explicit Error(const Str& mgs) noexcept;
     explicit Error(Kind kind, const Str& msg) noexcept;
     explicit Error(Kind kind, const Str& msg, const Self& self) noexcept;
@@ -741,6 +742,7 @@ public:
 
     static void setup(void);
 
+    static Result eval(const Self& self, Env& env);
 
 private:
     Env m_runtime;
@@ -774,7 +776,6 @@ private:
 
     static bool is_reserved_word(const Str& word);
     static bool is_keyword(const Str& word);
-    static Self eval(const Self& self, Env& env);
 
     // -*-
 

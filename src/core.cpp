@@ -1692,10 +1692,24 @@ i64 Closure::argc(void) const{
     return static_cast<i64>(this->m_params.size());
 }
 
-/*
-
-Result Closure::operator()(const Vec<Self>& args){}
-*/
+// -*-
+Result Closure::operator()(const Vec<Self>& args){
+    if(this->argc() != args.size()){
+        std::stringstream ss;
+        ss << "incorrect number of arguments. Expect ";
+        ss << this->argc() << ", got " << args.size();
+        Error err(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+    auto ctx = this->m_env;
+    // assumes each element in `args' has been already evaluated.
+    for(auto i=0; i < args.size(); i++){
+        auto key = this->m_params[i].str();
+        auto val = args[i];
+    }
+    auto self = share(this->m_body);
+    return Lynx::eval(self, ctx);
+}
 
 // -------------
 // --- Macro ---
