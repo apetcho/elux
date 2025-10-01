@@ -1885,8 +1885,12 @@ Self share(const Str& str){
     return std::make_shared<String>(str);
 }
 
+// -*-
+Self share(const Vec<Self>& xs){
+    return std::make_shared<List>(xs);
+}
+
 /*
-Self share(const Vec<Self>& xs){}
 Self share(const std::list<Self>& xs){}
 Self share(const Str& name, CFun fun, i64 minArgc, i64 maxArgc){}
 Self share(const Vec<Symbol>& params, const Vec<Self>& body, const Env& env){}
