@@ -1687,10 +1687,13 @@ Str Closure::repr(void) const{
     return ss.str();
 }
 
+// -*-
+i64 Closure::argc(void) const{
+    return static_cast<i64>(this->m_params.size());
+}
 
 /*
 
-i64 Closure::argc(void) const{}
 Result Closure::operator()(const Vec<Self>& args){}
 */
 
