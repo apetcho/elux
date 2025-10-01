@@ -1915,9 +1915,43 @@ Self share(const Str& name, const Vec<Symbol>& params, const Vec<Self>& body, co
 // -------------------------------------------------------
 // Convenient operators for Object and its derived classes
 // -------------------------------------------------------
+// -*-
+Self operator+(const Self& lhs, const Self& rhs){
+    if(lhs->is_list() && rhs->is_list()){
+        auto xs = *dynamic_cast<List*>(lhs.get());
+        auto ys = *dynamic_cast<List*>(rhs.get());
+        auto _xs_ = (xs + ys);
+        return share(_xs_.as_list());
+    }
+
+    if(lhs->is_string() && rhs->is_string()){
+        auto xstr = *dynamic_cast<String*>(lhs.get());
+        auto ystr = *dynamic_cast<String*>(rhs.get());
+        auto str = (xstr + ystr).str();
+        return share(str);
+    }
+    if(lhs->is_number() && rhs->is_number()){
+        auto xnum = *dynamic_cast<Number*>(lhs.get());
+        auto ynum = *dynamic_cast<Number*>(rhs.get());
+        auto num = (xnum + ynum);
+        if(num.is_integer()){
+            return share(num.as_integer());
+        }else if(num.is_float()){
+            return share(num.as_float());
+        }else{
+            return share(num.as_complex());
+        }
+    }
+
+    std::stringstream ss;
+    ss << "`+' is not applicable between types `";
+    ss << lhs->type().str() << "' and " << rhs->type().str() << "'";
+    throw Error(Error::Kind::TypeError, ss.str());
+}
+
 /*
-Self operator+(const Self& lhs, const Self& rhs){}
 Self operator-(const Self& lhs, const Self& rhs){}
+
 Self operator*(const Self& lhs, const Self& rhs){}
 Self operator/(const Self& lhs, const Self& rhs){}
 Self operator%(const Self& lhs, const Self& rhs){}
