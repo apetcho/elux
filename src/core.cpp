@@ -1463,9 +1463,29 @@ Builtin::Builtin(Builtin&& builtin) noexcept
 , m_maxArgc{std::move(builtin.m_maxArgc)}
 {}
 
+// -*-
+Builtin& Builtin::operator=(const Builtin& builtin) noexcept{
+    if(this != &builtin){
+        this->m_name = builtin.m_name;
+        this->m_cfun = builtin.m_cfun;
+        this->m_minArgc = builtin.m_minArgc;
+        this->m_maxArgc = builtin.m_maxArgc;
+    }
+    return *this;
+}
+
+// -*-
+Builtin& Builtin::operator=(Builtin&& builtin) noexcept{
+    if(this != &builtin){
+        this->m_name = std::move(builtin.m_name);
+        this->m_cfun = std::move(builtin.m_cfun);
+        this->m_minArgc = std::move(builtin.m_minArgc);
+        this->m_maxArgc = std::move(builtin.m_maxArgc);
+    }
+    return *this;
+}
+
 /*
-Builtin& Builtin::operator=(const Builtin& builtin) noexcept{}
-Builtin& Builtin::operator=(Builtin&& builtin) noexcept{}
 
 Symbol Builtin::type(void) const{}
 Str Builtin::str(void) const{}
