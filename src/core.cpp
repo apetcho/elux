@@ -1241,9 +1241,17 @@ bool List::is_nil(void) const{
     return (this->m_value.size()==0);
 }
 
+// -*-
+bool List::is_list(void) const{
+    return true;
+}
+
+// -*-
+Symbol List::type(void) const{
+    return Symbol("list");
+}
+
 /*
-bool List::is_list(void) const{}
-Symbol List::type(void) const{}
 Str List::str(void) const{}
 Str List::repr(void) const{}
 
