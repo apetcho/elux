@@ -1623,8 +1623,9 @@ Str Closure::str(void) const{
             ss << "()";
         }else{
             for(const auto& p: this->m_params){
-                auto sym = p.str().c_str();
-                vec.push_back(share(sym));
+                auto sym = p.repr();
+                auto cstr = sym.c_str();
+                vec.push_back(share(cstr));
             }
         }
         ss << List(vec).str() << "\n";
@@ -1637,8 +1638,9 @@ Str Closure::str(void) const{
             ss << "()";
         }else{
             for(const auto& p: this->m_params){
-                auto sym = p.str().c_str();
-                vec.push_back(share(sym));
+                auto sym = p.repr();
+                auto cstr = sym.c_str();
+                vec.push_back(share(cstr));
             }
         }
         ss << List(vec).str() << "\n";
@@ -1648,8 +1650,45 @@ Str Closure::str(void) const{
     return ss.str();
 }
 
+// -*-
+Str Closure::repr(void) const{
+    std::stringstream ss;
+    if(this->is_lambda()){
+        ss << "(lambda ";
+        Vec<Self> vec{};
+        if(this->m_params.size()==0){
+            ss << "()";
+        }else{
+            for(const auto& p: this->m_params){
+                auto sym = p.repr();
+                auto cstr = sym.c_str();
+                vec.push_back(share(cstr));
+            }
+        }
+        ss << List(vec).repr() << "\n";
+        ss << List(this->m_body).repr() << ")";
+    }
+    if(this->is_function()){
+        ss << "(fun " << this->m_name;
+        Vec<Self> vec{};
+        if(this->m_params.size()==0){
+            ss << "()";
+        }else{
+            for(const auto& p: this->m_params){
+                auto sym = p.repr();
+                auto cstr = sym.c_str();
+                vec.push_back(share(cstr));
+            }
+        }
+        ss << List(vec).repr() << "\n";
+        ss << List(this->m_body).repr() << ")";
+    }
+
+    return ss.str();
+}
+
+
 /*
-Str Closure::repr(void) const{}
 
 i64 Closure::argc(void) const{}
 Result Closure::operator()(const Vec<Self>& args){}
