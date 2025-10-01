@@ -2104,9 +2104,19 @@ bool operator||(const Self& lhs, const Self& rhs){
     return (toBool(lhs) || toBool(rhs));
 }
 
-/*
-bool operator&&(const Self& lhs, const Self& rhs){}
-*/
+// -*-
+bool operator&&(const Self& lhs, const Self& rhs){
+    auto toBool = [](const Self& self){
+        if(self->is_nil()){ return false; }
+        if(self->is_number()){
+            auto num = dynamic_cast<Number*>(self.get());
+            return num->as_bool();
+        }
+        return true;
+    };
+
+    return (toBool(lhs) && toBool(rhs));
+}
 
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::klx                                          -*-
