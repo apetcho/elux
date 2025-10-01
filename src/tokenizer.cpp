@@ -203,6 +203,31 @@ void Tokenizer::update_position(void){
 }
 
 // -*-
+Token Tokenizer::read_syntax_quote(void){
+    Token token;
+    token.kind = TokenKind::Invalid;
+    token.row = this->m_row;
+    token.col = this->m_col;
+    auto c = this->peek();
+    if(c=='\''){
+        token.kind = TokenKind::Quote;
+        token.lexeme = "quote";
+    }else if(c=='`'){
+        token.kind = TokenKind::Quasiquote;
+        token.lexeme = "quasiquote";
+    }else if(c==','){
+        token.kind = TokenKind::Unquote;
+        token.lexeme = "unquote";
+        if(this->peek(1)=='@'){
+            token.kind = TokenKind::UnquoteSplicing;
+            token.lexeme = "unquoe-splicing";
+            this->advance();
+        }
+    }
+    this->advance();
+    return token;
+}
+
 // -*-
 Token Tokenizer::read_identifier(void){
     auto row = this->m_row;
