@@ -257,8 +257,12 @@ Symbol Module::name(void) const{
     return Symbol(this->m_name);
 }
 
+// -*-
+const fs::path& Module::path(void) const{
+    return this->m_path;
+}
+
 /*
-const fs::path& Module::path(void) const;
 const Env& Module::env(void) const;
 
 void Module::initialize(void);
