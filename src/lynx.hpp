@@ -726,7 +726,7 @@ private:
     i64 m_row;
     i64 m_col;
 
-    Result parse_atom(void);
+    Result parse_atom(const Token& token);
     Result parse_list(void);
     bool match(const Str& word, const Token& token);
     bool match(TokenKind expectedKind, const Token& token);

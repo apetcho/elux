@@ -55,7 +55,7 @@ Result Parser::parse(void){
     }else if(token.kind==TokenKind::Eof){
         return Result(share()); // nil
     }else if(token.kind!=TokenKind::LParen){
-        return this->parse_atom();
+        return this->parse_atom(token);
     }else if(token.kind==TokenKind::LParen){
         Vec<Self> vec{};
         while(token.kind!=TokenKind::RParen && token.kind!=TokenKind::Eof){
@@ -81,9 +81,19 @@ Result Parser::parse(void){
     return Result(std::move(err));
 }
 
-/*
+// -*-
+Result Parser::parse_atom(const Token& token){
+    if(token.kind==TokenKind::INTEGER){
+        return Result(share(std::stoll(token.lexeme)));
+    }else if(token.kind==TokenKind::FLOAT){
+        return Result(share(std::stod(token.lexeme)));
+    }else if(token.kind==TokenKind::STRING){
+        return Result(share(token.lexeme));
+    }
+    return Result(share(token.lexeme.c_str()));
+}
 
-Result Parser::parse_atom(void){}
+/*
 Result Parser::parse_list(void){}
 bool Parser::match(const Str& word, const Token& token){}
 bool Parser::match(TokenKind expectedKind, const Token& token){}
