@@ -983,6 +983,31 @@ String::String(const Str& str) noexcept
 {}
 
 // -*-
+String::String(const String& other) noexcept
+: m_str{other.m_str}
+{}
+
+String::String(String&& other) noexcept
+: m_str{std::move(other.m_str)}
+{}
+
+// -*-
+String& String::operator=(const String& other) noexcept{
+    if(this != &other){
+        this->m_str = other.m_str;
+    }
+    return *this;
+}
+
+// -*-
+String& String::operator=(String&& other) noexcept{
+    if(this != &other){
+        this->m_str = std::move(other.m_str);
+    }
+    return *this;
+}
+
+// -*-
 Symbol String::type(void) const{
     return Symbol("string");
 }
@@ -1140,9 +1165,28 @@ String String::replace(const String& old, const String& neo) const{
     return String(text);
 }
 
+// -*-
+Vec<String> String::split(const String& delim){
+    Vec<String> result{};
+    auto sep = delim.str();
+    auto text = this->str();
+    String tmp{};
+    auto pos = text.find(sep);
+    while(pos!=Str::npos){
+        tmp = String(text.substr(pos));
+        result.push_back(tmp.trim());
+        int n = static_cast<int>(tmp.len() + delim.len());
+        auto first = text.begin();
+        auto last = first + n;
+        text.erase(first, last);
+        pos = text.find(sep);
+    }
+
+    if(text.length() != 0){ result.push_back(String(text).trim());}
+    return result;
+}
 
 /*
-Vec<String> String::split(const String& delim){}
 i64 String::find(const String& needle) const{}
 String String::substr(i64 start=0, i64 end=Str::npos) const{}
 bool String::contains(const String& needle) const{}

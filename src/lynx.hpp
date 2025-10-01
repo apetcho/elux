@@ -387,6 +387,8 @@ public:
     explicit String(const Str& str) noexcept;
     String(const String& other) noexcept;
     String(String&& other) noexcept;
+    String& operator=(const String& other) noexcept;
+    String& operator=(String&& other) noexcept;
     ~String() = default;
 
     bool is_nil(void) const override{ return false; }
