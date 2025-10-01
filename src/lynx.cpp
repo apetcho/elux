@@ -32,11 +32,24 @@ Error::Error(Kind kind, const Str& msg, const Self& self) noexcept
     this->m_prefix = this->make_prefix();
 }
 
+// -*-
+Error::Error(const Error& err) noexcept
+: m_kind{err.m_kind}
+, m_msg{err.m_msg}
+, m_reason{err.m_reason}
+, m_prefix{err.m_prefix}
+{}
+
+// -*-
+Error::Error(Error&& err) noexcept
+: m_kind{std::move(err.m_kind)}
+, m_msg{std::move(err.m_msg)}
+, m_reason{std::move(err.m_reason)}
+, m_prefix{std::move(err.m_prefix)}
+{}
 
 /*
-Error::Error(const Error& err) noexcept{}
 Error& Error::operator=(const Error& err) noexcept{}
-Error::Error(Error&& err) noexcept;
 Error& Error::operator=(Error&& err) noexcept;
 Str Error::describe(void) const{}
 const Str& Error::prefix(void) const{}
