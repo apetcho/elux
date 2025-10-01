@@ -61,7 +61,12 @@
     LYNX_DEF(Nil, "nil")            \
     LYNX_DEF(True, "true")          \
     LYNX_DEF(False, "false")        \
-    LYNX_KEYWORDS()
+    LYNX_KEYWORDS()                 \
+    LYNX_DEF(INTEGER, "INTEGER")    \
+    LYNX_DEF(FLOAT, "FLOAT")        \
+    LYNX_DEF(STRING, "STRING")      \
+    LYNX_DEF(Ident, "IDENTIFIER")
+
 
 // -*-
 namespace fs = std::filesystem;
@@ -679,12 +684,15 @@ private:
     bool is_symbol_char(i32 c);
     bool is_syntax_quote(i32 c);
     void skip_whitespace(void);
-    void peek(i32 idx=0);
+    void skip_comment(void);
+    i32 peek(i32 idx=0);
     void advance(i32 count=1);
 
-    Token read_symbol(void);
+    Token read_syntax_quote(void);
+    Token read_identifier(void);
     Token read_integer_or_float(void);
     Token read_string(void);
+    bool next_is_number(i32 c);
     bool is_eos(void);
     bool check_eos(i64 ptr);
 };

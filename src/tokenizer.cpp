@@ -43,17 +43,34 @@ Tokenizer& Tokenizer::operator=(Tokenizer&& tokenizer) noexcept{
     }
     return *this;
 }
+
+// -*-
+Token Tokenizer::token(void){
+    this->skip_whitespace();
+    this->skip_comment();
+    auto c = this->peek();
+    if(c==EOF){
+        return Token(TokenKind::Eof, "", -1, -1);
+    }else if(this->is_syntax_quote(c)){
+        return this->read_syntax_quote();
+    }else if(c=='"'){
+        return this->read_string();
+    }else if(this->next_is_number(c)){
+        return this->read_integer_or_float();
+    }
+
+    return this->read_identifier();
+}
+
 /*
-
-Token Tokenizer::token(void){}
-
 bool Tokenizer::is_symbol_char(i32 c){}
 bool Tokenizer::is_syntax_quote(i32 c){}
 void Tokenizer::skip_whitespace(void){}
+void Tokenizer::skip_comment(void){}
 void Tokenizer::peek(i32 idx){}
 void Tokenizer::advance(i32 count){}
 
-Token Tokenizer::read_symbol(void){}
+Token Tokenizer::read_identifier(void){}
 Token Tokenizer::read_integer_or_float(void){}
 Token Tokenizer::read_string(void){}
 
