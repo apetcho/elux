@@ -744,6 +744,10 @@ public:
 
     static Result eval(const Self& self, Env& env);
 
+    static Result expand(const Self& self, Env& env){
+        return Lynx::handle_expand(self, env);
+    }
+
 private:
     Env m_runtime;
     std::map<Str, Module> m_imported_libs;
@@ -795,7 +799,7 @@ private:
      * 
      * @note: At least, one test-expr must evaluate to true
      */
-    Result handle_cond(const Self& self, Env& env);
+    static Result handle_cond(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -808,7 +812,7 @@ private:
      *  (defvar name "John McCarthy")
      *  (defvar name "John McCarthy" "Creator of Lisp programming language")
      */
-    Result handle_defvar(const Self& self, Env& env);
+    static Result handle_defvar(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -821,7 +825,7 @@ private:
      *  (for (x '(1 2 3 4))
      *      (print x))
      */
-    Result handle_for(const Self& self, Env& env);
+    static Result handle_for(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -839,7 +843,7 @@ private:
      *      "Computes the sum of `x' and `y'."
      *      (+ x y))
      */
-    Result handle_fun(const Self& self, Env& env);
+    static Result handle_fun(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -855,7 +859,7 @@ private:
      *      (print "2 is greater than 3")
      *      (print "2 is less than 3"))
      */
-    Result handle_if(const Self& self, Env& env);
+    static Result handle_if(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -872,7 +876,7 @@ private:
      *  (declare-module snake "./snake-game.lynx")
      *  (import snake)
      */
-    Result handle_import(const Self& self, Env& env);
+    static Result handle_import(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -885,7 +889,7 @@ private:
      *  (lambda (x y)
      *      (+ (* x x) (* y y) (* 2 x y)))
      */
-    Result handle_lambda(const Self& self, Env& env);
+    static Result handle_lambda(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -901,7 +905,7 @@ private:
      *      (var msg (format "{lang} programming language\nCreator: {creator}\n{license}"))
      *      (println msg))
      */
-    Result handle_let(const Self& self, Env& env);
+    static Result handle_let(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -912,7 +916,7 @@ private:
      * 
      * @example
      */
-    Result handle_expand(const Self& self, Env& env);
+    static Result handle_expand(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -930,7 +934,7 @@ private:
      *          (println (format "Applying {fn} on {arg}"))
      *          (fn arg)))
      */
-    Result handle_macro(const Self& self, Env& env);
+    static Result handle_macro(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -946,7 +950,7 @@ private:
      *      (println (format "six = {six}"))
      *      (println "Thank you"))
      */
-    Result handle_progn(const Self& self, Env& env);
+    static Result handle_progn(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -961,7 +965,7 @@ private:
      *  (quote (range 10))
      *  '(range 10)
      */
-    Result handle_quote(const Self& self, Env& env);
+    static Result handle_quote(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -973,7 +977,7 @@ private:
      * 
      *  (quasiquote x)  or `x
      */
-    Result handle_quasiquote(const Self& self, Env& env);
+    static Result handle_quasiquote(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -985,7 +989,7 @@ private:
      * 
      *  (unquote x)   or ,x
      */
-    Result handle_unquote(const Self& self, Env& env);
+    static Result handle_unquote(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -997,7 +1001,7 @@ private:
      * 
      *  (unquote-splicing x)   or ,@x
      */
-    Result handle_unquote_splicing(const Self& self, Env& env);
+    static Result handle_unquote_splicing(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -1030,7 +1034,7 @@ private:
      *      (case "Ocaml" (println "Ocaml programming language"))
      *      (default (println "Unsupported programming language")))
      */
-    Result handle_match(const Self& self, Env& env);
+    static Result handle_match(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -1042,7 +1046,7 @@ private:
      * 
      *  (var lang "Rust")
      */
-    Result handle_var(const Self& self, Env& env);
+    static Result handle_var(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -1056,7 +1060,7 @@ private:
      *  (while (< x 10)
      *      (println (format "x = {x}")))
      */
-    Result handle_while(const Self& self, Env& env);
+    static Result handle_while(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -1065,7 +1069,7 @@ private:
      * @return 
      * 
      */
-    Result eval_atom(const Self& self, Env& env);
+    static Result eval_atom(const Self& self, Env& env);
 
     /**
      * @brief 
@@ -1073,7 +1077,7 @@ private:
      * @param env 
      * @return 
      */
-    Result eval_list(const Self& self, Env& env);
+    static Result eval_list(const Self& self, Env& env);
 
 public:
     // Constructors

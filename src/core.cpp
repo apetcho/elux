@@ -1706,6 +1706,7 @@ Result Closure::operator()(const Vec<Self>& args){
     for(auto i=0; i < args.size(); i++){
         auto key = this->m_params[i].str();
         auto val = args[i];
+        ctx.put(key, val);
     }
     auto self = share(this->m_body);
     return Lynx::eval(self, ctx);
@@ -1808,8 +1809,29 @@ i64 Macro::argc(void) const{
     return static_cast<i64>(this->m_params.size());
 }
 
+// -*-
+Result Macro::expand(const Vec<Self>& args) const{
+    // assumes each element in `args' has been evaluated.
+    if(this->argc() != args.size()){
+        std::stringstream ss;
+        ss << "incorrect number of arguments. Expect ";
+        ss << this->argc() << ", got " << args.size();
+        Error err(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+    auto ctx = this->m_env;
+    for(int i=0; i < args.size(); ++i){
+        auto key = this->m_params[i].str();
+        auto val = args[i];
+        ctx.put(key, val);
+    }
+
+    auto self = List(this->m_body);
+
+    return Lynx::expand(self, ctx);
+}
+
 /*
-Result Macro::expand(const Vec<Self>& args) const{}
 Result operator()(const Vec<Self>& args){}
 */
 
