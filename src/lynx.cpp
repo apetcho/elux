@@ -188,8 +188,16 @@ Result::Result(Result&& result) noexcept
 , m_value{std::move(result.m_value)}
 {}
 
+// -*-
+Result& Result::operator=(Result&& result) noexcept{
+    if(this != &result){
+        this->m_kind = std::move(result.m_kind);
+        this->m_value = std::move(result.m_value);
+    }
+    return *this;
+}
+
 /*
-Result& Result::operator=(Result&& result) noexcept{}
 bool Result::is_ok(void) const{}
 Self Result::ok(void) const{}
 Error Result::err(void) const{}
