@@ -1612,8 +1612,43 @@ Symbol Closure::type(void) const{
     ty = this->is_lambda() ? "lambda" : "function";
     return Symbol(ty);
 }
+
+// -*-
+Str Closure::str(void) const{
+    std::stringstream ss;
+    if(this->is_lambda()){
+        ss << "(lambda ";
+        Vec<Self> vec{};
+        if(this->m_params.size()==0){
+            ss << "()";
+        }else{
+            for(const auto& p: this->m_params){
+                auto sym = p.str().c_str();
+                vec.push_back(share(sym));
+            }
+        }
+        ss << List(vec).str() << "\n";
+        ss << List(this->m_body).str() << ")";
+    }
+    if(this->is_function()){
+        ss << "(fun " << this->m_name;
+        Vec<Self> vec{};
+        if(this->m_params.size()==0){
+            ss << "()";
+        }else{
+            for(const auto& p: this->m_params){
+                auto sym = p.str().c_str();
+                vec.push_back(share(sym));
+            }
+        }
+        ss << List(vec).str() << "\n";
+        ss << List(this->m_body).str() << ")";
+    }
+
+    return ss.str();
+}
+
 /*
-Str Closure::str(void) const{}
 Str Closure::repr(void) const{}
 
 i64 Closure::argc(void) const{}
