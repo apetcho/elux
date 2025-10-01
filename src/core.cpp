@@ -1562,9 +1562,26 @@ Closure::Closure(const Str& name, const Vec<Symbol>& params, const Vec<Self>& bo
 , m_env{Env(captures)}
 {}
 
+// -*-
+Closure::Closure(const Closure& closure) noexcept
+: m_kind{closure.m_kind}
+, m_name{closure.m_name}
+, m_params{closure.m_params}
+, m_body{closure.m_body}
+, m_env{closure.m_env}
+{}
+
+// -*-
+Closure::Closure(Closure&& closure) noexcept
+: m_kind{std::move(closure.m_kind)}
+, m_name{std::move(closure.m_name)}
+, m_params{std::move(closure.m_params)}
+, m_body{std::move(closure.m_body)}
+, m_env{std::move(closure.m_env)}
+{}
+
 /*
-Closure::Closure(const Closure& closure) noexcept{}
-Closure::Closure(Closure&& closure) noexcept{}
+
 Closure& Closure::operator=(const Closure& closure) noexcept{}
 Closure& Closure::operator=(Closure&& closure) noexcept{}
 
