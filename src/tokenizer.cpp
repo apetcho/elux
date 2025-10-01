@@ -65,13 +65,18 @@ Token Tokenizer::token(void){
 
 // -*-
 bool Tokenizer::is_symbol_char(i32 c){
-    const Str sym = ":_-+%*/!#$&=?`',@";
+    static const Str sym = ":_-+%*/!#$&=?`',@";
     auto pos = sym.find(c);
     return std::isalnum(c) || pos != Str::npos;
 }
 
+// -*-
+bool Tokenizer::is_syntax_quote(i32 c){
+    static const Str sym = ",`'";
+    return sym.find(c) != Str::npos;
+}
+
 /*
-bool Tokenizer::is_syntax_quote(i32 c){}
 void Tokenizer::skip_whitespace(void){}
 void Tokenizer::skip_comment(void){}
 void Tokenizer::peek(i32 idx){}
