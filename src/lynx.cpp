@@ -363,8 +363,82 @@ void Lynx::repl(Env& env){
     }
 }
 
+// -*-
+void Lynx::run(const Str& filename, const Vec<Str>& args, Env& env){
+    Env ctx(&env);
+
+    auto checkError = [](const Result& result){
+        if(result.is_ok()){
+            return false;
+        }
+        auto msg = result.err().describe();
+        auto pos = msg.find(":");
+        Str prefix{};
+        if(pos != Str::npos){
+            prefix = _my_highlight(msg.substr(0, pos));
+            msg = msg.substr(pos);
+        }
+        std::cerr << prefix << "\n" << msg << std::endl;
+        return true;
+    };
+
+    Vec<Self> vec{};
+    for(const auto arg: args){
+        std::istringstream stream(arg);
+        Parser parser(std::move(stream));
+        auto result = parser.parse();
+        if(!checkError(result)){
+            auto self = result.ok();
+            result = Lynx::eval(self, ctx);
+            if(!checkError(result)){
+                self = result.ok();
+                vec.push_back(self);
+            }else{
+                std::exit(EXIT_FAILURE);
+            }
+        }else{
+            std::exit(EXIT_FAILURE);
+        }
+    }
+    ctx.update("ARGV", share(vec));
+    vec = {};
+
+    // auto src = Lynx::readfile(filename);
+    std::ifstream fin(filename);
+    Parser parser(std::move(fin));
+    auto result = parser.parse();
+    if(!checkError(result)){
+        auto self = result.ok();
+        while(self->type()!=Symbol("nil")){
+            vec.push_back(self);
+            result = parser.parse();
+            if(!checkError(result)){
+                self = result.ok();
+            }else{
+                std::exit(EXIT_FAILURE);
+            }
+        }
+    }else{
+        std::exit(EXIT_FAILURE);
+    }
+
+    // -*- Evaluation
+    Self self = nullptr;
+    for(const auto expr: vec){
+        result = Lynx::eval(expr, ctx);
+        if(!checkError(result)){
+            self = result.ok();
+        }else{
+            std::exit(EXIT_FAILURE);
+        }
+    }
+
+    if(self != nullptr){
+        std::cout << self->str() << std::endl;
+    }
+}
+
 /*
-void Lynx::run(const Str& filename, const Vec<Str>& args, Env& env);
 void Lynx::setup(void);
 Result Lynx::eval(const Self& self, Env& env);
 

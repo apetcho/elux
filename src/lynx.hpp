@@ -671,7 +671,11 @@ public:
     Tokenizer& operator=(const Tokenizer&) = delete;
     Tokenizer(Tokenizer&& tokenizer) noexcept;
     Tokenizer& operator=(Tokenizer&& tokenizer) noexcept;
-    ~Tokenizer() = default;
+    ~Tokenizer(){
+        if(this->is_file_stream()){
+            this->m_fstream.close();
+        }
+    };
 
     Token token(void);
 
