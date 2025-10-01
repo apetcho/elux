@@ -49,22 +49,24 @@ Tokenizer& Tokenizer::operator=(Tokenizer&& tokenizer) noexcept{
 Token Tokenizer::token(void){
     this->skip_whitespace();
     this->skip_comment();
+    auto row = this->m_row;
+    auto col = this->m_col;
     auto c = this->peek();
     if(c==EOF){
-        return Token(TokenKind::Eof, "", -1, -1);
+        return Token(TokenKind::Eof, "", row, col);
     }else if(c=='('){
         Token token;
         token.kind = TokenKind::LParen;
-        token.row = this->m_row;
-        token.col = this->m_col;
+        token.row = row;
+        token.col = col;
         token.lexeme = "(";
         this->advance();
         return token;
     }else if(c==')'){
         Token token;
         token.kind = TokenKind::RParen;
-        token.row = this->m_row;
-        token.col = this->m_col;
+        token.row = row;
+        token.col = col;
         token.lexeme = ")";
         this->advance();
         return token;
@@ -200,6 +202,7 @@ void Tokenizer::update_position(void){
     }
 }
 
+// -*-
 // -*-
 Token Tokenizer::read_identifier(void){
     auto row = this->m_row;

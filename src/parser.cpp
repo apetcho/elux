@@ -45,9 +45,40 @@ Parser& Parser::operator=(Parser&& parser) noexcept{
 
 // -*-
 Result Parser::parse(void){
-    
+    auto token = this->next_token();
+    if(token.kind==TokenKind::Invalid){
+        Error err;
+        std::stringstream ss;
+        ss << "unexpected token found while parsing: `" << token.lexeme << "' ";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }else if(token.kind==TokenKind::Eof){
+        return Result(share()); // nil
+    }else if(token.kind!=TokenKind::LParen){
+        return this->parse_atom();
+    }else if(token.kind==TokenKind::LParen){
+        Vec<Self> vec{};
+        while(token.kind!=TokenKind::RParen && token.kind!=TokenKind::Eof){
+            auto ans = this->parse();
+            if(ans.is_ok()){
+                vec.push_back(ans.ok());
+            }else{
+                return Result(std::move(ans.err()));
+            }
+        }
+        if(token.kind==TokenKind::Eof){
+            std::stringstream ss;
+            ss << "malformed s-expression. Missing ')' at ";
+            ss << "row: " << this->m_row << ", column: " << this->m_col;
+            Error error(Error::Kind::SyntaxError, ss.str());
+            return Result(std::move(error));
+        }
+        // ')' has been already read.
+        return Result(share(vec));
+    }
 
-    return Result(share());
+    Error err("unexpected error occured.");
+    return Result(std::move(err));
 }
 
 /*
