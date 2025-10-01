@@ -1850,8 +1850,12 @@ Self share(void){
     return std::make_shared<Object>();
 }
 
+// -*-
+Self share(bool val){
+    return std::make_shared<Bool>(val);
+}
+
 /*
-Self share(bool val){}
 Self share(i64 num){}
 Self share(f64 num){}
 Self share(f64 x, f64 y){}
