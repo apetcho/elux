@@ -1811,7 +1811,7 @@ i64 Macro::argc(void) const{
 }
 
 // -*-
-Result Macro::expand(const Vec<Self>& args) const{
+Result Macro::expand(const Vec<Self>& args){
     // assumes each element in `args' has been evaluated.
     if(this->argc() != args.size()){
         std::stringstream ss;
@@ -1829,6 +1829,7 @@ Result Macro::expand(const Vec<Self>& args) const{
 
     auto self = share(this->m_body);
 
+    // return Result(std::move(share()));
     return Lynx::expand(self, this->m_env);
 }
 
@@ -1845,8 +1846,11 @@ Result Macro::operator()(const Vec<Self>& args){
 // -------------------------------------------------------------------------------
 // Convenient functions to create shared pointer of Object and its derived classes
 // -------------------------------------------------------------------------------
+Self share(void){
+    return std::make_shared<Object>();
+}
+
 /*
-Self share(void){}
 Self share(bool val){}
 Self share(i64 num){}
 Self share(f64 num){}

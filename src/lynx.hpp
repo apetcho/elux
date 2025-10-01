@@ -561,7 +561,7 @@ public:
     Str repr(void) const override;
 
     i64 argc(void) const;
-    Result expand(const Vec<Self>& args) const;
+    Result expand(const Vec<Self>& args);
     Result operator()(const Vec<Self>& args);
     const Str& name(void) const{ return this->m_name; }
     const Vec<Symbol>& params(void) const{ return this->m_params; }
