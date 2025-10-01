@@ -519,7 +519,7 @@ public:
     bool is_nil(void) const override{ return false; }
     bool is_callable(void) const override{ return true; }
     bool is_lambda(void) const override{ return this->m_kind==Kind::LAMBDA; }
-    bool is_function(void) const override;
+    bool is_function(void) const override{ return this->m_kind==Kind::FUNC; }
     Symbol type(void) const override;
     Str str(void) const override;
     Str repr(void) const override;
