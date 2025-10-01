@@ -1,4 +1,5 @@
 #include "lynx.hpp"
+#include<cctype>
 
 // -*----------------------------------------------------------------*-
 // -*- begin::namespace::klx                                        -*-
@@ -62,8 +63,14 @@ Token Tokenizer::token(void){
     return this->read_identifier();
 }
 
+// -*-
+bool Tokenizer::is_symbol_char(i32 c){
+    const Str sym = ":_-+%*/!#$&=?`',@";
+    auto pos = sym.find(c);
+    return std::isalnum(c) || pos != Str::npos;
+}
+
 /*
-bool Tokenizer::is_symbol_char(i32 c){}
 bool Tokenizer::is_syntax_quote(i32 c){}
 void Tokenizer::skip_whitespace(void){}
 void Tokenizer::skip_comment(void){}
