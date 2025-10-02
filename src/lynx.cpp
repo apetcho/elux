@@ -611,7 +611,6 @@ void Lynx::push_module(const Module& mymodule){
 }
 
 // -*-
-//! @todo: Refactor
 void Lynx::import_module(const Str& name, Env& env){
     if(Lynx::m_imported_libs.find(name) != Lynx::m_imported_libs.end()){
         return;
@@ -641,22 +640,22 @@ void Lynx::import_module(const Str& name, Env& env){
 
 // -*-
 //! @todo Refactor
-// void Lynx::import_module(const fs::path& module_path, Env& env){
-//     // -*-
-//     if(!fs::exists(module_path)){
-//         std::stringstream ss;
-//         ss << "module '" << module_path.string() << "' not found";
-//         throw Error(Error::Kind::RuntimeError, ss.str());
-//     }
-//     auto name = module_path.stem();
-//     Module mymodule(name, module_path, &Lynx::m_runtime);
-//     auto key = Lynx::make_library_key(mymodule);
-//     Lynx::m_imported_libs.insert({key, mymodule});
-//     auto _env = mymodule.env();
-//     for(const auto& key: _env.keys()){
-//         env.m_bindings.insert({key, _env.get(key)});
-//     }    
-// }
+void Lynx::import_module(const fs::path& module_path, Env& env){
+    // -*-
+    if(!fs::exists(module_path)){
+        std::stringstream ss;
+        ss << "module '" << module_path.string() << "' not found";
+        throw Error(Error::Kind::RuntimeError, ss.str());
+    }
+    auto name = module_path.stem();
+    Module mymodule(name, module_path, &Lynx::m_runtime);
+    auto key = Lynx::make_library_key(mymodule);
+    Lynx::m_imported_libs.insert({key, mymodule});
+    auto _env = mymodule.env();
+    for(const auto& key: _env.keys()){
+        env.m_bindings.insert({key, _env.get(key)});
+    }
+}
 
 // -*-
 bool Lynx::check_argc(int argc, int expected, const Str& funcname, Error& err){
