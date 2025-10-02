@@ -749,9 +749,20 @@ void Lynx::expect(const Symbol& sym, const Self& self){
     }
 }
 
-/*
-bool Lynx::is_atom(const Self& self){}
+// -*-
+bool Lynx::is_atom(const Self& self){
+    bool ans{};
+    ans = (
+        self->is_bool() || self->is_integer() ||
+        self->is_float() || self->is_symbol() ||
+        self->is_string()
+    );
 
+    return ans;
+}
+
+
+/*
 Result Lynx::handle_cond(const Self& self, Env& env){}
 Result Lynx::handle_defvar(const Self& self, Env& env){}
 Result Lynx::handle_for(const Self& self, Env& env){}
