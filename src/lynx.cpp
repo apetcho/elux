@@ -177,6 +177,11 @@ Env* Env::parent(void){
     return this->m_parent;
 }
 
+/*
+Vec<Str> Env::keys(void) const{}
+Vec<std::pair<Str, Self>> Env::items(void) const{}
+*/
+
 // --------------
 // -*- Result -*-
 // --------------
@@ -597,9 +602,28 @@ void Lynx::push_module(const Module& mymodule){
     Lynx::libraries.insert({key, mymodule});
 }
 
+// -*-
+void Lynx::import_module(const Str& name){
+    if(Lynx::m_imported_libs.find(name) != Lynx::m_imported_libs.end()){
+        return;
+    }
+    auto entry = Lynx::libraries.find(name);
+    if(entry == Lynx::libraries.end()){
+        std::stringstream ss;
+        ss << "module '" << name << "' not found.";
+        throw Error(Error::Kind::RuntimeError, ss.str());
+    }
+    auto lib = entry->second;
+    Lynx::m_imported_libs.insert({name, lib});
+    auto env = lib.env();
+    auto keys = env.keys();
+    for(const auto& key: keys){
+        Lynx::m_runtime.m_bindings.insert({key, env.get(key)});
+    }
+}
+
 /*
-void Lynx::import_module(const Str& module_name);
-void Lynx::import_module(const fs::path& module_path);
+void Lynx::import_module(const fs::path& module_path){}
 
 bool Lynx::check_argc(int argc, int expected, const Str& funcname, Error& err){}
 bool Lynx::check_type(const Symbol& ty, const Self& self, Error& err){}

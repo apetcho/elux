@@ -158,9 +158,13 @@ public:
     const Env* parent(void) const;
     Env* parent(void);
 
+    Vec<Str> keys(void) const;
+    Vec<std::pair<Str, Self>> items(void) const;
+
 private:
     Dict m_bindings;
     Env* m_parent;
+    friend class Lynx;
 };
 
 // --------------
@@ -798,8 +802,8 @@ public:
     }
 
 private:
-    Env m_runtime;
-    std::map<Str, Module> m_imported_libs;
+    static Env m_runtime;
+    static std::map<Str, Module> m_imported_libs;
 
     static Str readfile(const Str& filename);
     static Str input(void);
