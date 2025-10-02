@@ -55,23 +55,6 @@
     LYNX_DEF(Ident, "IDENTIFIER")
 
 
-/*
-LYNX_DEF(Plus, "+")             \
-    LYNX_DEF(Minus, "-")            \
-    LYNX_DEF(Div, "/")              \
-    LYNX_DEF(Mul, "*")              \
-    LYNX_DEF(Mod, "%")              \
-    LYNX_DEF(Equal, "=")            \
-    LYNX_DEF(And, "and")            \
-    LYNX_DEF(Or, "or")              \
-    LYNX_DEF(Not, "not")            \
-    LYNX_DEF(Less, "<")             \
-    LYNX_DEF(LessEq, "<=")          \
-    LYNX_DEF(Greater, ">")          \
-    LYNX_DEF(GreaterEq, ">=")       \
-    LYNX_DEF(NotEq, "!=")           \
-*/
-
 // -*-
 namespace fs = std::filesystem;
 
@@ -836,7 +819,7 @@ public:
     static bool is_keyword(const Str& word);
 
 private:
-    static Vec<Symbol> captured_symbols(const Vec<Self>& body);
+    static Vec<Symbol> get_symbols(const Vec<Self>& body);
     static bool match(const Symbol& type, const Self& Self);
     static void expect(const Symbol& type, const Self& Self);
     static bool is_atom(const Self& self);

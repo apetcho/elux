@@ -712,8 +712,22 @@ bool Lynx::is_keyword(const Str& word){
     return true;
 }
 
+// -*-
+Vec<Symbol> Lynx::get_symbols(const Vec<Self>& body){
+    Vec<Symbol> result{};
+    for(const auto self: body){
+        if(self->is_symbol()){
+            auto sym = *dynamic_cast<Symbol*>(self.get());
+            if(!Lynx::is_reserved_word(sym.str())){
+                result.push_back(sym);
+            }
+        }
+    }
+
+    return result;
+}
+
 /*
-Vec<Symbol> Lynx::captured_symbols(const Vec<Self>& body){}
 bool Lynx::match(const Symbol& type, const Self& Self){}
 void Lynx::expect(const Symbol& type, const Self& Self){}
 bool Lynx::is_atom(const Self& self){}
