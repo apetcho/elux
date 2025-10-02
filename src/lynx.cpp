@@ -1044,7 +1044,7 @@ Result Lynx::handle_fun(const Self& self, Env& env){
             return Result(std::move(err));
         }
     }
-    // check for duplicates
+    // check for duplicates parameters
     std::set<Str> _params_set_{};
     for(const auto param: params){
         auto key = *dynamic_cast<Symbol*>(param.get());
@@ -1082,8 +1082,89 @@ Result Lynx::handle_fun(const Self& self, Env& env){
     }
     
     auto _my_params_ = Vec<Symbol>(_params_set_.begin(), _params_set_.end());
+    if(Lynx::docstrs.contains(name)){
+        Lynx::docstrs.update(name, share(_doc_));
+    }else{
+        Lynx::docstrs.put(name, share(_doc_));
+    }
 
     return Result(share(name, _my_params_, body, ctx));
+}
+
+// -*-
+//! @todo
+Result Lynx::handle_if(const Self& self, Env& env){
+    //! @todo: add doc-string of `if' to lynxDocs describing it syntax
+    
+    return Result(share());
+}
+
+//! @todo
+Result Lynx::handle_import(const Self& self, Env& env){
+    //! @todo: add doc-string of `import' to lynxDocs describing it syntax
+    
+    return Result(share());
+}
+
+//! @todo
+Result Lynx::handle_lambda(const Self& self, Env& env){
+    //! @todo: add doc-string of `lambda' to lynxDocs describing it syntax
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+    auto vec = xs.as_vector();
+    [[maybe_unused]] Error _err_;
+    bool pred = (xs.len()>=1);
+    if(!Lynx::check_value(self, pred, _err_)){
+        std::stringstream ss;
+        ss << "malformed `lambda'. Takes at least 1 arguments";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+    
+    auto _params = *dynamic_cast<List*>(vec[0].get());
+    auto params = _params.as_vector();
+    for(const auto& param: params){
+        if(!Lynx::check_type(Symbol("symbol"), param, err)){
+            err = Error(Error::Kind::SyntaxError, "parameter to function must be a symbol");
+            return Result(std::move(err));
+        }
+    }
+    // check for duplicates parameters
+    std::set<Str> _params_set_{};
+    for(const auto param: params){
+        auto key = *dynamic_cast<Symbol*>(param.get());
+        _params_set_.insert(key.str());
+    }
+    if(_params_set_.size() != params.size()){
+        // there have been duplicate parameters
+        err = Error(Error::Kind::SyntaxError, "duplicate parameters in function definition");
+        return Result(std::move(err));
+    }
+    Vec<Self> body{};
+    body = Vec<Self>(vec.begin()+1, vec.end());
+    auto _symbols_ = Lynx::get_symbols(body);
+    Env ctx;
+
+    for(const auto& sym: _symbols_){
+        // check whether `sym' belong to the parent environment and 'capture' it so.
+        if(_params_set_.find(sym.str())==_params_set_.end()){
+            // is `sym' actually defined
+            if(!env.contains(sym.str())){
+                Str msg{"unbound variable `"};
+                msg += sym.str() + "'";
+                err = Error(Error::Kind::RuntimeError, msg);
+                return Result(std::move(err));
+            }
+            ctx.put(sym.str(), env.get(sym.str()));
+        }
+    }
+    
+    auto _my_params_ = Vec<Symbol>(_params_set_.begin(), _params_set_.end());
+
+    return Result(share(_my_params_, body, ctx));
 }
 
 /*
@@ -1096,9 +1177,7 @@ Result Lynx::handle_fun(const Self& self, Env& env){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::handle_if(const Self& self, Env& env){}
-Result Lynx::handle_import(const Self& self, Env& env){}
-Result Lynx::handle_lambda(const Self& self, Env& env){}
+
 Result Lynx::handle_let(const Self& self, Env& env){}
 Result Lynx::handle_macro(const Self& self, Env& env){}
 Result Lynx::handle_progn(const Self& self, Env& env){}
