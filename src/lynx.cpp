@@ -1223,7 +1223,7 @@ Result Lynx::handle_import(const Self& self, Env& env){
     return Result(share());
 }
 
-//! @todo
+// -*-
 Result Lynx::handle_lambda(const Self& self, Env& env){
     //! @todo: add doc-string of `lambda' to lynxDocs describing it syntax
     Error err;
@@ -1285,11 +1285,60 @@ Result Lynx::handle_lambda(const Self& self, Env& env){
 }
 
 // -*-
-//! @todo
 Result Lynx::handle_let(const Self& self, Env& env){
     //! @todo: add doc-string of `import' to lynxDocs describing it syntax
-    
-    return Result(share());
+    /*
+        (let pairs body)
+
+    Examples:
+        (let ((x 1)
+              (y 2))
+            (+ x y))
+    */
+
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+    auto vec = xs.as_vector();
+    [[maybe_unused]] Error _err_;
+    bool pred = (xs.len()==2);
+    if(!Lynx::check_value(self, pred, _err_)){
+        std::stringstream ss;
+        ss << "malformed `let' expression. Takes 2 arguments";
+        ss << ", got " << xs.len();
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(Symbol("list"), vec[0], err)){
+        return Result(std::move(err));
+    }
+    Env ctx(&env);
+    auto _pairs = *dynamic_cast<List*>(vec[0].get());
+    auto pairs = _pairs.as_vector();
+    for(const auto& _pair: pairs){
+        if(!Lynx::check_type(Symbol("list"), _pair, err)){
+            return Result(std::move(err));
+        }
+        auto __pair = *dynamic_cast<List*>(_pair.get());
+        pred = (__pair.len()==2);
+        if(!Lynx::check_value(self, pred, _err_)){
+            std::stringstream ss;
+            ss << "malformed `let' expression. Expect the first arguments to be ";
+            ss << "a list of pairs ";
+            err = Error(Error::Kind::SyntaxError, ss.str());
+            return Result(std::move(err));
+        }
+        auto pair = __pair.as_vector();
+        if(!Lynx::check_type(Symbol("symbol"), pair[0], err)){
+            return Result(std::move(err));
+        }
+        auto _name = *dynamic_cast<Symbol*>(pair[0].get());
+        ctx.put(_name.str(), pair[1]);
+    }
+    auto body = vec[1];
+    return Lynx::eval(body, ctx);
 }
 
 //! @todo
