@@ -517,8 +517,7 @@ Result Lynx::eval(const Self& self, Env& env){
     return Result(std::move(error));
 }
 
-
-/*
+// -*-
 Str Lynx::readfile(const Str& filename){
     if(!fs::exists(fs::path(filename))){
         std::stringstream ss;
@@ -544,7 +543,7 @@ Str Lynx::readfile(const Str& filename){
     return result;
 }
 
-
+/*
 
 Str Lynx::input(void){
     std::stack<char> parens{};
