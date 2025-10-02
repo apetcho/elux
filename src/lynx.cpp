@@ -643,8 +643,16 @@ void Lynx::import_module(const fs::path& module_path){
     }    
 }
 
+// -*-
+bool Lynx::check_argc(int argc, int expected, const Str& funcname, Error& err){
+    if(argc==expected){ return true; }
+    std::stringstream ss;
+    ss << "`" << funcname << "': ";
+    ss << "invalid number of arguments. Expected " << expected << ", got " << argc;
+    err = Error(Error::Kind::SyntaxError, ss.str());
+    return false;
+}
 /*
-bool Lynx::check_argc(int argc, int expected, const Str& funcname, Error& err){}
 bool Lynx::check_type(const Symbol& ty, const Self& self, Error& err){}
 bool Lynx::check_value(const Self& self, bool (*fn)(const Self&), Error& err){}
 bool Lynx::check_value(const Self& self, bool pred, Error& err){}
@@ -686,6 +694,7 @@ Result Lynx::fn_string(const Vec<Self>& args){}
 Result Lynx::fn_list(const Vec<Self>& args){}
 
 // Predicates
+Result Lynx::fn_is_nil(const Vec<Self>& args){}
 Result Lynx::fn_is_bool(const Vec<Self>& args){}
 Result Lynx::fn_is_number(const Vec<Self>& args){}
 Result Lynx::fn_is_integer(const Vec<Self>& args){}
@@ -809,7 +818,10 @@ Result Lynx::fn_sleep(const Vec<Self>& args){}
 Result Lynx::fn_timeit(const Vec<Self>& args){}
 Result Lynx::fn_eval(const Vec<Self>& args){}
 Result Lynx::fn_declare_module(const Vec<Self>& args){}
-Result Lynx::fn_help(const Vec<Self>& args){}
+Result Lynx::fn_declare_error(const Vec<Self>& args);
+Result Lynx::fn_has_feature(const Vec<Self>& args);
+Result Lynx::fn_help(const Vec<Self>& args);
+
 */
 
 // -*----------------------------------------------------------------*-

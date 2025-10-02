@@ -1148,6 +1148,7 @@ public:
     static Result fn_list(const Vec<Self>& args);
 
     // Predicates
+    static Result fn_is_nil(const Vec<Self>& args);
     static Result fn_is_bool(const Vec<Self>& args);
     static Result fn_is_number(const Vec<Self>& args);
     static Result fn_is_integer(const Vec<Self>& args);
@@ -1271,7 +1272,9 @@ public:
     static Result fn_timeit(const Vec<Self>& args);
     static Result fn_eval(const Vec<Self>& args);
     static Result fn_declare_module(const Vec<Self>& args);
-    // static Result fn_help(const Vec<Self>& args);
+    static Result fn_declare_error(const Vec<Self>& args);
+    static Result fn_has_feature(const Vec<Self>& args);
+    static Result fn_help(const Vec<Self>& args);
 };
 
 
