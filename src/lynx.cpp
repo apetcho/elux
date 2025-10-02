@@ -785,6 +785,7 @@ bool Lynx::to_bool(const Self& self){
 
 // -*-
 Result Lynx::handle_cond(const Self& self, Env& env){
+    //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
     /*
         (cond
             (pred-1 expr1)
@@ -829,8 +830,65 @@ Result Lynx::handle_cond(const Self& self, Env& env){
     return Result(std::move(err));
 }
 
+// -*-
+Result Lynx::handle_defvar(const Self& self, Env& env){
+    //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
+    /*
+        (defvar name value)
+        (defvar name value docstr)
+    */
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+    auto vec = xs.as_vector();
+    [[maybe_unused]] Error _err_;
+    bool pred = (xs.len()==2 || xs.len()==3);
+    if(!Lynx::check_value(self, pred, _err_)){
+        std::stringstream ss;
+        ss << "malformed `defvar'. Takes 2 or 3 arguments";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(Symbol("symbol"), vec[0], err)){
+        return Result(std::move(err));
+    }
+    Str _doc_{};
+    auto sym = *dynamic_cast<Symbol*>(vec[0].get());
+    auto name = sym.str();
+    auto val = vec[1];
+    val->immutable() = true;
+    if(xs.len()==2){
+        _doc_ = "";
+    }else{
+        if(!Lynx::check_type(Symbol("string"), vec[2], err)){
+            return Result(std::move(err));
+        }
+        auto msg = *dynamic_cast<String*>(vec[2].get());
+        _doc_ = msg.str();
+    }
+    if(env.contains(name)){
+        Str msg{"cannot redifined immutable variable `'"};
+        msg += name + "'";
+        err = Error(Error::Kind::RuntimeError, msg);
+        return Result(std::move(err));
+    }else{
+        env.put(name, val);
+    }
+
+    if(Lynx::docstrs.contains(name)){
+        Lynx::docstrs.update(name, share(_doc_));    
+    }else{
+        Lynx::docstrs.put(name, share(_doc_));
+    }
+
+    return Result(share());
+}
+
 /*
-Result Lynx::handle_defvar(const Self& self, Env& env){}
+//! @todo: add doc-string of `cond' to lynxDocs describing it syntax
+
 Result Lynx::handle_for(const Self& self, Env& env){}
 Result Lynx::handle_fun(const Self& self, Env& env){}
 Result Lynx::handle_if(const Self& self, Env& env){}
