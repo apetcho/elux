@@ -1183,7 +1183,7 @@ Result Lynx::handle_import(const Self& self, Env& env){
         err = Error(Error::Kind::SyntaxError, ss.str());
         return Result(std::move(err));
     }
-    bool found = false;
+    [[maybe_unused]] bool found = false;
     Str name{};
     if(_mymodule->is_symbol()){
         auto sym = *dynamic_cast<Symbol*>(_mymodule.get());
@@ -1192,30 +1192,24 @@ Result Lynx::handle_import(const Self& self, Env& env){
         }
         // module not yet imported. Import it now.
         name = sym.str();
-        for(const auto& [key, _mod]: Lynx::libraries){
-            auto _key_ = String(key);
-            if(_key_.startswith(String(name))){
-                // module found
-                found = true;
-                auto _modEnv = _mod.env();
-                auto _bindings = _modEnv.m_bindings;
-                for(const auto& [_key, _val]: _bindings){
-                    if(env.contains(_key)){
-                        env.update(_key, _val);
-                    }else{
-                        env.put(_key, _val);
-                    }
-                }
-            }
+        try{
+            Lynx::import_module(name, env);
+            found = true;
+        }catch(const Error& __err__){
+            auto _Err = __err__;
+            return Result(std::move(_Err));
         }
     }else{
         auto _str_ = *dynamic_cast<String*>(_mymodule.get());
         auto _mypath = fs::path(_str_.str());
         name = _mypath.stem();
-        // auto __module__ = Module(name, _str_.str(), &env);
-        Module __module__(name, _str_.str(), &env);
-        Lynx::push_module(__module__);
-        Lynx::import_module(name, env);
+        try{
+            Lynx::import_module(_mypath, env);
+            found = true;
+        }catch(const Error& __err__){
+            auto _Err = __err__;
+            return Result(std::move(_Err));
+        }
         found = true;
     }
 
