@@ -832,7 +832,7 @@ Result Lynx::handle_cond(const Self& self, Env& env){
 
 // -*-
 Result Lynx::handle_defvar(const Self& self, Env& env){
-    //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
+    //! @todo: add doc-string of `defvar' to lynxDocs describing it syntax
     /*
         (defvar name value)
         (defvar name value docstr)
@@ -886,10 +886,108 @@ Result Lynx::handle_defvar(const Self& self, Env& env){
     return Result(share());
 }
 
+// -*-
+Result Lynx::handle_for(const Self& self, Env& env){
+    //! @todo: add doc-string of `for' to lynxDocs describing it syntax
+    /*
+        (for (x xs) body)
+
+        Pre:
+            x is a symbol
+            xs evaluate to a list
+            body is any valid expression
+
+
+        Example:
+            (for (x '(1 2 3 4))
+                (println (format "x = {x}")))
+
+            >>
+            x = 1
+            x = 2
+            x = 3
+            x = 4
+    */
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+    auto vec = xs.as_vector();
+    [[maybe_unused]] Error _err_;
+    bool pred = (xs.len()>=1);
+    if(!Lynx::check_value(self, pred, _err_)){
+        std::stringstream ss;
+        ss << "malformed `for'. Takes at least 1 arguments";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(Symbol("list"), vec[0], err)){
+        return Result(std::move(err));
+    }
+    auto _iter_ = vec[0]; // iteration clause
+    auto _xxs_ = *dynamic_cast<List*>(_iter_.get());
+    auto body = Vec<Self>(vec.begin()+1, vec.end()); // the body of the loop
+    pred = (_xxs_.len() == 2);
+    if(!Lynx::check_value(self, pred, _err_)){
+        std::stringstream ss;
+        ss << "malformed `for'. The first argument to `for' special form must be ";
+        ss << "a list of 2 elements.";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+    auto _xxsvec_ = _xxs_.as_vector();
+    auto _x_ = _xxsvec_[0];     // iteration variable
+    auto _xs_ = _xxsvec_[1];    // iterable
+    
+    if(!Lynx::check_type(Symbol("symbol"), _x_, err)){
+        return Result(std::move(err));
+    }
+    auto _xs = Lynx::eval(_xs_, env);
+    if(!_xs.is_ok()){
+        return Result(std::move(_xs.err()));
+    }
+    auto xs_ = _xs.ok();
+    auto iterable = *dynamic_cast<List*>(xs_.get());
+    auto values = iterable.as_vector();
+    auto _sym_ = *dynamic_cast<Symbol*>(_x_.get());
+    auto name = _sym_.str();
+    // Create the loop's environment
+    Env ctx(&env);
+    // initialize the loop variable
+    Self ans = nullptr; // for storing the final result
+    ctx.put(name, share());
+    for(const auto& value: values){
+        // evaluate each loop variable
+        auto val = Lynx::eval(value, ctx);
+        if(!val.is_ok()){
+            return Result(std::move(val.err()));
+        }
+        // add the evaluated value to the loop environment
+        ctx.update(name, val.ok());
+        // evalue the loop's body
+        for(const auto& expr: body){
+            auto _ans = Lynx::eval(expr, ctx);
+            if(!_ans.is_ok()){
+                return Result(std::move(_ans.err()));
+            }
+            ans = _ans.ok();
+        }
+    }
+    
+    return Result(std::move(ans));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
+    
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+    auto vec = xs.as_vector();
 
-Result Lynx::handle_for(const Self& self, Env& env){}
 Result Lynx::handle_fun(const Self& self, Env& env){}
 Result Lynx::handle_if(const Self& self, Env& env){}
 Result Lynx::handle_import(const Self& self, Env& env){}
