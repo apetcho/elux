@@ -681,8 +681,45 @@ bool Lynx::check_value(const Self& self, bool pred, Error& err){
     return false;
 }
 
+// -*-
+bool Lynx::is_reserved_word(const Str& word){
+    static std::map<Str, TokenKind> _reserved_words_ = {
+#define LYNX_DEF(tok, name)     {name, TokenKind::tok},
+        LYNX_KEYWORDS()
+#undef LYNX_DEF
+        {"nil", TokenKind::Nil},
+        {"true", TokenKind::True},
+        {"false", TokenKind::False},
+    };
+    auto entry = _reserved_words_.find(word);
+    if(entry==_reserved_words_.end()){
+        return false;
+    }
+    return true;
+}
+
 /*
-bool Lynx::is_reserved_word(const Str& word){}
+
+{"cond"}
+LYNX_DEF(Cond, "cond")                                  \
+    LYNX_DEF(Defvar, "defvar")                              \
+    LYNX_DEF(For, "for")                                    \
+    LYNX_DEF(Fun, "fun")                                    \
+    LYNX_DEF(If, "if")                                      \
+    LYNX_DEF(Import, "import")                              \
+    LYNX_DEF(Lambda, "lambda")                              \
+    LYNX_DEF(Let, "let")                                    \
+    LYNX_DEF(Macro, "macro")                                \
+    LYNX_DEF(Match, "match")                                \
+    LYNX_DEF(Any, "_")                                      \
+    LYNX_DEF(Progn, "progn")                                \
+    LYNX_DEF(Quasiquote, "quasiquote")               \
+    LYNX_DEF(Quote, "quote")                         \
+    LYNX_DEF(Unquote, "unquote")                    \
+    LYNX_DEF(UnquoteSplicing, "unquote-splicing")  \
+    LYNX_DEF(Var, "var")                                    \
+    LYNX_DEF(While, "while")
+
 bool Lynx::is_keyword(const Str& word){}
 Vec<Symbol> Lynx::captured_symbols(const Vec<Self>& body){}
 bool Lynx::match(const Symbol& type, const Self& Self){}

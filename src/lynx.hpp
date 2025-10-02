@@ -30,8 +30,6 @@
     LYNX_DEF(Let, "let")                                    \
     LYNX_DEF(Macro, "macro")                                \
     LYNX_DEF(Match, "match")                                \
-    LYNX_DEF(Case, "case")                                  \
-    LYNX_DEF(Default, "default")                            \
     LYNX_DEF(Progn, "progn")                                \
     LYNX_DEF(Quasiquote, "quasiquote") /* ` */              \
     LYNX_DEF(Quote, "quote") /* ' */                        \
@@ -46,6 +44,7 @@
     LYNX_DEF(Eof, "EOF")            \
     LYNX_DEF(LParen, "(")           \
     LYNX_DEF(RParen, ")")           \
+    LYNX_DEF(Any, "_")              \
     LYNX_DEF(Nil, "nil")            \
     LYNX_DEF(True, "true")          \
     LYNX_DEF(False, "false")        \
