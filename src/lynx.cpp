@@ -994,13 +994,13 @@ Result Lynx::handle_fun(const Self& self, Env& env){
         (2) With a docstr
             (fun quadratic-equation-solver (a b c)
                 "Solve the quadratic a equation for real numbers."
-                (var discriminat (- (pow b 2) (* 4 a c)))
+                (var discriminant (- (pow b 2) (* 4 a c)))
                 (progn
                     (cond
                         ((> discriminant 0)
                             (progn
                                 (var result '())
-                                (var delta (sqrt discriminat))
+                                (var delta (sqrt discriminant))
                                 (var x1 (/ (- (- b) delta) 2)
                                 (var x2 (/ (+ (- b) delta) 2)
                                 (push x1 result)
@@ -1095,7 +1095,48 @@ Result Lynx::handle_fun(const Self& self, Env& env){
 //! @todo
 Result Lynx::handle_if(const Self& self, Env& env){
     //! @todo: add doc-string of `if' to lynxDocs describing it syntax
+    /*
+        [1] (if test-expr ok-body)
+        [2] (if test-expr ok-body no-body)
+    */
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
     
+
+    [[maybe_unused]] Error _err_;
+    bool pred = (xs.len()==2 || xs.len()==3);
+    if(!Lynx::check_value(self, pred, _err_)){
+        std::stringstream ss;
+        ss << "malformed `if' expression. Takes at least 2 or 3 arguments";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+
+    auto vec = xs.as_vector();
+    auto testExpr = vec[0];
+    auto testResult = Lynx::eval(testExpr, env);
+    if(!testResult.is_ok()){
+        return testResult;
+    }
+    auto test = testResult.ok();
+    if(!test->is_bool()){
+        std::stringstream ss;
+        ss << "malformed `if' expression. Test-expression must evaluate to boolean";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+
+    if(test){// test evaluate to true. Take the ok-branch
+        return Lynx::eval(vec[1], env);
+    }
+    // Test evaluate to false. If no-banch exist, evaluate it.
+    if(xs.len() == 3){
+        return Lynx::eval(vec[2], env);
+    }
+    // no-branch does exist, return nil
     return Result(share());
 }
 
