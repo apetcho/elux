@@ -791,11 +791,12 @@ private:
     static Str input(void);
     static Str make_library_key(const Module& mymodule);
     static void push_module(const Module& mymodule);
-    void import_module(const Str& module_name);
-    void import_module(const fs::path& module_path);
+    static void import_module(const Str& module_name, Env& env);
+    static void import_module(const fs::path& module_path, Env& env);
 
     static void initialize_prelude(void);
     static void initialize_math_module(void);
+    static bool is_imported(const Symbol& mymodule);
     /** @todo
     static void initialize_datetime_module(void);
     static void initialize_filesystem_module(void);

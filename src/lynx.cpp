@@ -143,16 +143,20 @@ void Env::put(const Str& key, const Self& val){
 
 // -*-
 [[maybe_unused]] Self Env::update(const Str& key, const Self& val){
-    if(!this->contains(key)){
-        std::stringstream ss;
-        ss << "unbound identifier `" << key << "'. Cannot be updated.";
-        throw Error(Error::Kind::RuntimeError, ss.str());
-    }
+    // if(!this->contains(key)){
+    //     std::stringstream ss;
+    //     ss << "unbound identifier `" << key << "'. Cannot be updated.";
+    //     throw Error(Error::Kind::RuntimeError, ss.str());
+    // }
     if(this->m_bindings.find(key) != this->m_bindings.end()){
         this->m_bindings[key] = val;
+        return share();
     }
+    auto self = this->m_bindings[key];
+    this->m_bindings[key] = val;
 
-    return this->m_parent->update(key, val);
+    // return this->m_parent->update(key, val);
+    return std::move(self);
 }
 
 // -*-
@@ -607,43 +611,45 @@ void Lynx::push_module(const Module& mymodule){
 }
 
 // -*-
-void Lynx::import_module(const Str& name){
-    if(Lynx::m_imported_libs.find(name) != Lynx::m_imported_libs.end()){
-        return;
-    }
-    auto entry = Lynx::libraries.find(name);
-    if(entry == Lynx::libraries.end()){
-        std::stringstream ss;
-        ss << "module '" << name << "' not found.";
-        throw Error(Error::Kind::RuntimeError, ss.str());
-    }
-    auto lib = entry->second;
-    auto _name_ = Lynx::make_library_key(lib);
-    Lynx::m_imported_libs.insert({_name_, lib});
-    auto env = lib.env();
-    auto keys = env.keys();
-    for(const auto& key: keys){
-        Lynx::m_runtime.m_bindings.insert({key, env.get(key)});
-    }
-}
+//! @todo: Refactor
+// void Lynx::import_module(const Str& name, Env&){
+//     if(Lynx::m_imported_libs.find(name) != Lynx::m_imported_libs.end()){
+//         return;
+//     }
+//     auto entry = Lynx::libraries.find(name);
+//     if(entry == Lynx::libraries.end()){
+//         std::stringstream ss;
+//         ss << "module '" << name << "' not found.";
+//         throw Error(Error::Kind::RuntimeError, ss.str());
+//     }
+//     auto lib = entry->second;
+//     auto _name_ = Lynx::make_library_key(lib);
+//     Lynx::m_imported_libs.insert({_name_, lib});
+//     auto env = lib.env();
+//     auto keys = env.keys();
+//     for(const auto& key: keys){
+//         Lynx::m_runtime.m_bindings.insert({key, env.get(key)});
+//     }
+// }
 
 // -*-
-void Lynx::import_module(const fs::path& module_path){
-    // -*-
-    if(!fs::exists(module_path)){
-        std::stringstream ss;
-        ss << "module '" << module_path.string() << "' not found";
-        throw Error(Error::Kind::RuntimeError, ss.str());
-    }
-    auto name = module_path.stem();
-    Module mymodule(name, module_path, &Lynx::m_runtime);
-    auto key = Lynx::make_library_key(mymodule);
-    Lynx::m_imported_libs.insert({key, mymodule});
-    auto env = mymodule.env();
-    for(const auto& key: env.keys()){
-        Lynx::m_runtime.m_bindings.insert({key, env.get(key)});
-    }    
-}
+//! @todo Refactor
+// void Lynx::import_module(const fs::path& module_path, Env&){
+//     // -*-
+//     if(!fs::exists(module_path)){
+//         std::stringstream ss;
+//         ss << "module '" << module_path.string() << "' not found";
+//         throw Error(Error::Kind::RuntimeError, ss.str());
+//     }
+//     auto name = module_path.stem();
+//     Module mymodule(name, module_path, &Lynx::m_runtime);
+//     auto key = Lynx::make_library_key(mymodule);
+//     Lynx::m_imported_libs.insert({key, mymodule});
+//     auto env = mymodule.env();
+//     for(const auto& key: env.keys()){
+//         Lynx::m_runtime.m_bindings.insert({key, env.get(key)});
+//     }    
+// }
 
 // -*-
 bool Lynx::check_argc(int argc, int expected, const Str& funcname, Error& err){
@@ -1092,7 +1098,6 @@ Result Lynx::handle_fun(const Self& self, Env& env){
 }
 
 // -*-
-//! @todo
 Result Lynx::handle_if(const Self& self, Env& env){
     //! @todo: add doc-string of `if' to lynxDocs describing it syntax
     /*
@@ -1140,9 +1145,81 @@ Result Lynx::handle_if(const Self& self, Env& env){
     return Result(share());
 }
 
-//! @todo
+// -*-
 Result Lynx::handle_import(const Self& self, Env& env){
     //! @todo: add doc-string of `import' to lynxDocs describing it syntax
+    /*
+        (import module-name)
+        (import "/path/to/module.lynx")
+    */
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+    
+
+    [[maybe_unused]] Error _err_;
+    bool pred = (xs.len()==1);
+    if(!Lynx::check_value(self, pred, _err_)){
+        std::stringstream ss;
+        ss << "malformed `import' expression. Takes 1 arguments";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+
+    auto vec = xs.as_vector();
+    auto _mymodule = vec[0];
+    pred = (_mymodule->is_string() || _mymodule->is_symbol());
+    if(!Lynx::check_value(self, pred, _err_)){
+        std::stringstream ss;
+        ss << "malformed `import' expression. Argument must be a string or symbol";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+    bool found = false;
+    Str name{};
+    if(_mymodule->is_symbol()){
+        auto sym = *dynamic_cast<Symbol*>(_mymodule.get());
+        if(Lynx::is_imported(sym)){ // already imported
+            return Result(share());
+        }
+        // module not yet imported. Import it now.
+        name = sym.str();
+        for(const auto& [key, _mod]: Lynx::libraries){
+            auto _key_ = String(key);
+            if(_key_.startswith(String(name))){
+                // module found
+                found = true;
+                auto _modEnv = _mod.env();
+                auto _bindings = _modEnv.m_bindings;
+                for(const auto& [_key, _val]: _bindings){
+                    if(env.contains(_key)){
+                        env.update(_key, _val);
+                    }else{
+                        env.put(_key, _val);
+                    }
+                }
+            }
+        }
+    }else{
+        auto _str_ = *dynamic_cast<String*>(_mymodule.get());
+        auto _mypath = fs::path(_str_.str());
+        name = _mypath.stem();
+        // auto __module__ = Module(name, _str_.str(), &env);
+        Module __module__(name, _str_.str(), &env);
+        Lynx::push_module(__module__);
+        Lynx::import_module(name, env);
+        found = true;
+        return Result(share());
+    }
+
+    if(!found){
+        std::stringstream ss;
+        ss << "module `" << name << "' not found.";
+        err = Error(Error::Kind::RuntimeError, ss.str());
+        return Result(std::move(err));
+    }
     
     return Result(share());
 }
