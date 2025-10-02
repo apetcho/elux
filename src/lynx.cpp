@@ -444,9 +444,81 @@ void Lynx::setup(void){
     Lynx::initialize_math_module();
 }
 
-/*
-Result Lynx::eval(const Self& self, Env& env);
+// -*-
+Result Lynx::eval(const Self& self, Env& env){
+    if(Lynx::is_atom(self)){
+        return Lynx::eval_atom(self, env);
+    }else if(self->is_list()){
+        auto xs = *dynamic_cast<List*>(self.get());
+        if(xs.len()==0){
+            //! @todo: Yield an error instead as this is normally a function application.
+            return Result(share(xs.as_list()));
+        }
+        auto vec = xs.as_vector();
+        auto term = vec[0];
+        if(term->type()!=Symbol("symbol")){
+            std::stringstream ss;
+            ss << "illegal function application. Unknown identifier `" << self->str() << "'";
+            Error err(Error::Kind::SyntaxError, ss.str());
+            return Result(std::move(err));
+        }
+        auto ident = *dynamic_cast<Symbol*>(term.get());
+        auto args = Vec<Self>(vec.begin()+1, vec.end());
+        auto name = ident.str();
+        if(Lynx::is_keyword(ident.str())){
+            if(name=="cond"){ return Lynx::handle_cond(share(args), env); }
+            if(name=="defvar"){ return Lynx::handle_defvar(share(args), env); }
+            if(name=="for"){ return Lynx::handle_for(share(args), env); }
+            if(name=="fun"){ return Lynx::handle_fun(share(args), env); }
+            if(name=="if"){ return Lynx::handle_if(share(args), env); }
+            if(name=="import"){ return Lynx::handle_import(share(args), env); }
+            if(name=="lambda"){ return Lynx::handle_lambda(share(args), env); }
+            if(name=="let"){ return Lynx::handle_let(share(args), env); }
+            if(name=="macro"){ return Lynx::handle_macro(share(args), env); }
+            if(name=="progn"){ return Lynx::handle_progn(share(args), env); }
+            if(name=="quote"){ return Lynx::handle_quote(share(args), env); }
+            if(name=="quasiquote"){return Lynx::handle_quasiquote(share(args), env); }
+            if(name=="unquote"){ return Lynx::handle_unquote(share(args), env); }
+            if(name=="unquote-splicing"){ return Lynx::handle_unquote_splicing(share(args), env); }
+            if(name=="match"){ return Lynx::handle_match(share(args), env); }
+            if(name=="var"){ return Lynx::handle_var(share(args), env); }
+            if(name=="while"){ return Lynx::handle_while(share(args), env); }
+        }else{
+            // ident is either a builtin funtion or user-defined lambda or function
+            if(!env.contains(name)){
+                std::stringstream ss;
+                ss << "undefined function `" << name << "' in scope";
+                Error err(Error::Kind::RuntimeError, ss.str());
+                return Result(std::move(err));
+            }
+            auto obj = env.get(name);
+            if(!obj->is_callable()){
+                std::stringstream ss;
+                ss << "`" << name << "' is not a callable object.";
+                Error err(Error::Kind::TypeError, ss.str());
+                return Result(std::move(err));
+            }
+            if(obj->is_builtin()){
+                auto fun = *dynamic_cast<Builtin*>(obj.get());
+                return fun(args);
+            }else if(obj->is_closure()){
+                auto fun = *dynamic_cast<Closure*>(obj.get());
+                return fun(args);
+            }else{
+                auto macro = *dynamic_cast<Closure*>(obj.get());
+                return macro(args);
+            }
+        }
+    }
 
+    // -*-
+    Error error("unexpected occured during evaluation.");
+
+    return Result(std::move(error));
+}
+
+
+/*
 Str Lynx::readfile(const Str& filename){
     if(!fs::exists(fs::path(filename))){
         std::stringstream ss;
@@ -528,7 +600,7 @@ bool Lynx::is_keyword(const Str& word){}
 Vec<Symbol> Lynx::captured_symbols(const Vec<Self>& body){}
 bool Lynx::match(const Symbol& type, const Self& Self){}
 void Lynx::expect(const Symbol& type, const Self& Self){}
-
+bool Lynx::is_atom(const Self& self){}
 
 Result Lynx::handle_cond(const Self& self, Env& env){}
 Result Lynx::handle_defvar(const Self& self, Env& env){}
@@ -544,10 +616,10 @@ Result Lynx::handle_quote(const Self& self, Env& env){}
 Result Lynx::handle_quasiquote(const Self& self, Env& env){}
 Result Lynx::handle_unquote(const Self& self, Env& env){}
 Result Lynx::handle_unquote_splicing(const Self& self, Env& env){}
-
 Result Lynx::handle_match(const Self& self, Env& env){}
 Result Lynx::handle_var(const Self& self, Env& env){}
 Result Lynx::handle_while(const Self& self, Env& env){}
+
 Result Lynx::eval_atom(const Self& self, Env& env){}
 Result Lynx::eval_list(const Self& self, Env& env){}
 

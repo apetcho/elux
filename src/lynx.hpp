@@ -837,6 +837,7 @@ private:
     static Vec<Symbol> captured_symbols(const Vec<Self>& body);
     static bool match(const Symbol& type, const Self& Self);
     static void expect(const Symbol& type, const Self& Self);
+    static bool is_atom(const Self& self);
     // -*-
 
     /**
