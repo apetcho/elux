@@ -736,8 +736,20 @@ bool Lynx::match(const Symbol& sym, const Self& self){
     return false;
 }
 
+// -*-
+void Lynx::expect(const Symbol& sym, const Self& self){
+    if(self->is_symbol()){
+        auto _sym_ = *dynamic_cast<Symbol*>(self.get());
+        if(sym!=_sym_){
+            std::stringstream ss;
+            ss << "symbols mismatched. Expected `" << sym.str() << "'";
+            ss << ", got `" << _sym_.str() << "'";
+            throw Error(Error::Kind::ValueError, ss.str());
+        }
+    }
+}
+
 /*
-void Lynx::expect(const Symbol& sym, const Self& Self){}
 bool Lynx::is_atom(const Self& self){}
 
 Result Lynx::handle_cond(const Self& self, Env& env){}
