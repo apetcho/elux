@@ -659,12 +659,20 @@ bool Lynx::check_type(const Symbol& ty, const Self& self, Error& err){
     std::stringstream ss;
     ss << "type mismatch. Expected `" << ty.str() << "', got `";
     ss << self->type().str() << "'";
-    err = Error(Error::Kind::SyntaxError, ss.str());
+    err = Error(Error::Kind::TypeError, ss.str());
+    return false;
+}
+
+// -*-
+bool Lynx::check_value(const Self& self, bool (*fn)(const Self&), Error& err){
+    if(fn(self)){ return true; }
+    std::stringstream ss;
+    ss << "unexpected value `" << self->str() << "'";
+    err = Error(Error::Kind::ValueError, ss.str());
     return false;
 }
 
 /*
-bool Lynx::check_value(const Self& self, bool (*fn)(const Self&), Error& err){}
 bool Lynx::check_value(const Self& self, bool pred, Error& err){}
 
 bool Lynx::is_reserved_word(const Str& word){}
