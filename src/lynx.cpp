@@ -298,6 +298,8 @@ Env Lynx::lynxDocs;
 Env Lynx::docstrs;
 Env Lynx::prelude;
 std::map<Str, Module> Lynx::libraries;
+Env Lynx::m_runtime;
+std::map<Str, Module> Lynx::m_imported_libs;
 
 // -*-
 const Env& Lynx::runtime(void) const{
@@ -614,7 +616,8 @@ void Lynx::import_module(const Str& name){
         throw Error(Error::Kind::RuntimeError, ss.str());
     }
     auto lib = entry->second;
-    Lynx::m_imported_libs.insert({name, lib});
+    auto _name_ = Lynx::make_library_key(lib);
+    Lynx::m_imported_libs.insert({_name_, lib});
     auto env = lib.env();
     auto keys = env.keys();
     for(const auto& key: keys){
@@ -622,9 +625,25 @@ void Lynx::import_module(const Str& name){
     }
 }
 
-/*
-void Lynx::import_module(const fs::path& module_path){}
+// -*-
+void Lynx::import_module(const fs::path& module_path){
+    // -*-
+    if(!fs::exists(module_path)){
+        std::stringstream ss;
+        ss << "module '" << module_path.string() << "' not found";
+        throw Error(Error::Kind::RuntimeError, ss.str());
+    }
+    auto name = module_path.stem();
+    Module mymodule(name, module_path, &Lynx::m_runtime);
+    auto key = Lynx::make_library_key(mymodule);
+    Lynx::m_imported_libs.insert({key, mymodule});
+    auto env = mymodule.env();
+    for(const auto& key: env.keys()){
+        Lynx::m_runtime.m_bindings.insert({key, env.get(key)});
+    }    
+}
 
+/*
 bool Lynx::check_argc(int argc, int expected, const Str& funcname, Error& err){}
 bool Lynx::check_type(const Symbol& ty, const Self& self, Error& err){}
 bool Lynx::check_value(const Self& self, bool (*fn)(const Self&), Error& err){}
