@@ -765,6 +765,23 @@ bool Lynx::is_atom(const Self& self){
     return ans;
 }
 
+// -*-
+bool Lynx::to_bool(const Self& self){
+    if(self->is_bool()){
+        auto val = *dynamic_cast<Bool*>(self.get());
+        return val.as_bool();
+    }else if(self->is_integer()){
+        auto val = *dynamic_cast<Number*>(self.get());
+        return val.as_integer() == 0 ? false : true;
+    }else if(self->is_float()){
+        auto val = *dynamic_cast<Number*>(self.get());
+        return val.as_float() == 0.0 ? false : true;
+    }else if(self->type()==Symbol("nil")){
+        return false;
+    }
+    return true;
+}
+
 
 // -*-
 Result Lynx::handle_cond(const Self& self, Env& env){
