@@ -1341,7 +1341,7 @@ Result Lynx::handle_let(const Self& self, Env& env){
     return Lynx::eval(body, ctx);
 }
 
-//! @todo
+// -*-
 Result Lynx::handle_macro(const Self& self, Env& env){
     /** @note: 
     Hygynic macro should not capture variable from the outer environment
@@ -1425,6 +1425,26 @@ Result Lynx::handle_macro(const Self& self, Env& env){
     return Result(share(name, _my_params_, body, ctx, true));
 }
 
+// -*-
+Result Lynx::handle_progn(const Self& self, Env& env){
+    //! @todo: add doc-string of `progn' to lynxDocs describing it syntax
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+    auto vec = xs.as_vector();
+    Self result = nullptr;
+    for(const auto& expr: vec){
+        auto ans = Lynx::eval(expr, env);
+        if(!ans.is_ok()){
+            return ans;
+        }
+        result = ans.ok();
+    }
+
+    return Result(std::move(result));
+}
 
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
@@ -1436,9 +1456,6 @@ Result Lynx::handle_macro(const Self& self, Env& env){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-
-
-Result Lynx::handle_progn(const Self& self, Env& env){}
 Result Lynx::handle_quote(const Self& self, Env& env){}
 Result Lynx::handle_quasiquote(const Self& self, Env& env){}
 Result Lynx::handle_unquote(const Self& self, Env& env){}
