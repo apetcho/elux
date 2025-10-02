@@ -978,6 +978,114 @@ Result Lynx::handle_for(const Self& self, Env& env){
     return Result(std::move(ans));
 }
 
+// -*-
+Result Lynx::handle_fun(const Self& self, Env& env){
+    //! @todo: add doc-string of `fun' to lynxDocs describing it syntax 
+    /*
+        (fun name params [docstr] body)
+
+        Examples
+        (1) Without docstr
+            (fun favorite-programming-languages ()
+                (println "(1) C programming language")
+                (println "(2) C++ programming language")
+                (println "(3) Rust programming language"))
+
+        (2) With a docstr
+            (fun quadratic-equation-solver (a b c)
+                "Solve the quadratic a equation for real numbers."
+                (var discriminat (- (pow b 2) (* 4 a c)))
+                (progn
+                    (cond
+                        ((> discriminant 0)
+                            (progn
+                                (var result '())
+                                (var delta (sqrt discriminat))
+                                (var x1 (/ (- (- b) delta) 2)
+                                (var x2 (/ (+ (- b) delta) 2)
+                                (push x1 result)
+                                (push x2 result)
+                                result))
+                        ((= discriminant 0)
+                            (var x (/ (- b) / 2))
+                            (var result (list x))
+                            result)
+                        ((< discriminant 0)
+                            (eprintln "No solution found")))))
+    */
+    
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+    auto vec = xs.as_vector();
+    [[maybe_unused]] Error _err_;
+    bool pred = (xs.len()>=2);
+    if(!Lynx::check_value(self, pred, _err_)){
+        std::stringstream ss;
+        ss << "malformed `fun'. Takes at least 2 arguments";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(Symbol("symbol"), vec[0], err)){
+        return Result(std::move(err));
+    }
+    auto _name = *dynamic_cast<Symbol*>(vec[0].get());
+    auto name = _name.str();
+    if(!Lynx::check_type(Symbol("list"), vec[1], err)){
+        return Result(std::move(err));
+    }
+    auto _params = *dynamic_cast<List*>(vec[1].get());
+    auto params = _params.as_vector();
+    for(const auto& param: params){
+        if(!Lynx::check_type(Symbol("symbol"), param, err)){
+            err = Error(Error::Kind::SyntaxError, "parameter to function must be a symbol");
+            return Result(std::move(err));
+        }
+    }
+    // check for duplicates
+    std::set<Str> _params_set_{};
+    for(const auto param: params){
+        auto key = *dynamic_cast<Symbol*>(param.get());
+        _params_set_.insert(key.str());
+    }
+    if(_params_set_.size() != params.size()){
+        // there have been duplicate parameters
+        err = Error(Error::Kind::SyntaxError, "duplicate parameters in function definition");
+        return Result(std::move(err));
+    }
+    Vec<Self> body{};
+    Str _doc_{};
+    if(vec[2]->is_string()){
+        auto _my_doc = *dynamic_cast<String*>(vec[2].get());
+        _doc_ = _my_doc.str();
+        body = Vec<Self>(vec.begin()+3, vec.end());
+    }else{
+        body = Vec<Self>(vec.begin()+2, vec.end());
+    }
+    auto _symbols_ = Lynx::get_symbols(body);
+    Env ctx;
+
+    for(const auto& sym: _symbols_){
+        // check whether `sym' belong to the parent environment and 'capture' it so.
+        if(_params_set_.find(sym.str())==_params_set_.end()){
+            // is `sym' actually defined
+            if(!env.contains(sym.str())){
+                Str msg{"unbound variable `"};
+                msg += sym.str() + "'";
+                err = Error(Error::Kind::RuntimeError, msg);
+                return Result(std::move(err));
+            }
+            ctx.put(sym.str(), env.get(sym.str()));
+        }
+    }
+    
+    auto _my_params_ = Vec<Symbol>(_params_set_.begin(), _params_set_.end());
+
+    return Result(share(name, _my_params_, body, ctx));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
     
@@ -988,7 +1096,6 @@ Result Lynx::handle_for(const Self& self, Env& env){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::handle_fun(const Self& self, Env& env){}
 Result Lynx::handle_if(const Self& self, Env& env){}
 Result Lynx::handle_import(const Self& self, Env& env){}
 Result Lynx::handle_lambda(const Self& self, Env& env){}
