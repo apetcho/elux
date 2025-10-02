@@ -652,8 +652,18 @@ bool Lynx::check_argc(int argc, int expected, const Str& funcname, Error& err){
     err = Error(Error::Kind::SyntaxError, ss.str());
     return false;
 }
+
+// -*-
+bool Lynx::check_type(const Symbol& ty, const Self& self, Error& err){
+    if(ty==self->type()){ return true; }
+    std::stringstream ss;
+    ss << "type mismatch. Expected `" << ty.str() << "', got `";
+    ss << self->type().str() << "'";
+    err = Error(Error::Kind::SyntaxError, ss.str());
+    return false;
+}
+
 /*
-bool Lynx::check_type(const Symbol& ty, const Self& self, Error& err){}
 bool Lynx::check_value(const Self& self, bool (*fn)(const Self&), Error& err){}
 bool Lynx::check_value(const Self& self, bool pred, Error& err){}
 
