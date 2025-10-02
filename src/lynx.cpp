@@ -672,9 +672,16 @@ bool Lynx::check_value(const Self& self, bool (*fn)(const Self&), Error& err){
     return false;
 }
 
-/*
-bool Lynx::check_value(const Self& self, bool pred, Error& err){}
+// -*-
+bool Lynx::check_value(const Self& self, bool pred, Error& err){
+    if(pred){ return true; }
+    std::stringstream ss;
+    ss << "unexpected value `" << self->str() << "'";
+    err = Error(Error::Kind::ValueError, ss.str());
+    return false;
+}
 
+/*
 bool Lynx::is_reserved_word(const Str& word){}
 bool Lynx::is_keyword(const Str& word){}
 Vec<Symbol> Lynx::captured_symbols(const Vec<Self>& body){}
