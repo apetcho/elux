@@ -591,9 +591,13 @@ Str Lynx::make_library_key(const Module& mymodule){
     return key;
 }
 
+// -*-
+void Lynx::push_module(const Module& mymodule){
+    auto key = Lynx::make_library_key(mymodule);
+    Lynx::libraries.insert({key, mymodule});
+}
+
 /*
-void Lynx::push_module(const Module& mymodule);
-void Lynx::push_module(const Str& name, const Module& mymodule);
 void Lynx::import_module(const Str& module_name);
 void Lynx::import_module(const fs::path& module_path);
 

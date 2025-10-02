@@ -753,8 +753,8 @@ class Module final{
 public:
     explicit Module(const Str& name, const Dict& dict, Env* env) noexcept;
     explicit Module(const Str& name, const fs::path& path, Env* env) noexcept;
-    Module(const Module&) = delete;
-    Module& operator=(const Module&) = delete;
+    Module(const Module&) = default;
+    Module& operator=(const Module&) = default;
     Module(Module&& other) noexcept;
     Module& operator=(Module&& other) noexcept;
     ~Module() = default;
@@ -805,7 +805,6 @@ private:
     static Str input(void);
     static Str make_library_key(const Module& mymodule);
     static void push_module(const Module& mymodule);
-    static void push_module(const Str& name, const Module& mymodule);
     void import_module(const Str& module_name);
     void import_module(const fs::path& module_path);
 
