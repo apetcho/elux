@@ -820,8 +820,8 @@ public:
 
 private:
     static Vec<Symbol> get_symbols(const Vec<Self>& body);
-    static bool match(const Symbol& type, const Self& Self);
-    static void expect(const Symbol& type, const Self& Self);
+    static bool match(const Symbol& sym, const Self& Self);
+    static void expect(const Symbol& sym, const Self& Self);
     static bool is_atom(const Self& self);
     // -*-
 

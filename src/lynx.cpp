@@ -727,9 +727,17 @@ Vec<Symbol> Lynx::get_symbols(const Vec<Self>& body){
     return result;
 }
 
+// -*-
+bool Lynx::match(const Symbol& sym, const Self& self){
+    if(self->is_symbol()){
+        auto _sym_ = *dynamic_cast<Symbol*>(self.get());
+        return sym==_sym_;
+    }
+    return false;
+}
+
 /*
-bool Lynx::match(const Symbol& type, const Self& Self){}
-void Lynx::expect(const Symbol& type, const Self& Self){}
+void Lynx::expect(const Symbol& sym, const Self& Self){}
 bool Lynx::is_atom(const Self& self){}
 
 Result Lynx::handle_cond(const Self& self, Env& env){}
