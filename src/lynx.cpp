@@ -543,8 +543,7 @@ Str Lynx::readfile(const Str& filename){
     return result;
 }
 
-/*
-
+// -*-
 Str Lynx::input(void){
     std::stack<char> parens{};
     char c{};
@@ -583,6 +582,7 @@ Str Lynx::input(void){
     return src;
 }
 
+/*
 Str Lynx::make_library_key(const Module& mymodule);
 void Lynx::push_module(const Module& mymodule);
 void Lynx::push_module(const Str& name, const Module& mymodule);
