@@ -473,6 +473,8 @@ Result Lynx::eval(const Self& self, Env& env){
         auto args = Vec<Self>(vec.begin()+1, vec.end());
         auto name = ident.str();
         if(Lynx::is_keyword(ident.str())){
+            // (cond ...) => args = List(...)
+            // ... == xs ==> args = List(xs)
             if(name=="cond"){ return Lynx::handle_cond(share(args), env); }
             if(name=="defvar"){ return Lynx::handle_defvar(share(args), env); }
             if(name=="for"){ return Lynx::handle_for(share(args), env); }
@@ -647,7 +649,9 @@ void Lynx::import_module(const fs::path& module_path){
 bool Lynx::check_argc(int argc, int expected, const Str& funcname, Error& err){
     if(argc==expected){ return true; }
     std::stringstream ss;
-    ss << "`" << funcname << "': ";
+    if(funcname.length()!=0){
+        ss << "`" << funcname << "': ";
+    }
     ss << "invalid number of arguments. Expected " << expected << ", got " << argc;
     err = Error(Error::Kind::SyntaxError, ss.str());
     return false;
@@ -762,8 +766,53 @@ bool Lynx::is_atom(const Self& self){
 }
 
 
+// -*-
+Result Lynx::handle_cond(const Self& self, Env& env){
+    /*
+        (cond
+            (pred-1 expr1)
+            (pred-2 expr2)
+            ...
+            (pred-N exprN))
+
+    Pre: self is a list of pairs (pred expr)
+         matched = false
+    Post:
+        matched = true if at least one of the predicate evaluates to true
+                otherwise throw a SyntaxError
+    */
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = dynamic_cast<List*>(self.get());
+    auto vec = xs->as_vector();
+    for(const auto clause: vec){
+        if(!Lynx::check_type(Symbol("list"), clause, err)){
+            return Result(std::move(err));
+        }
+
+        auto _xs_ = *dynamic_cast<List*>(clause.get());
+        if(!Lynx::check_argc(_xs_.len(), 2, "", err)){
+            return Result(std::move(err));
+        }
+        auto _vec_ = _xs_.as_vector();
+        auto ans = Lynx::eval(_vec_[0], env);
+        if(!ans.is_ok()){
+            err = ans.err();
+            return Result(std::move(err));            
+        }
+        auto val = ans.ok();
+        if(Lynx::to_bool(val)){
+            return Lynx::eval(_vec_[1], env);
+        }
+    }
+
+    err = Error(Error::Kind::SyntaxError, "umatched clause in `cond' special form.");
+    return Result(std::move(err));
+}
+
 /*
-Result Lynx::handle_cond(const Self& self, Env& env){}
 Result Lynx::handle_defvar(const Self& self, Env& env){}
 Result Lynx::handle_for(const Self& self, Env& env){}
 Result Lynx::handle_fun(const Self& self, Env& env){}

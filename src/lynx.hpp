@@ -824,6 +824,7 @@ private:
     static void expect(const Symbol& sym, const Self& self);
     static bool is_atom(const Self& self);
     // -*-
+    static bool to_bool(const Self& self);
 
     /**
      * @brief 
