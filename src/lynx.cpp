@@ -3066,7 +3066,6 @@ Result my_apply_filter_callback(Macro& fun, const Self& rhs){
 Result Lynx::fn_filter(const Vec<Self>& args){
     //! @todo: add doc-string of `filter' to lynxDocs describing it syntax
     Error err;
-    Vec<Self> mapped{};
     auto argc = args.size();
     auto pred = (argc==2);
     if(!Lynx::check_argc(pred, "filter", err)){
@@ -3185,7 +3184,6 @@ Result my_apply_reduce_callback(Builtin& fun, const Self& init, const Self& rhs)
 Result Lynx::fn_reduce(const Vec<Self>& args){
     //! @todo: add doc-string of `reduce' to lynxDocs describing it syntax
     Error err;
-    Vec<Self> mapped{};
     auto argc = args.size();
     auto pred = (argc==3);
     if(!Lynx::check_argc(pred, "reduce", err)){
@@ -3225,6 +3223,30 @@ Result Lynx::fn_reduce(const Vec<Self>& args){
     return my_apply_reduce_callback(fun, args[1], args[2]);
 }
 
+// --------------------------------------------------------------------
+// -*-                 Common list & string functions               -*-
+// --------------------------------------------------------------------
+Result Lynx::fn_len(const Vec<Self>& args){
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "len", err)){
+        return Result(std::move(err));
+    }
+    auto self = args[0];
+    pred = (self->is_list() || self->is_string());
+    if(!Lynx::check_type(pred, self, err)){
+        err.message() += "\nExpect a list or a string.";
+        return Result(std::move(err));
+    }
+    if(self->is_string()){
+        auto str = *dynamic_cast<String*>(self.get());
+        return Result(share(str.len()));
+    }
+
+    auto xs = *dynamic_cast<List*>(self.get());
+    return Result(share(xs.len()));
+}
 
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
@@ -3242,8 +3264,6 @@ Result Lynx::fn_reduce(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-// Common list & string functions
-Result Lynx::fn_len(const Vec<Self>& args){}
 Result Lynx::fn_concat(const Vec<Self>& args){}
 
 // Functions on list
