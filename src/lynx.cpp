@@ -3006,14 +3006,15 @@ Result my_apply_filter_callback(Builtin& fun, const Self& rhs){
     return Result(share(filtered));
 }
 
-/*
+// -*-
 Result my_apply_filter_callback(Closure& fun, const Self& rhs){
     Error err;
     if(!Lynx::check_type(rhs->is_list(), rhs, err)){
         err.message() += "\nExpect a list.";
         return Result(std::move(err));
     }
-    Vec<Self> mapped{};
+    
+    Vec<Self> filtered{};
     auto xs_ = *dynamic_cast<List*>(rhs.get());
     auto xs = xs_.as_vector();
     for(auto x: xs){
@@ -3021,11 +3022,19 @@ Result my_apply_filter_callback(Closure& fun, const Self& rhs){
         if(!ans.is_ok()){
             return ans;
         }
-        mapped.push_back(std::move(ans.ok()));
+        auto ok = ans.ok();
+        if(Lynx::check_type(ok->is_bool(), ok, err)){
+            err.message() += "\nExpect callabe argument of `filter' to be a predicate.";
+            return Result(std::move(err));
+        }
+        auto flag_ = *dynamic_cast<Bool*>(ok.get());
+        auto flag = flag_.as_bool();
+        if(flag){ filtered.push_back(std::move(x)); }
     }
-    return Result(share(mapped));
+    return Result(share(filtered));
 }
 
+/*
 Result my_apply_filter_callback(Macro& fun, const Self& rhs){
     Error err;
     if(!Lynx::check_type(rhs->is_list(), rhs, err)){
