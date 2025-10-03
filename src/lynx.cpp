@@ -2812,6 +2812,24 @@ Result Lynx::fn_or(const Vec<Self>& args){
     return Result(share(ans));
 }
 
+// -*-
+Result Lynx::fn_not(const Vec<Self>& args){
+    //! @todo: add doc-string of `not' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "not", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_bool(), args[0], err)){
+        return Result(std::move(err));
+    }
+    auto val_ = *dynamic_cast<Bool*>(args[0].get());
+    auto val = val_.as_bool();
+
+    return Result(share(!val));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2823,8 +2841,6 @@ Result Lynx::fn_or(const Vec<Self>& args){
     }
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
-
-Result Lynx::fn_not(const Vec<Self>& args){}
 
 // Functional APIs
 Result Lynx::fn_map(const Vec<Self>& args){}
