@@ -1447,9 +1447,11 @@ Result Lynx::handle_progn(const Self& self, Env& env){
     }
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
+    // progn should have its own environment.
+    Env ctx(&env);
     Self result = nullptr;
     for(const auto& expr: vec){
-        auto ans = Lynx::eval(expr, env);
+        auto ans = Lynx::eval(expr, ctx);
         if(!ans.is_ok()){
             return ans;
         }
@@ -1750,6 +1752,75 @@ Result Lynx::handle_var(const Self& self, Env& env){
     return Result(share());
 }
 
+// -*-
+Result Lynx::handle_while(const Self& self, Env& env){
+    //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
+    /*
+        (while testExpr
+            body)
+    */
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+
+    [[maybe_unused]] Error _err_;
+    bool pred = (xs.len() > 1);
+    if(!Lynx::check_value(self, pred, _err_)){
+        std::stringstream ss;
+        ss << "malformed `while' expression. Takes at least 1 arguments.";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+
+    bool failed{false};
+    Env ctx(&env);
+    auto evalTest = [ctx, failed, err](const Self& expr) mutable {
+        auto testExpr_ = Lynx::eval(expr, ctx);
+        if(!testExpr_.is_ok()){
+            std::stringstream ss;
+            ss << "invalid test-expression in while expression.";
+            err = Error(Error::Kind::ValueError, ss.str());
+            failed = true;
+            return failed;
+        }
+        auto testExpr = testExpr_.ok();
+        auto pred = (testExpr->is_bool());
+        if(!Lynx::check_value(testExpr, pred, err)){
+            std::stringstream ss;
+            ss << "malformed `while' expression. Expect test-expression to evaluate to a boolean.\n";
+            ss << "Got `" << testExpr->type().str() << "' value.";
+            err = Error(Error::Kind::SyntaxError, ss.str());
+            // return Result(std::move(err_));
+            failed = true;
+            return failed;
+        }
+        auto test_ = *dynamic_cast<Bool*>(testExpr.get());
+        auto test = test_.as_bool();
+        failed = false;
+        return test;
+    };
+
+    auto vec = xs.as_vector();
+    auto test = evalTest(vec[0]);
+    auto body = Vec<Self>(vec.begin()+1, vec.end());
+    Self ans = nullptr;
+    if(failed){
+        return Result(std::move(err));
+    }
+    while(test){
+        for(const auto& expr: body){
+            auto ans_ = Lynx::eval(expr, ctx);
+            if(!ans_.is_ok()){ return ans_; }
+            ans = ans_.ok();
+        }
+        test = evalTest(vec[0]);
+    }
+
+    return Result(share());
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
     
@@ -1760,8 +1831,6 @@ Result Lynx::handle_var(const Self& self, Env& env){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-
-Result Lynx::handle_while(const Self& self, Env& env){}
 
 Result Lynx::eval_atom(const Self& self, Env& env){}
 Result Lynx::eval_list(const Self& self, Env& env){}
