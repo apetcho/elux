@@ -2647,6 +2647,36 @@ Result Lynx::fn_div(const Vec<Self>& args){
     return Result(share(acc));
 }
 
+// -*-
+Result Lynx::fn_mod(const Vec<Self>& args){
+    //! @todo: add doc-string of `/' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "/", err)){
+        return Result(std::move(err));
+    }
+    auto lhs = args[0];
+    auto rhs = args[1];
+    if(!Lynx::check_type(lhs->is_number(), lhs, err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(rhs->is_number(), rhs, err)){
+        return Result(std::move(err));
+    }
+    auto xnum = *dynamic_cast<Number*>(lhs.get());
+    if(!Lynx::check_type(xnum.is_scalar(), lhs, err)){
+        return Result(std::move(err));
+    }
+    auto ynum = *dynamic_cast<Number*>(rhs.get());
+    if(!Lynx::check_type(ynum.is_scalar(), rhs, err)){
+        return Result(std::move(err));
+    }
+    auto ans = xnum % ynum;
+    
+    return Result(share(ans));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2659,7 +2689,6 @@ Result Lynx::fn_div(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::fn_mod(const Vec<Self>& args){}
 
 // Relational operators
 Result Lynx::fn_lt(const Vec<Self>& args){;}
