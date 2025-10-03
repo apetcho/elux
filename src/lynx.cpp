@@ -3330,6 +3330,9 @@ Result Lynx::fn_list_tail(const Vec<Self>& args){
 }
 
 // -*-
+// Result Lynx::fn_list_last(const Vec<Self>& args){}
+
+// -*-
 Result Lynx::fn_list_nth(const Vec<Self>& args){
     //! @todo: add doc-string of `list.nth' to lynxDocs describing it syntax
     /*

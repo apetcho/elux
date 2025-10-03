@@ -473,7 +473,7 @@ public:
     Self last(void) const;
     Self nth(i64 idx) const;
     List push(const Self& self);
-    Self pop(void);
+    List pop(void);
     List append(const Self& self);
     List insert(i64 idx, const Self& self);
     List remove(i64 idx);
@@ -1181,6 +1181,7 @@ public:
     // Functions on list
     static Result fn_list_head(const Vec<Self>& args);
     static Result fn_list_tail(const Vec<Self>& args);
+    static Result fn_list_last(const Vec<Self>& args);
     static Result fn_list_nth(const Vec<Self>& args);
     static Result fn_list_insert(const Vec<Self>& args);
     static Result fn_list_remove(const Vec<Self>& args);

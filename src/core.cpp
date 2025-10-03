@@ -1366,13 +1366,13 @@ List List::push(const Self& self){
 }
 
 // -*-
-Self List::pop(void){
+List List::pop(void){
     if(this->len()==0){
         throw Error(Error::Kind::ValueError, "cannot `pop' an empty list.");
     }
-    auto self = this->m_value.back();
+    [[maybe_unused]] auto self = this->m_value.back();
     this->m_value.pop_back();
-    return self;
+    return List(this->m_value);
 }
 
 // -*-
