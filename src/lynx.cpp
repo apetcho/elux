@@ -3522,6 +3522,39 @@ Result Lynx::fn_list_append(const Vec<Self>& args){
     return Result(share(ans));
 }
 
+// -*-
+Result Lynx::fn_list_set(const Vec<Self>& args){
+    //! @todo: add doc-string of `list.set' to lynxDocs describing it syntax
+    /*
+        (list.set xs idx val)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==3);
+    if(!Lynx::check_argc(pred, "list.set", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_list(), args[0], err)){
+        err.message() += "\nExpect the first argument to `list.set' to be a list";
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[1]->is_integer(), args[1], err)){
+        err.message() += "\nExpect the second argument to `list.set' to be an integer.";
+        return Result(std::move(err));
+    }
+    
+    auto xs = *dynamic_cast<List*>(args[0].get());
+    try{
+        auto num = *dynamic_cast<Number*>(args[1].get());
+        auto idx = num.as_integer();
+        auto ans = xs.set(idx, args[2]).as_list();
+        return Result(share(ans));
+    }catch(const Error& err_){
+        err = err_;
+        return Result(std::move(err));
+    }
+    return Result(share());
+}
 
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
@@ -3537,8 +3570,6 @@ Result Lynx::fn_list_append(const Vec<Self>& args){
 
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
-
-Result Lynx::fn_list_set(const Vec<Self>& args){}
 
 // Functions on string
 Result Lynx::fn_str_capitalize(const Vec<Self>& args){}
