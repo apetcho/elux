@@ -2694,6 +2694,20 @@ Result Lynx::fn_lt(const Vec<Self>& args){
     return Result(share(ans));
 }
 
+// -*-
+Result Lynx::fn_le(const Vec<Self>& args){
+    //! @todo: add doc-string of `<' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "<=", err)){
+        return Result(std::move(err));
+    }
+    auto ans = (args[0] <= args[1]);
+
+    return Result(share(ans));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2706,7 +2720,6 @@ Result Lynx::fn_lt(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::fn_le(const Vec<Self>& args){}
 Result Lynx::fn_gt(const Vec<Self>& args){}
 Result Lynx::fn_ge(const Vec<Self>& args){}
 Result Lynx::fn_eq(const Vec<Self>& args){}
