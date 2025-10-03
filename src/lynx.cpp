@@ -1949,7 +1949,7 @@ Result Lynx::fn_integer(const Vec<Self>& args){
     /*
         (integer 1)         ==> 1
         (integer 3.14)      ==> 3
-        (integer "1.0")
+        (integer "1.0")     ==> 1
     */
 
     Error err;
@@ -1984,7 +1984,7 @@ Result Lynx::fn_integer(const Vec<Self>& args){
     size_t pos;
     i64 num;
     if(numstr.find('.')!=Str::npos || numstr.find('e')!=Str::npos || numstr.find('E')!=Str::npos){
-        auto num_ = std::stod(numstr, pos);
+        auto num_ = std::stod(numstr, &pos);
         if(pos != numstr.length()){
             std::stringstream ss;
             ss << "" << self->repr() << " is not a numeric string.";
@@ -2009,7 +2009,61 @@ Result Lynx::fn_integer(const Vec<Self>& args){
 Result Lynx::fn_float(const Vec<Self>& args){
     //! @todo: add doc-string of `float' to lynxDocs describing it syntax
 
-    return Result(share());
+    /*
+        (float 1)       ==> 1.0
+        (float 3.14)    ==> 3.14
+        (float "3.14")  ==> 3.14
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "float", err)){
+        return Result(std::move(err));
+    }
+    auto self = args[0];
+    pred = (
+        self->is_integer() || self->is_float() ||
+        self->is_string() || self->is_bool()
+    );
+    if(!Lynx::check_type(pred, self, err)){
+        err.message() += "\n`float': expect a boolean, integer, float, "
+            "or a numeric string.";
+        return Result(std::move(err));
+    }
+    if(self->is_bool()){
+        auto val = *dynamic_cast<Bool*>(self.get());
+        return Result(share(val.as_float()));
+    }else if(self->is_integer()){
+        auto val = *dynamic_cast<Number*>(self.get());
+        return Result(share(val.as_float()));
+    }else if(self->is_float()){
+        auto val = *dynamic_cast<Number*>(self.get());
+        return Result(share(val.as_float()));
+    }
+
+    auto my_str = *dynamic_cast<String*>(self.get());
+    auto numstr = my_str.str();
+    size_t pos;
+    f64 num;
+    if(numstr.find('.')!=Str::npos || numstr.find('e')!=Str::npos || numstr.find('E')!=Str::npos){
+        num = std::stod(numstr, &pos);
+        if(pos != numstr.length()){
+            std::stringstream ss;
+            ss << "" << self->repr() << " is not a numeric string.";
+            err = Error(Error::Kind::ValueError, ss.str());
+            return Result(std::move(err));
+        }
+    }else{
+        num = static_cast<f64>(std::stoll(numstr, &pos));
+        if(pos != numstr.length()){
+            std::stringstream ss;
+            ss << "" << self->repr() << " is not a numeric string.";
+            err = Error(Error::Kind::ValueError, ss.str());
+            return Result(std::move(err));
+        }
+    }
+
+    return Result(share(num));
 }
 
 /*
