@@ -2212,6 +2212,19 @@ Result Lynx::fn_is_integer(const Vec<Self>& args){
     return Result(share(self->is_integer()));
 }
 
+// -*-
+Result Lynx::fn_is_float(const Vec<Self>& args){
+    //! @todo: add doc-string of `float?' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "float?", err)){
+        return Result(std::move(err));
+    }
+    auto self = args[0];
+    return Result(share(self->is_float()));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2224,8 +2237,6 @@ Result Lynx::fn_is_integer(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-
-Result Lynx::fn_is_float(const Vec<Self>& args){}
 Result Lynx::fn_is_complex(const Vec<Self>& args){}
 Result Lynx::fn_is_string(const Vec<Self>& args){}
 Result Lynx::fn_is_list(const Vec<Self>& args){}
