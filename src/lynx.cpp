@@ -2146,8 +2146,15 @@ Result Lynx::fn_string(const Vec<Self>& args){
         return Result(std::move(err));
     }
     auto str = args[0]->str();
-    
+
     return Result(share(str));
+}
+
+// -*-
+Result Lynx::fn_list(const Vec<Self>& args){
+    //! @todo: add doc-string of `list' to lynxDocs describing it syntax
+
+    return Result(share(args));
 }
 
 /*
@@ -2162,7 +2169,6 @@ Result Lynx::fn_string(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::fn_list(const Vec<Self>& args){}
 
 // Predicates
 Result Lynx::fn_is_nil(const Vec<Self>& args){}
