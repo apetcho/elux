@@ -3063,48 +3063,48 @@ Result my_apply_filter_callback(Macro& fun, const Self& rhs){
 }
 
 // -*-
-// Result Lynx::fn_filter(const Vec<Self>& args){
-//     //! @todo: add doc-string of `filter' to lynxDocs describing it syntax
-//     Error err;
-//     Vec<Self> mapped{};
-//     auto argc = args.size();
-//     auto pred = (argc==2);
-//     if(!Lynx::check_argc(pred, "map", err)){
-//         return Result(std::move(err));
-//     }
-//     auto lhs = args[0];
-//     if(!Lynx::check_type(lhs->is_callable(), lhs, err)){
-//         err.message() += "\nInvalid argument type. Expect the first argument of `map' to be ";
-//         err.message() += "a callable, got `";
-//         err.message() += lhs->type().str() + "'.";
-//         return Result(std::move(err));
-//     }
+Result Lynx::fn_filter(const Vec<Self>& args){
+    //! @todo: add doc-string of `filter' to lynxDocs describing it syntax
+    Error err;
+    Vec<Self> mapped{};
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "filter", err)){
+        return Result(std::move(err));
+    }
+    auto lhs = args[0];
+    if(!Lynx::check_type(lhs->is_callable(), lhs, err)){
+        err.message() += "\nInvalid argument type. Expect the first argument of `map' to be ";
+        err.message() += "a callable, got `";
+        err.message() += lhs->type().str() + "'.";
+        return Result(std::move(err));
+    }
 
-//     if(lhs->is_builtin()){
-//         auto fun = *dynamic_cast<Builtin*>(lhs.get());
-//         if(!Lynx::check_argc(fun.min_argc()==1, "map", err)){
-//             err.message() += "\nExpect the first argument of `map' to be a unary callable.";
-//             return Result(std::move(err));
-//         }
-//         return my_apply_map_callback(fun, args[1]);
-//     }
-//     if(lhs->is_closure()){
-//         auto fun = *dynamic_cast<Closure*>(lhs.get());
-//         if(!Lynx::check_argc(fun.argc()==1, "map", err)){
-//             err.message() += "\nExpect the first argument of `map' to be a unary callable.";
-//             return Result(std::move(err));
-//         }
-//         return my_apply_map_callback(fun, args[1]);
-//     }
+    if(lhs->is_builtin()){
+        auto fun = *dynamic_cast<Builtin*>(lhs.get());
+        if(!Lynx::check_argc(fun.min_argc()==1, "map", err)){
+            err.message() += "\nExpect the first argument of `filter' to be a unary callable.";
+            return Result(std::move(err));
+        }
+        return my_apply_filter_callback(fun, args[1]);
+    }
+    if(lhs->is_closure()){
+        auto fun = *dynamic_cast<Closure*>(lhs.get());
+        if(!Lynx::check_argc(fun.argc()==1, "filter", err)){
+            err.message() += "\nExpect the first argument of `filter' to be a unary callable.";
+            return Result(std::move(err));
+        }
+        return my_apply_filter_callback(fun, args[1]);
+    }
     
-//     auto fun = *dynamic_cast<Macro*>(lhs.get());
-//     if(!Lynx::check_argc(fun.argc()==1, "map", err)){
-//         err.message() += "\nExpect the first argument of `map' to be a unary callable.";
-//         return Result(std::move(err));
-//     }
+    auto fun = *dynamic_cast<Macro*>(lhs.get());
+    if(!Lynx::check_argc(fun.argc()==1, "filter", err)){
+        err.message() += "\nExpect the first argument of `filter' to be a unary callable.";
+        return Result(std::move(err));
+    }
 
-//     return my_apply_map_callback(fun, args[1]);
-// }
+    return my_apply_filter_callback(fun, args[1]);
+}
 
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
