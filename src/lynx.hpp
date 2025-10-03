@@ -1093,7 +1093,7 @@ private:
      * @return 
      * 
      */
-    static Result eval_atom(const Self& self, Env& env);
+    static Result eval_atom(const Self& self, [[maybe_unused]] Env& env);
 
     /**
      * @brief 

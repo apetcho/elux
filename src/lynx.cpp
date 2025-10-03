@@ -1821,6 +1821,24 @@ Result Lynx::handle_while(const Self& self, Env& env){
     return Result(share());
 }
 
+// -*-
+Result Lynx::eval_atom(const Self& self, [[maybe_unused]] Env& env){
+    //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
+
+    [[maybe_unused]] Error err;
+    bool pred = Lynx::is_atom(self);
+    if(!Lynx::check_value(self, pred, err)){
+        std::stringstream ss;
+        ss << "error while evaluating an atom. Value is of `" << self->type().str();
+        ss << "' type. Expect a boolean, symbol, integer, float or string";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+
+    auto ans = self;
+    return Result(std::move(ans));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
     
@@ -1832,7 +1850,6 @@ Result Lynx::handle_while(const Self& self, Env& env){
     auto vec = xs.as_vector();
 
 
-Result Lynx::eval_atom(const Self& self, Env& env){}
 Result Lynx::eval_list(const Self& self, Env& env){}
 
 // Constructors
