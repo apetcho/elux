@@ -3656,6 +3656,33 @@ Result Lynx::fn_str_contains(const Vec<Self>& args){
     return Result(share(self.contains(needle)));
 }
 
+// -*-
+Result Lynx::fn_str_find(const Vec<Self>& args){
+    //! @todo: add doc-string of `string.find' to lynxDocs describing it syntax
+    /*
+        (string.find str needle)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "string.find", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_string(), args[0], err)){
+        err.message() += "\nExpect the argument of `string.find' to be a string";
+        return Result(std::move(err));
+    }
+    
+    if(!Lynx::check_type(args[1]->is_string(), args[1], err)){
+        err.message() += "\nExpect the second argument of `string.find' to be a string";
+        return Result(std::move(err));
+    }
+    
+    auto self = *dynamic_cast<String*>(args[0].get());
+    auto needle = *dynamic_cast<String*>(args[1].get());
+    return Result(share(self.find(needle)));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -3671,7 +3698,6 @@ Result Lynx::fn_str_contains(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-Result Lynx::fn_str_find(const Vec<Self>& args){}
 Result Lynx::fn_str_split(const Vec<Self>& args){}
 Result Lynx::fn_str_join(const Vec<Self>& args){}
 Result Lynx::fn_str_replace(const Vec<Self>& args){}
