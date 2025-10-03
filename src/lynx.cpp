@@ -2604,6 +2604,49 @@ Result Lynx::fn_mul(const Vec<Self>& args){
     return Result(share(acc));
 }
 
+// -*-
+Result Lynx::fn_div(const Vec<Self>& args){
+    //! @todo: add doc-string of `/' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc>1);
+    if(!Lynx::check_argc(pred, "/", err)){
+        return Result(std::move(err));
+    }
+    if(argc==1){
+        auto self = args[0];
+        if(!Lynx::check_type(self->is_number(), self, err)){
+            return Result(std::move(err));
+        }
+        Number num(1.0);
+        auto deno = *dynamic_cast<Number*>(self.get());
+        try{
+            num = num / deno;
+        }catch(const Error& err_){
+            auto myErr = err_;
+            return Result(std::move(myErr));
+        }
+        return Result(share(num));
+    }
+    Number acc;
+    bool first{true};
+    for(const auto& arg: args){
+        if(!Lynx::check_type(arg->is_number(), arg, err)){
+            err.message() += "\nInvalid argument type to `/' builtin function.";
+            return Result(std::move(err));
+        }
+        auto num = *dynamic_cast<Number*>(arg.get());
+        try{
+            acc = first ? num : (acc / num);
+            first = first ? false : first;
+        }catch(const Error& err_){
+            auto myErr = err_;
+            return Result(std::move(myErr));
+        }
+    }    
+    return Result(share(acc));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2616,7 +2659,6 @@ Result Lynx::fn_mul(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::fn_div(const Vec<Self>& args){}
 Result Lynx::fn_mod(const Vec<Self>& args){}
 
 // Relational operators
