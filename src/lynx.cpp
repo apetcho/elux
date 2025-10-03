@@ -1946,6 +1946,11 @@ Result Lynx::fn_bool(const Vec<Self>& args){
 // -*-
 Result Lynx::fn_integer(const Vec<Self>& args){
     //! @todo: add doc-string of `integer' to lynxDocs describing it syntax
+    /*
+        (integer 1)         ==> 1
+        (integer 3.14)      ==> 3
+        (integer "1.0")
+    */
 
     Error err;
     auto argc = args.size();
@@ -1977,15 +1982,34 @@ Result Lynx::fn_integer(const Vec<Self>& args){
     auto my_str = *dynamic_cast<String*>(self.get());
     auto numstr = my_str.str();
     size_t pos;
-    auto num = static_cast<i64>(std::stoll(numstr, &pos));
-
-    if(pos != numstr.length()){
-        std::stringstream ss;
-        ss << "" << self->repr() << " is not a numeric string.";
-        err = Error(Error::Kind::ValueError, ss.str());
-        return Result(std::move(err));
+    i64 num;
+    if(numstr.find('.')!=Str::npos || numstr.find('e')!=Str::npos || numstr.find('E')!=Str::npos){
+        auto num_ = std::stod(numstr, pos);
+        if(pos != numstr.length()){
+            std::stringstream ss;
+            ss << "" << self->repr() << " is not a numeric string.";
+            err = Error(Error::Kind::ValueError, ss.str());
+            return Result(std::move(err));
+        }
+        num = static_cast<i64>(num_);
+    }else{
+        num = static_cast<i64>(std::stoll(numstr, &pos));
+        if(pos != numstr.length()){
+            std::stringstream ss;
+            ss << "" << self->repr() << " is not a numeric string.";
+            err = Error(Error::Kind::ValueError, ss.str());
+            return Result(std::move(err));
+        }
     }
+
     return Result(share(num));
+}
+
+// -*-
+Result Lynx::fn_float(const Vec<Self>& args){
+    //! @todo: add doc-string of `float' to lynxDocs describing it syntax
+
+    return Result(share());
 }
 
 /*
@@ -2000,7 +2024,6 @@ Result Lynx::fn_integer(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::fn_float(const Vec<Self>& args){}
 Result Lynx::fn_complex(const Vec<Self>& args){}
 Result Lynx::fn_string(const Vec<Self>& args){}
 Result Lynx::fn_list(const Vec<Self>& args){}
