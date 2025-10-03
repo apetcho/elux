@@ -2341,6 +2341,36 @@ Result Lynx::fn_is_macro(const Vec<Self>& args){
     return Result(share(self->is_macro()));
 }
 
+// --------------------------------------------------------------------
+// -*-                        I/O functions                         -*-
+// --------------------------------------------------------------------
+/* IO-Formatter: */
+struct Formatter{
+    Formatter() = default;
+    explicit Formatter(const Self& self) noexcept
+    : fself{self}
+    , fsrc{}
+    {}
+
+    explicit Formatter(const Str& str) noexcept
+    : fself{nullptr}
+    , fsrc{str}
+    {}
+
+    Str format(void){
+        return this->parse();
+    }
+
+    Self fself;
+    Str fsrc;
+
+private:
+    Str parse(void){
+        //! @todo
+        return "";
+    }
+};
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2354,7 +2384,6 @@ Result Lynx::fn_is_macro(const Vec<Self>& args){
     auto vec = xs.as_vector();
 
 
-// I/O functions
 Result Lynx::fn_print(const Vec<Self>& args){}
 Result Lynx::fn_eprint(const Vec<Self>& args){}
 Result Lynx::fn_println(const Vec<Self>& args){}
