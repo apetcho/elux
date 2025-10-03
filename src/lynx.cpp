@@ -1877,18 +1877,49 @@ Result Lynx::eval_list(const Self& self, Env& env){
         return Result(std::move(err));
     }
     auto xs = *dynamic_cast<List*>(self.get());
-
-    // bool pred = (xs.len() > 1);
-    // if(!Lynx::check_value(self, pred, err)){
-    //     std::stringstream ss;
-    //     ss << "malformed `while' expression. Takes at least 1 arguments.";
-    //     err = Error(Error::Kind::SyntaxError, ss.str());
-    //     return Result(std::move(err));
-    // }
-
     auto vec = xs.as_vector();
+    auto car_ = Lynx::eval(vec[0], env);
+    if(!car_.is_ok()){
+        return car_;
+    }
+    auto car = car_.ok();
+    auto args = Vec<Self>(vec.begin()+1, vec.end());
+    Vec<Self> argv{};
+    for(const auto& arg: args){
+        auto arg_ = Lynx::eval(arg, env);
+        if(!arg_.is_ok()){
+            return arg_;
+        }
+        argv.push_back(std::move(arg_.ok()));
+    }
+    if(car->is_closure()){
+        auto fun = *dynamic_cast<Closure*>(car.get());
+        return fun(argv);
+    }
+    if(car->is_builtin()){
+        auto fun = *dynamic_cast<Builtin*>(car.get());
+        return fun(argv);
+    }
+    if(car->is_macro()){
+        auto fun = *dynamic_cast<Macro*>(car.get());
+        auto prog = fun.expand(argv);
+        if(!prog.is_ok()){
+            return prog;
+        }
+        auto expanded = prog.ok();
+        if(Lynx::is_atom(expanded)){
+            return Result(std::move(expanded));
+        }else{
+            return Lynx::handle_progn(expanded, env);
+        }
+    }
+    
+    std::stringstream ss;
+    ss << "expected error occured while evaluating the expression\n";
+    ss << self->repr() << "\n";
+    err = Error(Error::Kind::SyntaxError, ss.str());
 
-    return Result(share());
+    return Result(std::move(err));
 }
 
 /*
