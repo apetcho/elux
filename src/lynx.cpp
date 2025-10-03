@@ -2764,6 +2764,31 @@ Result Lynx::fn_ne(const Vec<Self>& args){
     return Result(share(ans));
 }
 
+// --------------------------------------------------------------------
+// -*-                      Logical operators                       -*-
+// --------------------------------------------------------------------
+Result Lynx::fn_and(const Vec<Self>& args){
+    //! @todo: add doc-string of `and' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc>=2);
+    if(!Lynx::check_argc(pred, "and", err)){
+        return Result(std::move(err));
+    }
+    auto ans{true};
+    for(const auto& arg: args){
+        if(!Lynx::check_type(arg->is_bool(), arg, err)){
+            return Result(std::move(err));
+        }
+        auto val_ = *dynamic_cast<Bool*>(arg.get());
+        auto val = val_.as_bool();
+        ans = ans && val;
+        if(!ans){ break;}
+    }
+
+    return Result(share(ans));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2776,8 +2801,7 @@ Result Lynx::fn_ne(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-// Logical operators
-Result Lynx::fn_and(const Vec<Self>& args){}
+
 Result Lynx::fn_or(const Vec<Self>& args){}
 Result Lynx::fn_not(const Vec<Self>& args){}
 
