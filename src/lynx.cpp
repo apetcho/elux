@@ -467,14 +467,26 @@ Result Lynx::eval(const Self& self, Env& env){
         }
         auto vec = xs.as_vector();
         auto term = vec[0];
-        if(term->type()!=Symbol("symbol")){
+        auto args = Vec<Self>(vec.begin()+1, vec.end());
+
+        auto term_ = Lynx::eval(vec[0], env);
+        if(!term_.is_ok()){
+            return term_;
+        }
+        if(!term_.ok()->is_lambda() && term->type()!=Symbol("symbol")){
             std::stringstream ss;
-            ss << "illegal function application. Unknown identifier `" << self->str() << "'";
+            ss << "unknown identifier `" << self->str() << "'\n";
+            ss << "Expect a lambda expression or a valid identifier or keyword.";
             Error err(Error::Kind::SyntaxError, ss.str());
             return Result(std::move(err));
         }
+        
+        if(term_.ok()->is_lambda()){
+            return Lynx::eval_list(self, env);
+        }
+        // We certain that `term' is a symbol.
         auto ident = *dynamic_cast<Symbol*>(term.get());
-        auto args = Vec<Self>(vec.begin()+1, vec.end());
+        
         auto name = ident.str();
         if(Lynx::is_keyword(ident.str())){
             // (cond ...) => args = List(...)
@@ -497,7 +509,7 @@ Result Lynx::eval(const Self& self, Env& env){
             if(name=="match"){ return Lynx::handle_match(share(args), env); }
             if(name=="var"){ return Lynx::handle_var(share(args), env); }
             if(name=="while"){ return Lynx::handle_while(share(args), env); }
-        }else{
+        }else{ // function call
             // ident is either a builtin funtion or user-defined lambda or function
             if(!env.contains(name)){
                 std::stringstream ss;
@@ -512,15 +524,23 @@ Result Lynx::eval(const Self& self, Env& env){
                 Error err(Error::Kind::TypeError, ss.str());
                 return Result(std::move(err));
             }
+            Vec<Self> argv{};
+            for(const auto& arg: args){
+                auto arg_ = Lynx::eval(arg, env);
+                if(!arg_.is_ok()){
+                    return arg_;
+                }
+                argv.push_back(std::move(arg_.ok()));
+            }
             if(obj->is_builtin()){
                 auto fun = *dynamic_cast<Builtin*>(obj.get());
-                return fun(args);
+                return fun(argv);
             }else if(obj->is_closure()){
                 auto fun = *dynamic_cast<Closure*>(obj.get());
-                return fun(args);
+                return fun(argv);
             }else{
                 auto macro = *dynamic_cast<Closure*>(obj.get());
-                return macro(args);
+                return macro(argv);
             }
         }
     }
@@ -1839,6 +1859,38 @@ Result Lynx::eval_atom(const Self& self, [[maybe_unused]] Env& env){
     return Result(std::move(ans));
 }
 
+// -*-
+Result Lynx::eval_list(const Self& self, Env& env){
+    //! @note: this is a function-call or builtin syntax-application
+    /*
+        (symbol ...)
+        (lambda-expr ...)
+
+        symbol is:
+        [1] builtin keyword for syntax application
+        [2] builtin function name
+        [3] user-defined function
+    */
+    
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+
+    // bool pred = (xs.len() > 1);
+    // if(!Lynx::check_value(self, pred, err)){
+    //     std::stringstream ss;
+    //     ss << "malformed `while' expression. Takes at least 1 arguments.";
+    //     err = Error(Error::Kind::SyntaxError, ss.str());
+    //     return Result(std::move(err));
+    // }
+
+    auto vec = xs.as_vector();
+
+    return Result(share());
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
     
@@ -1850,7 +1902,6 @@ Result Lynx::eval_atom(const Self& self, [[maybe_unused]] Env& env){
     auto vec = xs.as_vector();
 
 
-Result Lynx::eval_list(const Self& self, Env& env){}
 
 // Constructors
 Result Lynx::fn_bool(const Vec<Self>& args){}
