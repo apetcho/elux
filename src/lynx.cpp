@@ -1446,6 +1446,27 @@ Result Lynx::handle_progn(const Self& self, Env& env){
     return Result(std::move(result));
 }
 
+// -*-
+Result Lynx::handle_quote(const Self& self, Env& env){
+    //! @todo: add doc-string of `quote' to lynxDocs describing it syntax
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+    auto vec = xs.as_vector();
+    bool pred = (xs.len()==1);
+    [[maybe_unused]] Error _err_;
+    if(!Lynx::check_value(self, pred, _err_)){
+        std::stringstream ss;
+        ss << "malformed `quote' definition. Takes 1 argument";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+
+    return Result(std::move(vec[0]));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
     
@@ -1456,7 +1477,6 @@ Result Lynx::handle_progn(const Self& self, Env& env){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::handle_quote(const Self& self, Env& env){}
 Result Lynx::handle_quasiquote(const Self& self, Env& env){}
 Result Lynx::handle_unquote(const Self& self, Env& env){}
 Result Lynx::handle_unquote_splicing(const Self& self, Env& env){}
