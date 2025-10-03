@@ -2435,6 +2435,28 @@ Result Lynx::fn_println(const Vec<Self>& args){
     return Result(share());
 }
 
+// -*-
+Result Lynx::fn_eprintln(const Vec<Self>& args){
+    //! @todo: add doc-string of `eprintln' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "eprintln", err)){
+        return Result(std::move(err));
+    }
+    auto self = args[0];
+    Formatter formatter;
+    if(self->is_string()){
+        auto str = self->str();
+        formatter.fsrc = str;
+        std::cerr << formatter.format() << std::endl;
+    }else{
+        formatter.fself = self;
+        std::cerr << formatter.format() << std::endl;
+    }
+    return Result(share());
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2447,7 +2469,6 @@ Result Lynx::fn_println(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::fn_eprintln(const Vec<Self>& args){}
 Result Lynx::fn_input(const Vec<Self>& args){}
 Result Lynx::fn_format(const Vec<Self>& args){}
 
