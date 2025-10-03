@@ -3388,7 +3388,7 @@ Result Lynx::fn_list_insert(const Vec<Self>& args){
         auto num = *dynamic_cast<Number*>(args[1].get());
         auto idx = num.as_integer();
         auto ans = xs.insert(idx, args[2]).as_list();
-        return Result(std::move(ans));
+        return Result(share(ans));
     }catch(const Error& err_){
         err = err_;
         return Result(std::move(err));
