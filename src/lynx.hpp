@@ -1134,6 +1134,7 @@ public:
     static Result fn_is_closure(const Vec<Self>& args);
     static Result fn_is_lambda(const Vec<Self>& args);
     static Result fn_is_function(const Vec<Self>& args);
+    static Result fn_is_macro(const Vec<Self>& args);
 
     // I/O functions
     static Result fn_print(const Vec<Self>& args);

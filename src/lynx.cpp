@@ -2315,6 +2315,19 @@ Result Lynx::fn_is_lambda(const Vec<Self>& args){
     return Result(share(self->is_lambda()));
 }
 
+// -*-
+Result Lynx::fn_is_function(const Vec<Self>& args){
+    //! @todo: add doc-string of `function?' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "function?", err)){
+        return Result(std::move(err));
+    }
+    auto self = args[0];
+    return Result(share(self->is_function()));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2327,8 +2340,7 @@ Result Lynx::fn_is_lambda(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-
-Result Lynx::fn_is_function(const Vec<Self>& args){}
+Result Lynx::fn_is_macro(const Vec<Self>& args);
 
 // I/O functions
 Result Lynx::fn_print(const Vec<Self>& args){}
