@@ -1683,6 +1683,13 @@ Result Lynx::handle_match(const Self& self, Env& env){
             return pattern_ev; // error occured
         }
         auto pattern = pattern_ev.ok();
+        if(!matchable(pattern)){
+            std::stringstream ss;
+            ss << "invalid match pattern type. Expect a symbol, boolean, integer or ";
+            ss << "string value. Got `" << pattern->type().str() << "' value.";
+            err = Error(Error::Kind::TypeError, ss.str());
+            return Result(std::move(err));
+        }
         if(pattern->is_symbol() && pattern->str()=="_"){ // ANY_PATTERN found
             return Lynx::eval(expr, env);
         }
