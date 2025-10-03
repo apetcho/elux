@@ -2173,6 +2173,19 @@ Result Lynx::fn_is_nil(const Vec<Self>& args){
     return Result(share(self->is_nil()));
 }
 
+// -*-
+Result Lynx::fn_is_bool(const Vec<Self>& args){
+    //! @todo: add doc-string of `bool?' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "bool?", err)){
+        return Result(std::move(err));
+    }
+    auto self = args[0];
+    return Result(share(self->is_bool()));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2185,7 +2198,6 @@ Result Lynx::fn_is_nil(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::fn_is_bool(const Vec<Self>& args){}
 Result Lynx::fn_is_number(const Vec<Self>& args){}
 Result Lynx::fn_is_integer(const Vec<Self>& args){}
 Result Lynx::fn_is_float(const Vec<Self>& args){}
