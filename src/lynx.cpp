@@ -726,9 +726,16 @@ bool Lynx::check_argc(bool pred, const Str& funcname, Error& err){
     err = Error(Error::Kind::ValueError, ss.str());
     return false;
 }
-/** @todo
-bool Lynx::check_type(bool pred, const Self& self, Error& err){}
-*/
+
+// -*-
+bool Lynx::check_type(bool pred, const Self& self, Error& err){
+    if(pred){ return true; }
+    std::stringstream ss;
+    ss << "unexpected argument type. Got `" << self->type().str() << "'.";
+    err = Error(Error::Kind::ValueError, ss.str());
+    return false;
+}
+
 // -*-
 bool Lynx::is_reserved_word(const Str& word){
     static std::map<Str, TokenKind> _reserved_words_ = {
