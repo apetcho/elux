@@ -1171,8 +1171,8 @@ public:
     static Result fn_zip(const Vec<Self>& args);
     static Result fn_filter(const Vec<Self>& args);
     static Result fn_reduce(const Vec<Self>& args);
-    static Result fn_take(const Vec<Self>& args);
-    static Result fn_take_while(const Vec<Self>& args);
+    // static Result fn_take(const Vec<Self>& args);
+    // static Result fn_take_while(const Vec<Self>& args);
 
     // Common list & string functions
     static Result fn_len(const Vec<Self>& args);

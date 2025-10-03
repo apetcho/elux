@@ -2978,6 +2978,119 @@ Result Lynx::fn_zip(const Vec<Self>& args){
     return Result(share(zipped));
 }
 
+// -*-
+Result my_apply_filter_callback(Builtin& fun, const Self& rhs){
+    Error err;
+    if(!Lynx::check_type(rhs->is_list(), rhs, err)){
+        err.message() += "\nExpect a list.";
+        return Result(std::move(err));
+    }
+    
+    Vec<Self> filtered{};
+    auto xs_ = *dynamic_cast<List*>(rhs.get());
+    auto xs = xs_.as_vector();
+    for(auto x: xs){
+        auto ans = fun(Vec<Self>{x});
+        if(!ans.is_ok()){
+            return ans;
+        }
+        auto ok = ans.ok();
+        if(Lynx::check_type(ok->is_bool(), ok, err)){
+            err.message() += "\nExpect callabe argument of `filter' to be a predicate.";
+            return Result(std::move(err));
+        }
+        auto flag_ = *dynamic_cast<Bool*>(ok.get());
+        auto flag = flag_.as_bool();
+        if(flag){ filtered.push_back(std::move(x)); }
+    }
+    return Result(share(filtered));
+}
+
+/*
+Result my_apply_filter_callback(Closure& fun, const Self& rhs){
+    Error err;
+    if(!Lynx::check_type(rhs->is_list(), rhs, err)){
+        err.message() += "\nExpect a list.";
+        return Result(std::move(err));
+    }
+    Vec<Self> mapped{};
+    auto xs_ = *dynamic_cast<List*>(rhs.get());
+    auto xs = xs_.as_vector();
+    for(auto x: xs){
+        auto ans = fun(Vec<Self>{x});
+        if(!ans.is_ok()){
+            return ans;
+        }
+        mapped.push_back(std::move(ans.ok()));
+    }
+    return Result(share(mapped));
+}
+
+Result my_apply_filter_callback(Macro& fun, const Self& rhs){
+    Error err;
+    if(!Lynx::check_type(rhs->is_list(), rhs, err)){
+        err.message() += "\nExpect a list.";
+        return Result(std::move(err));
+    }
+    Vec<Self> mapped{};
+    auto xs_ = *dynamic_cast<List*>(rhs.get());
+    auto xs = xs_.as_vector();
+    for(auto x: xs){
+        auto ans = fun(Vec<Self>{x});
+        if(!ans.is_ok()){
+            return ans;
+        }
+        mapped.push_back(std::move(ans.ok()));
+    }
+    return Result(share(mapped));
+}
+
+*/
+
+// -*-
+// Result Lynx::fn_filter(const Vec<Self>& args){
+//     //! @todo: add doc-string of `filter' to lynxDocs describing it syntax
+//     Error err;
+//     Vec<Self> mapped{};
+//     auto argc = args.size();
+//     auto pred = (argc==2);
+//     if(!Lynx::check_argc(pred, "map", err)){
+//         return Result(std::move(err));
+//     }
+//     auto lhs = args[0];
+//     if(!Lynx::check_type(lhs->is_callable(), lhs, err)){
+//         err.message() += "\nInvalid argument type. Expect the first argument of `map' to be ";
+//         err.message() += "a callable, got `";
+//         err.message() += lhs->type().str() + "'.";
+//         return Result(std::move(err));
+//     }
+
+//     if(lhs->is_builtin()){
+//         auto fun = *dynamic_cast<Builtin*>(lhs.get());
+//         if(!Lynx::check_argc(fun.min_argc()==1, "map", err)){
+//             err.message() += "\nExpect the first argument of `map' to be a unary callable.";
+//             return Result(std::move(err));
+//         }
+//         return my_apply_map_callback(fun, args[1]);
+//     }
+//     if(lhs->is_closure()){
+//         auto fun = *dynamic_cast<Closure*>(lhs.get());
+//         if(!Lynx::check_argc(fun.argc()==1, "map", err)){
+//             err.message() += "\nExpect the first argument of `map' to be a unary callable.";
+//             return Result(std::move(err));
+//         }
+//         return my_apply_map_callback(fun, args[1]);
+//     }
+    
+//     auto fun = *dynamic_cast<Macro*>(lhs.get());
+//     if(!Lynx::check_argc(fun.argc()==1, "map", err)){
+//         err.message() += "\nExpect the first argument of `map' to be a unary callable.";
+//         return Result(std::move(err));
+//     }
+
+//     return my_apply_map_callback(fun, args[1]);
+// }
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2991,10 +3104,9 @@ Result Lynx::fn_zip(const Vec<Self>& args){
     auto vec = xs.as_vector();
 
 
-Result Lynx::fn_filter(const Vec<Self>& args){}
 Result Lynx::fn_reduce(const Vec<Self>& args){}
-Result Lynx::fn_take(const Vec<Self>& args){}
-Result Lynx::fn_take_while(const Vec<Self>& args){}
+// Result Lynx::fn_take(const Vec<Self>& args){}
+// Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 // Common list & string functions
 Result Lynx::fn_len(const Vec<Self>& args){}
