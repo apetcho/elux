@@ -2872,8 +2872,22 @@ Result my_apply_map_callback(Closure& fun, const Self& rhs){
 }
 
 Result my_apply_map_callback(Macro& fun, const Self& rhs){
-    //! @todo
-    return Result(share());
+    Error err;
+    if(!Lynx::check_type(rhs->is_list(), rhs, err)){
+        err.message() += "\nExpect a list.";
+        return Result(std::move(err));
+    }
+    Vec<Self> mapped{};
+    auto xs_ = *dynamic_cast<List*>(rhs.get());
+    auto xs = xs_.as_vector();
+    for(auto x: xs){
+        auto ans = fun(Vec<Self>{x});
+        if(!ans.is_ok()){
+            return ans;
+        }
+        mapped.push_back(std::move(ans.ok()));
+    }
+    return Result(share(mapped));
 }
 
 // -*-
