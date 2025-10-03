@@ -2263,6 +2263,19 @@ Result Lynx::fn_is_list(const Vec<Self>& args){
     return Result(share(self->is_list()));
 }
 
+// -*-
+Result Lynx::fn_is_callable(const Vec<Self>& args){
+    //! @todo: add doc-string of `callable?' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "callable?", err)){
+        return Result(std::move(err));
+    }
+    auto self = args[0];
+    return Result(share(self->is_callable()));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2275,7 +2288,6 @@ Result Lynx::fn_is_list(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::fn_is_callable(const Vec<Self>& args){}
 Result Lynx::fn_is_builtin(const Vec<Self>& args){}
 Result Lynx::fn_is_closure(const Vec<Self>& args){}
 Result Lynx::fn_is_lambda(const Vec<Self>& args){}
