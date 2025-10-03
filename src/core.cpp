@@ -1875,7 +1875,14 @@ Self share(const Complex& z){
     return std::make_shared<Number>(z);
 }
 
-// Self share(const Number& num){}
+Self share(const Number& num){
+    if(num.is_integer()){
+        return share(num.as_integer());
+    }else if(num.is_float()){
+        return share(num.as_float());
+    }
+    return share(num.as_complex());
+}
 
 // -*-
 Self share(const char* sym){
