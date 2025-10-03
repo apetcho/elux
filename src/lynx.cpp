@@ -3248,6 +3248,38 @@ Result Lynx::fn_len(const Vec<Self>& args){
     return Result(share(xs.len()));
 }
 
+// -*-
+Result Lynx::fn_concat(const Vec<Self>& args){
+    //! @todo: add doc-string of `concat' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "concat", err)){
+        return Result(std::move(err));
+    }
+    auto lhs = args[0];
+    auto rhs = args[1];
+    pred = (lhs->type()==rhs->type());
+    if(!Lynx::check_type(pred, lhs, err)){
+        err.message() += "\nExpect argument to `concat' to have the same type.";
+        err.message() += "\nSecond has `" + rhs->type().str() + "' type.";
+        return Result(std::move(err));
+    }
+
+    if(lhs->is_string()){
+        auto xstr = *dynamic_cast<String*>(lhs.get());
+        auto ystr = *dynamic_cast<String*>(rhs.get());
+        auto self = xstr + ystr;
+        return Result(share(self.str()));
+    }
+
+    auto xs = *dynamic_cast<List*>(lhs.get());
+    auto ys = *dynamic_cast<List*>(rhs.get());
+    auto myXs = xs + ys;
+    return Result(share(myXs.as_list()));
+}
+
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -3264,7 +3296,6 @@ Result Lynx::fn_len(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-Result Lynx::fn_concat(const Vec<Self>& args){}
 
 // Functions on list
 Result Lynx::fn_list_head(const Vec<Self>& args){}
