@@ -3556,6 +3556,30 @@ Result Lynx::fn_list_set(const Vec<Self>& args){
     return Result(share());
 }
 
+// -*-
+// Functions on string
+Result Lynx::fn_str_capitalize(const Vec<Self>& args){
+    //! @todo: add doc-string of `string.capitalize' to lynxDocs describing it syntax
+    /*
+        (string.capitalize xs)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "string.capitalize", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_string(), args[0], err)){
+        err.message() += "\nExpect the first argument to `string.capitalize' to be a string";
+        return Result(std::move(err));
+    }
+    
+    
+    auto self = (*dynamic_cast<String*>(args[0].get())).capitalize();
+    
+    return Result(share(self.str()));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -3571,8 +3595,7 @@ Result Lynx::fn_list_set(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-// Functions on string
-Result Lynx::fn_str_capitalize(const Vec<Self>& args){}
+
 Result Lynx::fn_str_upper(const Vec<Self>& args){}
 Result Lynx::fn_str_lower(const Vec<Self>& args){}
 Result Lynx::fn_str_contains(const Vec<Self>& args){}
