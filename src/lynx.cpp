@@ -1934,16 +1934,29 @@ Result Lynx::fn_bool(const Vec<Self>& args){
     //! @todo: add doc-string of `bool' to lynxDocs describing it syntax
     Error err;
     auto argc = args.size();
-    auto pred = (argc==0 || argc==1);
+    auto pred = (argc==1);
     if(!Lynx::check_argc(pred, "bool", err)){
         return Result(std::move(err));
-    }
-    if(argc==0){
-        return Result(share(false));
     }
     auto self = args[0];
     auto val = Lynx::to_bool(self);
     return Result(share(val));
+}
+
+// -*-
+Result Lynx::fn_integer(const Vec<Self>& args){
+    //! @todo: add doc-string of `integer' to lynxDocs describing it syntax
+
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "integer", err)){
+        return Result(std::move(err));
+    }
+    auto self = args[0];
+    pred = (self->is_integer() || self->is_float() || self->is_string());
+
+    return Result(share());
 }
 
 /*
@@ -1958,7 +1971,6 @@ Result Lynx::fn_bool(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::fn_integer(const Vec<Self>& args){}
 Result Lynx::fn_float(const Vec<Self>& args){}
 Result Lynx::fn_complex(const Vec<Self>& args){}
 Result Lynx::fn_string(const Vec<Self>& args){}

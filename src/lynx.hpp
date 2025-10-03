@@ -114,6 +114,9 @@ public:
     const Str& prefix(void) const;
     Str& prefix(void);
 
+    const Str& message(void) const{ return this->m_msg; }
+    Str& message(void){ return this->m_msg; }
+
 private:
     Kind m_kind;
     Str m_msg;
