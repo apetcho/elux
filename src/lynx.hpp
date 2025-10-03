@@ -1023,29 +1023,9 @@ private:
      */
     static Result handle_quasiquote(const Self& self, Env& env);
 
-    /**
-     * @brief 
-     * @param self 
-     * @param env 
-     * @return 
-     * 
-     * @example
-     * 
-     *  (unquote x)   or ,x
-     */
-    static Result handle_unquote(const Self& self, Env& env);
-
-    /**
-     * @brief 
-     * @param self 
-     * @param env 
-     * @return 
-     * 
-     * @example
-     * 
-     *  (unquote-splicing x)   or ,@x
-     */
-    static Result handle_unquote_splicing(const Self& self, Env& env);
+    
+    // static Result handle_unquote(const Self& self, Env& env);
+    // static Result handle_unquote_splicing(const Self& self, Env& env);
 
     /**
      * @brief 

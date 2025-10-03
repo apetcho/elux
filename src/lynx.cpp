@@ -489,10 +489,11 @@ Result Lynx::eval(const Self& self, Env& env){
             if(name=="let"){ return Lynx::handle_let(share(args), env); }
             if(name=="macro"){ return Lynx::handle_macro(share(args), env); }
             if(name=="progn"){ return Lynx::handle_progn(share(args), env); }
+            // [quasi]quote may contains `unquote' and `unquote-splicing'
             if(name=="quote"){ return Lynx::handle_quote(share(args), env); }
             if(name=="quasiquote"){return Lynx::handle_quasiquote(share(args), env); }
-            if(name=="unquote"){ return Lynx::handle_unquote(share(args), env); }
-            if(name=="unquote-splicing"){ return Lynx::handle_unquote_splicing(share(args), env); }
+            // if(name=="unquote"){ return Lynx::handle_unquote(share(args), env); }
+            // if(name=="unquote-splicing"){ return Lynx::handle_unquote_splicing(share(args), env); }
             if(name=="match"){ return Lynx::handle_match(share(args), env); }
             if(name=="var"){ return Lynx::handle_var(share(args), env); }
             if(name=="while"){ return Lynx::handle_while(share(args), env); }
@@ -1603,6 +1604,99 @@ Result Lynx::handle_quasiquote(const Self& self, Env& env){
     return Result(share(ans));
 }
 
+// Result Lynx::handle_unquote(const Self& self, Env& env){}
+// Result Lynx::handle_unquote_splicing(const Self& self, Env& env){}
+
+// -*-
+Result Lynx::handle_match(const Self& self, Env& env){
+    //! @todo: add doc-string of `match' to lynxDocs describing it syntax
+    /*
+        (match clause
+            (pattern1 expr1)
+            (pattern2 expr2)
+            ...
+            (patternN exprN))
+
+        The pattern '_' (i.e ANY-PATTERN) matches against any clause.
+        At least one pattern should match in the pattern-list, otherwise an
+        error is reported. To avoid error, one should make sure one of the
+        patterns matches against the match-clause by possible using the so-called
+        ANY-PATTERN
+
+        Right now, matchable patterns include boolean, integers, symbol or string.
+        This is so because these type of object provide a well defined equality
+        operator.
+    */
+
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+    auto vec = xs.as_vector();
+
+    [[maybe_unused]] Error _err_;
+    bool pred = (xs.len()>1);
+    if(!Lynx::check_value(self, pred, _err_)){
+        std::stringstream ss;
+        ss << "malformed `match' expression. Takes more than 1 argument";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+    auto clause_ = Lynx::eval(vec[0], env);
+    if(!clause_.is_ok()){
+        std::stringstream ss;
+        ss << "error occured while evaluate the clause of a match-expressin";
+        err = Error(Error::Kind::ValueError, ss.str());
+        return Result(std::move(err));
+    }
+    auto clause = clause_.ok();
+    auto branches = Vec<Self>(vec.begin()+1, vec.end());
+
+    auto matchable = [](const Self& arg){
+        return (
+            arg->is_bool() || arg->is_integer() ||
+            arg->is_symbol() || arg->is_string()
+        );
+    };
+    bool matched{false};
+    for(const auto& branch: branches){
+        // we expect every branch has the form: (pattern expr)
+        if(!Lynx::check_type(Symbol("list"), branch, err)){
+            return Result(std::move(err));
+        }
+
+        auto branch_xs = *dynamic_cast<List*>(branch.get());
+        pred = (branch_xs.len()==2);
+        if(!Lynx::check_value(self, pred, _err_)){
+            std::stringstream ss;
+            ss << "malformed `match' expression. Branch must have the form: ";
+            ss << "(pattern expr).\nWe've got\n" << branch_xs.repr();
+            err = Error(Error::Kind::SyntaxError, ss.str());
+            return Result(std::move(err));
+        }
+        auto branch_vec = branch_xs.as_vector();
+        auto pattern_ = branch_vec[0];
+        auto expr = branch_vec[1];
+        auto pattern_ev = Lynx::eval(pattern_, env);
+        if(!pattern_ev.is_ok()){
+            return pattern_ev; // error occured
+        }
+        auto pattern = pattern_ev.ok();
+        if(pattern->is_symbol() && pattern->str()=="_"){ // ANY_PATTERN found
+            return Lynx::eval(expr, env);
+        }
+        if(pattern==clause){
+            return Lynx::eval(expr, env);
+        }
+    }
+    // There was not match. The match-expression was not well formed.
+    std::stringstream ss;
+    ss << "non-exhaustive pattern. None of the pattern matched againt the match-clause.";
+    err = Error(Error::Kind::SyntaxError, ss.str());
+    return Result(std::move(err));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
     
@@ -1613,9 +1707,7 @@ Result Lynx::handle_quasiquote(const Self& self, Env& env){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::handle_unquote(const Self& self, Env& env){}
-Result Lynx::handle_unquote_splicing(const Self& self, Env& env){}
-Result Lynx::handle_match(const Self& self, Env& env){}
+
 Result Lynx::handle_var(const Self& self, Env& env){}
 Result Lynx::handle_while(const Self& self, Env& env){}
 
