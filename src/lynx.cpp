@@ -1704,6 +1704,52 @@ Result Lynx::handle_match(const Self& self, Env& env){
     return Result(std::move(err));
 }
 
+// -*-
+Result Lynx::handle_var(const Self& self, Env& env){
+    //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
+    /*
+        (var name value)
+        (var name1 value1 name2 value2 ...)
+    */
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+
+    [[maybe_unused]] Error _err_;
+    bool pred = (xs.len() % 2 == 0);
+    if(!Lynx::check_value(self, pred, _err_)){
+        std::stringstream ss;
+        ss << "malformed `var' expression. Takes 2 or a multiple of 2 arguments.\n";
+        ss << "Note: each successive pair consist of an identifier and the associated value.";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+
+    auto vec = xs.as_vector();
+    // Add the name-value pair to the current environment, possibly updating
+    // existing name.
+    for(size_t i=0; i < xs.len()-1; i++){
+        auto name = vec[i];
+        if(!Lynx::check_type(Symbol("symbol"), name, err)){
+            return Result(std::move(err));
+        }
+        auto expr_ = Lynx::eval(vec[i+1], env);
+        if(!expr_.is_ok()){
+            std::stringstream ss;
+            ss << "invalid expression " << vec[i+1]->repr() << " binding to ";
+            ss << name->str();
+            err = Error(Error::Kind::ValueError, ss.str());
+            return Result(std::move(err));
+        }
+        auto expr = expr_.ok();
+        env.update(name->str(), expr);
+    }
+
+    return Result(share());
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
     
@@ -1715,7 +1761,6 @@ Result Lynx::handle_match(const Self& self, Env& env){
     auto vec = xs.as_vector();
 
 
-Result Lynx::handle_var(const Self& self, Env& env){}
 Result Lynx::handle_while(const Self& self, Env& env){}
 
 Result Lynx::eval_atom(const Self& self, Env& env){}
