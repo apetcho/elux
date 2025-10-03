@@ -3332,25 +3332,62 @@ Result Lynx::fn_list_tail(const Vec<Self>& args){
 // -*-
 Result Lynx::fn_list_nth(const Vec<Self>& args){
     //! @todo: add doc-string of `list.nth' to lynxDocs describing it syntax
+    /*
+        (list.nth xs idx)
+    */
     Error err;
     auto argc = args.size();
     auto pred = (argc==2);
     if(!Lynx::check_argc(pred, "list.nth", err)){
         return Result(std::move(err));
     }
-    if(!Lynx::check_type(args[0]->is_integer(), args[0], err)){
-        err.message() += "\nExpect the first argument to `list.nth' to be an integer";
+    if(!Lynx::check_type(args[0]->is_list(), args[0], err)){
+        err.message() += "\nExpect the first argument to `list.nth' to be a list";
         return Result(std::move(err));
     }
-    if(!Lynx::check_type(args[1]->is_list(), args[1], err)){
-        err.message() += "\nExpect the second argument to `list.nth' to be a list.";
+    if(!Lynx::check_type(args[1]->is_integer(), args[1], err)){
+        err.message() += "\nExpect the second argument to `list.nth' to be a integer.";
         return Result(std::move(err));
     }
-    auto xs = *dynamic_cast<List*>(args[1].get());
+    auto xs = *dynamic_cast<List*>(args[0].get());
     try{
-        auto num = *dynamic_cast<Number*>(args[0].get());
+        auto num = *dynamic_cast<Number*>(args[1].get());
         auto idx = num.as_integer();
         auto ans = xs.nth(idx);
+        return Result(std::move(ans));
+    }catch(const Error& err_){
+        err = err_;
+        return Result(std::move(err));
+    }
+    return Result(share());
+}
+
+// -*-
+Result Lynx::fn_list_insert(const Vec<Self>& args){
+    //! @todo: add doc-string of `list.insert' to lynxDocs describing it syntax
+    /*
+        (list.insert xs idx val)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==3);
+    if(!Lynx::check_argc(pred, "list.insert", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_list(), args[0], err)){
+        err.message() += "\nExpect the first argument to `list.insert' to be a list";
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[1]->is_integer(), args[1], err)){
+        err.message() += "\nExpect the second argument to `list.insert' to be an integer.";
+        return Result(std::move(err));
+    }
+    
+    auto xs = *dynamic_cast<List*>(args[0].get());
+    try{
+        auto num = *dynamic_cast<Number*>(args[1].get());
+        auto idx = num.as_integer();
+        auto ans = xs.insert(idx, args[2]).as_list();
         return Result(std::move(ans));
     }catch(const Error& err_){
         err = err_;
@@ -3374,7 +3411,6 @@ Result Lynx::fn_list_nth(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-Result Lynx::fn_list_insert(const Vec<Self>& args){}
 Result Lynx::fn_list_remove(const Vec<Self>& args){}
 Result Lynx::fn_list_push(const Vec<Self>& args){}
 Result Lynx::fn_list_pop(const Vec<Self>& args){}
