@@ -3074,7 +3074,7 @@ Result Lynx::fn_filter(const Vec<Self>& args){
     }
     auto lhs = args[0];
     if(!Lynx::check_type(lhs->is_callable(), lhs, err)){
-        err.message() += "\nInvalid argument type. Expect the first argument of `map' to be ";
+        err.message() += "\nInvalid argument type. Expect the first argument of `filter' to be ";
         err.message() += "a callable, got `";
         err.message() += lhs->type().str() + "'.";
         return Result(std::move(err));
@@ -3082,7 +3082,7 @@ Result Lynx::fn_filter(const Vec<Self>& args){
 
     if(lhs->is_builtin()){
         auto fun = *dynamic_cast<Builtin*>(lhs.get());
-        if(!Lynx::check_argc(fun.min_argc()==1, "map", err)){
+        if(!Lynx::check_argc(fun.min_argc()==1, "filter", err)){
             err.message() += "\nExpect the first argument of `filter' to be a unary callable.";
             return Result(std::move(err));
         }
@@ -3181,6 +3181,51 @@ Result my_apply_reduce_callback(Builtin& fun, const Self& init, const Self& rhs)
     return Result(std::move(reduced));
 }
 
+// -*-
+Result Lynx::fn_reduce(const Vec<Self>& args){
+    //! @todo: add doc-string of `reduce' to lynxDocs describing it syntax
+    Error err;
+    Vec<Self> mapped{};
+    auto argc = args.size();
+    auto pred = (argc==3);
+    if(!Lynx::check_argc(pred, "reduce", err)){
+        return Result(std::move(err));
+    }
+    auto lhs = args[0];
+    if(!Lynx::check_type(lhs->is_callable(), lhs, err)){
+        err.message() += "\nInvalid argument type. Expect the first argument of `reduce' to be ";
+        err.message() += "a callable, got `";
+        err.message() += lhs->type().str() + "'.";
+        return Result(std::move(err));
+    }
+
+    if(lhs->is_builtin()){
+        auto fun = *dynamic_cast<Builtin*>(lhs.get());
+        if(!Lynx::check_argc(fun.min_argc()==2, "reduce", err)){
+            err.message() += "\nExpect the first argument of `reduce' to be a unary callable.";
+            return Result(std::move(err));
+        }
+        return my_apply_reduce_callback(fun, args[1], args[2]);
+    }
+    if(lhs->is_closure()){
+        auto fun = *dynamic_cast<Closure*>(lhs.get());
+        if(!Lynx::check_argc(fun.argc()==2, "reduce", err)){
+            err.message() += "\nExpect the first argument of `reduce' to be a unary callable.";
+            return Result(std::move(err));
+        }
+        return my_apply_reduce_callback(fun, args[1], args[2]);
+    }
+    
+    auto fun = *dynamic_cast<Macro*>(lhs.get());
+    if(!Lynx::check_argc(fun.argc()==2, "reduce", err)){
+        err.message() += "\nExpect the first argument of `reduce' to be a unary callable.";
+        return Result(std::move(err));
+    }
+
+    return my_apply_reduce_callback(fun, args[1], args[2]);
+}
+
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -3194,7 +3239,6 @@ Result my_apply_reduce_callback(Builtin& fun, const Self& init, const Self& rhs)
     auto vec = xs.as_vector();
 
 
-Result Lynx::fn_reduce(const Vec<Self>& args){}
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
