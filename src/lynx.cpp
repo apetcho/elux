@@ -2496,6 +2496,25 @@ Result Lynx::fn_getline(const Vec<Self>& args){
     return Result(share(input));
 }
 
+// -*-
+Result Lynx::fn_format(const Vec<Self>& args){
+    //! @todo: add doc-string of `format' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "format", err)){
+        return Result(std::move(err));
+    }
+    auto self = args[0];
+    if(self->is_string()){
+        Formatter formatter(self->str());
+        auto ans = formatter.format();
+        return Result(share(ans));
+    }
+    Formatter formatter(self);    
+    return Result(share(formatter.format()));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2508,7 +2527,6 @@ Result Lynx::fn_getline(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::fn_format(const Vec<Self>& args){}
 
 // Arithmetic operators
 Result Lynx::fn_add(const Vec<Self>& args){}
