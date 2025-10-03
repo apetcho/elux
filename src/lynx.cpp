@@ -3131,6 +3131,31 @@ Result my_apply_reduce_callback(Macro& fun, const Self& init, const Self& rhs){
     return Result(std::move(reduced));
 }
 
+// -*-
+Result my_apply_reduce_callback(Closure& fun, const Self& init, const Self& rhs){
+    Error err;
+    if(!Lynx::check_type(rhs->is_list(), rhs, err)){
+        err.message() += "\nExpect a list.";
+        return Result(std::move(err));
+    }
+    
+    Vec<Self> filtered{};
+    Self reduced = init;
+    auto xs_ = *dynamic_cast<List*>(rhs.get());
+    auto xs = xs_.as_vector();
+    for(auto x: xs){
+        Vec<Self> argv{};
+        argv.push_back(std::move(reduced));
+        argv.push_back(std::move(x));
+        auto ans = fun(argv);
+        if(!ans.is_ok()){
+            return ans;
+        }
+        reduced = ans.ok();
+    }
+    return Result(std::move(reduced));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
