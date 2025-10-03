@@ -1142,6 +1142,7 @@ public:
     static Result fn_println(const Vec<Self>& args);
     static Result fn_eprintln(const Vec<Self>& args);
     static Result fn_input(const Vec<Self>& args);
+    static Result fn_getline(const Vec<Self>& args);
     static Result fn_format(const Vec<Self>& args);
 
     // Arithmetic operators
