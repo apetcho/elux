@@ -510,38 +510,39 @@ Result Lynx::eval(const Self& self, Env& env){
             if(name=="var"){ return Lynx::handle_var(share(args), env); }
             if(name=="while"){ return Lynx::handle_while(share(args), env); }
         }else{ // function call
-            // ident is either a builtin funtion or user-defined lambda or function
-            if(!env.contains(name)){
-                std::stringstream ss;
-                ss << "undefined function `" << name << "' in scope";
-                Error err(Error::Kind::RuntimeError, ss.str());
-                return Result(std::move(err));
-            }
-            auto obj = env.get(name);
-            if(!obj->is_callable()){
-                std::stringstream ss;
-                ss << "`" << name << "' is not a callable object.";
-                Error err(Error::Kind::TypeError, ss.str());
-                return Result(std::move(err));
-            }
-            Vec<Self> argv{};
-            for(const auto& arg: args){
-                auto arg_ = Lynx::eval(arg, env);
-                if(!arg_.is_ok()){
-                    return arg_;
-                }
-                argv.push_back(std::move(arg_.ok()));
-            }
-            if(obj->is_builtin()){
-                auto fun = *dynamic_cast<Builtin*>(obj.get());
-                return fun(argv);
-            }else if(obj->is_closure()){
-                auto fun = *dynamic_cast<Closure*>(obj.get());
-                return fun(argv);
-            }else{
-                auto macro = *dynamic_cast<Closure*>(obj.get());
-                return macro(argv);
-            }
+            // // ident is either a builtin funtion or user-defined lambda or function
+            // if(!env.contains(name)){
+            //     std::stringstream ss;
+            //     ss << "undefined function `" << name << "' in scope";
+            //     Error err(Error::Kind::RuntimeError, ss.str());
+            //     return Result(std::move(err));
+            // }
+            // auto obj = env.get(name);
+            // if(!obj->is_callable()){
+            //     std::stringstream ss;
+            //     ss << "`" << name << "' is not a callable object.";
+            //     Error err(Error::Kind::TypeError, ss.str());
+            //     return Result(std::move(err));
+            // }
+            // Vec<Self> argv{};
+            // for(const auto& arg: args){
+            //     auto arg_ = Lynx::eval(arg, env);
+            //     if(!arg_.is_ok()){
+            //         return arg_;
+            //     }
+            //     argv.push_back(std::move(arg_.ok()));
+            // }
+            // if(obj->is_builtin()){
+            //     auto fun = *dynamic_cast<Builtin*>(obj.get());
+            //     return fun(argv);
+            // }else if(obj->is_closure()){
+            //     auto fun = *dynamic_cast<Closure*>(obj.get());
+            //     return fun(argv);
+            // }else{
+            //     auto macro = *dynamic_cast<Closure*>(obj.get());
+            //     return macro(argv);
+            // }
+            return Lynx::eval_list(self, env);
         }
     }
 
