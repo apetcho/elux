@@ -2346,16 +2346,14 @@ Result Lynx::fn_is_macro(const Vec<Self>& args){
 // --------------------------------------------------------------------
 /* IO-Formatter: */
 struct Formatter{
-    Formatter() = default;
+    Formatter()
+    : fself{nullptr}, fsrc{}{}
+
     explicit Formatter(const Self& self) noexcept
-    : fself{self}
-    , fsrc{}
-    {}
+    : fself{self}, fsrc{}{}
 
     explicit Formatter(const Str& str) noexcept
-    : fself{nullptr}
-    , fsrc{str}
-    {}
+    : fself{nullptr}, fsrc{str}{}
 
     Str format(void){
         return this->parse();
@@ -2371,6 +2369,25 @@ private:
     }
 };
 
+// -*-
+Result Lynx::fn_print(const Vec<Self>& args){
+    //! @todo: add doc-string of `print' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "print", err)){
+        return Result(std::move(err));
+    }
+    auto self = args[0];
+    Formatter formatter;
+    if(self->is_string()){
+        auto str = self->str();
+        formatter.fsrc = str;
+        std::cout << formatter.format();
+    }
+    return Result(share());
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2384,7 +2401,6 @@ private:
     auto vec = xs.as_vector();
 
 
-Result Lynx::fn_print(const Vec<Self>& args){}
 Result Lynx::fn_eprint(const Vec<Self>& args){}
 Result Lynx::fn_println(const Vec<Self>& args){}
 Result Lynx::fn_eprintln(const Vec<Self>& args){}
