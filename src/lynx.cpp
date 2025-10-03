@@ -730,8 +730,14 @@ bool Lynx::is_keyword(const Str& word){
 
 // -*-
 bool Lynx::is_syntax_quote(const Self& self){
-    //! @todo
-    return false;
+    return (
+        self->is_symbol() && (
+            self->str() == "quote" ||
+            self->str() == "unquote" ||
+            self->str() == "quasiquote" ||
+            self->str() == "unquote-splicing"
+        )
+    );
 }
 
 // -*-
