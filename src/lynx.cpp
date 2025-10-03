@@ -2830,6 +2830,68 @@ Result Lynx::fn_not(const Vec<Self>& args){
     return Result(share(!val));
 }
 
+// --------------------------------------------------------------------
+// -*-                        Functional APIs                       -*-
+// --------------------------------------------------------------------
+Result my_apply_map_callback(Builtin& fun, const Self&){
+    //! @todo
+    return Result(share());
+}
+
+Result my_apply_map_callback(Closure& fun, const Self&){
+    //! @todo
+    return Result(share());
+}
+
+Result my_apply_map_callback(Macro& fun, const Self&){
+    //! @todo
+    return Result(share());
+}
+
+// -*-
+Result Lynx::fn_map(const Vec<Self>& args){
+    //! @todo: add doc-string of `map' to lynxDocs describing it syntax
+    Error err;
+    Vec<Self> mapped{};
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "map", err)){
+        return Result(std::move(err));
+    }
+    auto lhs = args[0];
+    if(!Lynx::check_type(lhs->is_callable(), lhs, err)){
+        err.message() += "\nInvalid argument type. Expect the first argument of `map' to be ";
+        err.message() += "a callable, got `";
+        err.message() += lhs->type().str() + "'.";
+        return Result(std::move(err));
+    }
+
+    if(lhs->is_builtin()){
+        auto fun = *dynamic_cast<Builtin*>(lhs.get());
+        if(!Lynx::check_argc(fun.min_argc()==1, "map", err)){
+            err.message() += "\nExpect the first argument of `map' to be a unary callable.";
+            return Result(std::move(err));
+        }
+        return my_apply_map_callback(fun, args[1]);
+    }
+    if(lhs->is_closure()){
+        auto fun = *dynamic_cast<Closure*>(lhs.get());
+        if(!Lynx::check_argc(fun.argc()==1, "map", err)){
+            err.message() += "\nExpect the first argument of `map' to be a unary callable.";
+            return Result(std::move(err));
+        }
+        return my_apply_map_callback(fun, args[1]);
+    }
+    
+    auto fun = *dynamic_cast<Macro*>(lhs.get());
+    if(!Lynx::check_argc(fun.argc()==1, "map", err)){
+        err.message() += "\nExpect the first argument of `map' to be a unary callable.";
+        return Result(std::move(err));
+    }
+
+    return my_apply_map_callback(fun, args[1]);
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2842,9 +2904,56 @@ Result Lynx::fn_not(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-// Functional APIs
-Result Lynx::fn_map(const Vec<Self>& args){}
-Result Lynx::fn_zip(const Vec<Self>& args){}
+
+Result Lynx::fn_zip(const Vec<Self>& args){
+    //! @todo: add doc-string of `map' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "map", err)){
+        return Result(std::move(err));
+    }
+    auto lhs = args[0];
+    if(!Lynx::check_type(lhs->is_list(), lhs, err)){
+        err.message() += "\nInvalid argument type. Expect a `list', got ";
+        err.message() += lhs->type().str();
+        return Result(std::move(err));
+    }
+    
+    auto rhs = args[1];
+    if(!Lynx::check_type(rhs->is_list(), rhs, err)){
+        err.message() += "\nInvalid argument type. Expect a `list', got ";
+        err.message() += rhs->type().str();
+        return Result(std::move(err));
+    }
+    auto xs_ = *dynamic_cast<List*>(lhs.get());
+    auto ys_ = *dynamic_cast<List*>(rhs.get());
+    pred = (xs_.len()==ys_.len());
+    if(!Lynx::check_argc(pred, "map", err)){
+        err.message() += "arguments to `map' must 2 lists of same length.";
+        return Result(std::move(err));
+    }
+    auto N = ys_.len();
+    auto xs = xs_.as_vector();
+    auto ys = ys_.as_vector();
+    
+    Vec<Self> mapped{};
+    for(decltype(N) i=0; i < N; i++){
+        Vec<Self> node{};
+        node.push_back(xs[i]);
+        node.push_back(ys[i]);
+        mapped.push_back(share(node));
+    }
+
+    if(!Lynx::check_type(args[0]->is_bool(), args[0], err)){
+        return Result(std::move(err));
+    }
+    auto val_ = *dynamic_cast<Bool*>(args[0].get());
+    auto val = val_.as_bool();
+
+    return Result(share(mapped));
+}
+
 Result Lynx::fn_filter(const Vec<Self>& args){}
 Result Lynx::fn_reduce(const Vec<Self>& args){}
 Result Lynx::fn_take(const Vec<Self>& args){}
