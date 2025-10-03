@@ -1954,9 +1954,38 @@ Result Lynx::fn_integer(const Vec<Self>& args){
         return Result(std::move(err));
     }
     auto self = args[0];
-    pred = (self->is_integer() || self->is_float() || self->is_string());
+    pred = (
+        self->is_integer() || self->is_float() ||
+        self->is_string() || self->is_bool()
+    );
+    if(!Lynx::check_type(pred, self, err)){
+        err.message() += "\n`integer': expect a boolean, integer, float, "
+            "or a numeric string.";
+        return Result(std::move(err));
+    }
+    if(self->is_bool()){
+        auto val = *dynamic_cast<Bool*>(self.get());
+        return Result(share(val.as_integer()));
+    }else if(self->is_integer()){
+        auto val = *dynamic_cast<Number*>(self.get());
+        return Result(share(val.as_integer()));
+    }else if(self->is_float()){
+        auto val = *dynamic_cast<Number*>(self.get());
+        return Result(share(val.as_integer()));
+    }
 
-    return Result(share());
+    auto my_str = *dynamic_cast<String*>(self.get());
+    auto numstr = my_str.str();
+    size_t pos;
+    auto num = static_cast<i64>(std::stoll(numstr, &pos));
+
+    if(pos != numstr.length()){
+        std::stringstream ss;
+        ss << "" << self->repr() << " is not a numeric string.";
+        err = Error(Error::Kind::ValueError, ss.str());
+        return Result(std::move(err));
+    }
+    return Result(share(num));
 }
 
 /*
