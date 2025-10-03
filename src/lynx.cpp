@@ -3556,8 +3556,10 @@ Result Lynx::fn_list_set(const Vec<Self>& args){
     return Result(share());
 }
 
+// --------------------------------------------------------------------
+// -*-                  Functions on string                         -*-
+// --------------------------------------------------------------------
 // -*-
-// Functions on string
 Result Lynx::fn_str_capitalize(const Vec<Self>& args){
     //! @todo: add doc-string of `string.capitalize' to lynxDocs describing it syntax
     /*
@@ -3570,7 +3572,7 @@ Result Lynx::fn_str_capitalize(const Vec<Self>& args){
         return Result(std::move(err));
     }
     if(!Lynx::check_type(args[0]->is_string(), args[0], err)){
-        err.message() += "\nExpect the first argument to `string.capitalize' to be a string";
+        err.message() += "\nExpect the argument of `string.capitalize' to be a string";
         return Result(std::move(err));
     }
     
@@ -3593,7 +3595,7 @@ Result Lynx::fn_str_upper(const Vec<Self>& args){
         return Result(std::move(err));
     }
     if(!Lynx::check_type(args[0]->is_string(), args[0], err)){
-        err.message() += "\nExpect the first argument to `string.upper' to be a string";
+        err.message() += "\nExpect the argument of `string.upper' to be a string";
         return Result(std::move(err));
     }
     
@@ -3616,7 +3618,7 @@ Result Lynx::fn_str_lower(const Vec<Self>& args){
         return Result(std::move(err));
     }
     if(!Lynx::check_type(args[0]->is_string(), args[0], err)){
-        err.message() += "\nExpect the first argument to `string.lower' to be a string";
+        err.message() += "\nExpect the argument of `string.lower' to be a string";
         return Result(std::move(err));
     }
     
@@ -3624,6 +3626,34 @@ Result Lynx::fn_str_lower(const Vec<Self>& args){
     auto self = (*dynamic_cast<String*>(args[0].get())).lower();
     
     return Result(share(self.str()));
+}
+
+
+// -*-
+Result Lynx::fn_str_contains(const Vec<Self>& args){
+    //! @todo: add doc-string of `string.contains' to lynxDocs describing it syntax
+    /*
+        (string.contains str needle)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "string.contains", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_string(), args[0], err)){
+        err.message() += "\nExpect the argument of `string.contains' to be a string";
+        return Result(std::move(err));
+    }
+    
+    if(!Lynx::check_type(args[1]->is_string(), args[1], err)){
+        err.message() += "\nExpect the second argument of `string.contains' to be a string";
+        return Result(std::move(err));
+    }
+    
+    auto self = *dynamic_cast<String*>(args[0].get());
+    auto needle = *dynamic_cast<String*>(args[1].get());
+    return Result(share(self.contains(needle)));
 }
 
 /*
@@ -3641,8 +3671,6 @@ Result Lynx::fn_str_lower(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-
-Result Lynx::fn_str_contains(const Vec<Self>& args){}
 Result Lynx::fn_str_find(const Vec<Self>& args){}
 Result Lynx::fn_str_split(const Vec<Self>& args){}
 Result Lynx::fn_str_join(const Vec<Self>& args){}
