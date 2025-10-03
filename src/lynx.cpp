@@ -729,6 +729,12 @@ bool Lynx::is_keyword(const Str& word){
 }
 
 // -*-
+bool Lynx::is_syntax_quote(const Self& self){
+    //! @todo
+    return false;
+}
+
+// -*-
 Vec<Symbol> Lynx::get_symbols(const Vec<Self>& body){
     Vec<Symbol> result{};
     for(const auto self: body){
@@ -1467,6 +1473,130 @@ Result Lynx::handle_quote(const Self& self, Env& env){
     return Result(std::move(vec[0]));
 }
 
+// -*-
+Result Lynx::handle_quasiquote(const Self& self, Env& env){
+    //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
+    /*
+        `expr or (quasiquote expr)
+        Algorithm:
+            [1] expr is atom  => Error
+            [2] expr is a list
+                foreach term in expr
+                    [2.1] if term is atom => atom
+                    [2.2] if term is list and term[0] is unquote
+                        => eval(term[1] ... term[:last])
+                    [2.3] if term is list and term[0] is unquote-splicing
+                        => splice(term[1] ... term[:last])
+                    [2.4] if term is list and term[0] is quote
+                        => (term[1] ... term[:last])
+    */
+    Error err;
+    if(!Lynx::check_type(Symbol("list"), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+    auto vec = xs.as_vector();
+    bool pred = (xs.len()==1);
+    [[maybe_unused]] Error _err_;
+    if(!Lynx::check_value(self, pred, _err_)){
+        std::stringstream ss;
+        ss << "malformed `quasiquote' definition. Takes 1 argument";
+        err = Error(Error::Kind::SyntaxError, ss.str());
+        return Result(std::move(err));
+    }
+    // Self result = nullptr;
+    auto expr = vec[0];
+    if(!Lynx::check_type(Symbol("list"), expr, err)){
+        return Result(std::move(err));
+    }
+    auto my_vec = *dynamic_cast<List*>(expr.get());
+    auto argv = my_vec.as_vector();
+    Vec<Self> ans{};
+    for(const auto& arg: argv){
+        // arg is either an atom or a list
+        // Case 1: arg is an atom
+        if(Lynx::is_atom(arg)){
+            ans.push_back(std::move(arg));
+            continue;
+        }
+
+        // Case 2: arg is a list
+        // first element in list could be a syntax-quote or anything else
+        //else{
+        auto tmpv = *dynamic_cast<List*>(arg.get());
+        auto tmp = tmpv.as_vector();
+        // First element is not a syntax-quote
+        if(!Lynx::is_syntax_quote(tmp[0])){
+            // other builtin symbol or user-defined symbol
+            // We preserved the structure
+            ans.push_back(share(tmp));
+            continue;
+        }// else 
+        // From here on, we assume that the First element is a syntax-quote
+        // tmp = (a-syntax_quote _arg_)
+        // Requirement: tmp.size() == 2
+        pred = (tmp.size()==2);
+        if(!Lynx::check_value(self, pred, _err_)){
+            std::stringstream ss;
+            ss << "error while processing quasiquote-form.";
+            err = Error(Error::Kind::SyntaxError, ss.str());
+            return Result(std::move(err));
+        }
+
+        if(tmp[0]->is_symbol() && tmp[0]->str()=="quote"){
+            // other builtin symbol or user-defined symbol
+            // We preserved the structure at this point for later evaluation
+            ans.push_back(share(tmp));
+            continue;
+        }// else 
+        if(tmp[0]->is_symbol() && tmp[0]->str()=="unquote"){
+            // auto my_expr = share(Vec<Self>(tmp.begin()+1, tmp.end()));
+            auto my_ans = Lynx::eval(tmp[1], env);
+            if(!my_ans.is_ok()){
+                std::stringstream ss;
+                ss << "malformed argument to unquote in quasiquote expression";
+                err = Error(Error::Kind::RuntimeError, ss.str());
+                return Result(std::move(err));
+            }
+            ans.push_back(std::move(my_ans.ok()));
+            continue;
+        }//else
+
+        pred = (tmp[1]->is_list());
+        if(!Lynx::check_value(self, pred, _err_)){
+            std::stringstream ss;
+            ss << "error while processing unquote-splicing in quasiquote-form.";
+            err = Error(Error::Kind::SyntaxError, ss.str());
+            return Result(std::move(err));
+        }
+        if(tmp[0]->is_symbol() && tmp[0]->str()=="unquote-splicing"){
+            auto my_xs = *dynamic_cast<List*>(tmp[1].get());
+            auto my_vec = my_xs.as_vector();
+            for(const auto& val: my_vec){
+                ans.push_back(std::move(val));
+            }
+            continue;
+        }
+        // -
+        if(tmp[0]->is_symbol() && tmp[0]->str()=="quasiquote"){
+            // everything from with will be quoted.
+            auto my_xs = *dynamic_cast<List*>(tmp[1].get());
+            auto my_vec = my_xs.as_vector();
+            for(const auto& val: my_vec){
+                Vec<Self> term{};
+                term.push_back(share("quote"));
+                term.push_back(std::move(val));
+                ans.push_back(share(term));
+            }
+            continue;
+        }
+        // else{}
+        // }
+    }
+
+    return Result(share(ans));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
     
@@ -1477,7 +1607,6 @@ Result Lynx::handle_quote(const Self& self, Env& env){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::handle_quasiquote(const Self& self, Env& env){}
 Result Lynx::handle_unquote(const Self& self, Env& env){}
 Result Lynx::handle_unquote_splicing(const Self& self, Env& env){}
 Result Lynx::handle_match(const Self& self, Env& env){}

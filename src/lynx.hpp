@@ -818,6 +818,7 @@ public:
 
     static bool is_reserved_word(const Str& word);
     static bool is_keyword(const Str& word);
+    static bool is_syntax_quote(const Self& self);
 
 private:
     static Vec<Symbol> get_symbols(const Vec<Self>& body);
