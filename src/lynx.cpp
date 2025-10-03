@@ -3330,7 +3330,28 @@ Result Lynx::fn_list_tail(const Vec<Self>& args){
 }
 
 // -*-
-// Result Lynx::fn_list_last(const Vec<Self>& args){}
+Result Lynx::fn_list_last(const Vec<Self>& args){
+    //! @todo: add doc-string of `list.last' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "list.last", err)){
+        return Result(std::move(err));
+    }
+    auto self = args[0];
+    if(!Lynx::check_type(self->is_list(), self, err)){
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(self.get());
+    try{
+        auto ans = xs.last();
+        return Result(std::move(ans));
+    }catch(const Error& err_){
+        err = err_;
+        return Result(std::move(err));
+    }
+    return Result(share());
+}
 
 // -*-
 Result Lynx::fn_list_nth(const Vec<Self>& args){
