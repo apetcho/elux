@@ -3287,7 +3287,7 @@ Result Lynx::fn_list_head(const Vec<Self>& args){
     Error err;
     auto argc = args.size();
     auto pred = (argc==1);
-    if(!Lynx::check_argc(pred, "head", err)){
+    if(!Lynx::check_argc(pred, "list.head", err)){
         return Result(std::move(err));
     }
     auto self = args[0];
@@ -3311,7 +3311,7 @@ Result Lynx::fn_list_tail(const Vec<Self>& args){
     Error err;
     auto argc = args.size();
     auto pred = (argc==1);
-    if(!Lynx::check_argc(pred, "tail", err)){
+    if(!Lynx::check_argc(pred, "list.tail", err)){
         return Result(std::move(err));
     }
     auto self = args[0];
@@ -3322,6 +3322,36 @@ Result Lynx::fn_list_tail(const Vec<Self>& args){
     try{
         auto ans = xs.tail().as_list();
         return Result(share(ans));
+    }catch(const Error& err_){
+        err = err_;
+        return Result(std::move(err));
+    }
+    return Result(share());
+}
+
+// -*-
+Result Lynx::fn_list_nth(const Vec<Self>& args){
+    //! @todo: add doc-string of `list.nth' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "list.nth", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_integer(), args[0], err)){
+        err.message() += "\nExpect the first argument to `list.nth' to be an integer";
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[1]->is_list(), args[1], err)){
+        err.message() += "\nExpect the second argument to `list.nth' to be a list.";
+        return Result(std::move(err));
+    }
+    auto xs = *dynamic_cast<List*>(args[1].get());
+    try{
+        auto num = *dynamic_cast<Number*>(args[0].get());
+        auto idx = num.as_integer();
+        auto ans = xs.nth(idx);
+        return Result(std::move(ans));
     }catch(const Error& err_){
         err = err_;
         return Result(std::move(err));
@@ -3341,11 +3371,9 @@ Result Lynx::fn_list_tail(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-Result Lynx::fn_list_nth(const Vec<Self>& args){}
 Result Lynx::fn_list_insert(const Vec<Self>& args){}
 Result Lynx::fn_list_remove(const Vec<Self>& args){}
 Result Lynx::fn_list_push(const Vec<Self>& args){}
