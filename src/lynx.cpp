@@ -2133,6 +2133,23 @@ Result Lynx::fn_complex(const Vec<Self>& args){
     return Result(share(x, y));
 }
 
+// -*-
+Result Lynx::fn_string(const Vec<Self>& args){
+    //! @todo: add doc-string of `complex' to lynxDocs describing it syntax
+    /*
+        (string arg)    ==> ...
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "string", err)){
+        return Result(std::move(err));
+    }
+    auto str = args[0]->str();
+    
+    return Result(share(str));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2145,7 +2162,6 @@ Result Lynx::fn_complex(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::fn_string(const Vec<Self>& args){}
 Result Lynx::fn_list(const Vec<Self>& args){}
 
 // Predicates
