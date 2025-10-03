@@ -2515,6 +2515,36 @@ Result Lynx::fn_format(const Vec<Self>& args){
     return Result(share(formatter.format()));
 }
 
+// --------------------------------------------------------------------
+// -*-                     Arithmetic operators                     -*-
+// --------------------------------------------------------------------
+Result Lynx::fn_add(const Vec<Self>& args){
+    //! @todo: add doc-string of `+' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc>1);
+    if(!Lynx::check_argc(pred, "+", err)){
+        return Result(std::move(err));
+    }
+    if(argc==1){
+        auto self = args[0];
+        if(!Lynx::check_type(self->is_number(), self, err)){
+            return Result(std::move(err));
+        }
+        return Result(std::move(self));
+    }
+    Number acc;
+    for(const auto& arg: args){
+        if(!Lynx::check_type(arg->is_number(), arg, err)){
+            err.message() += "\nInvalid argument type to `+' builtin function.";
+            return Result(std::move(err));
+        }
+        auto num = *dynamic_cast<Number*>(arg.get());
+        acc = acc + num;
+    }    
+    return Result(share(acc));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2527,9 +2557,6 @@ Result Lynx::fn_format(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-
-// Arithmetic operators
-Result Lynx::fn_add(const Vec<Self>& args){}
 Result Lynx::fn_sub(const Vec<Self>& args){}
 Result Lynx::fn_mul(const Vec<Self>& args){}
 Result Lynx::fn_div(const Vec<Self>& args){}

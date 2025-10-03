@@ -1875,6 +1875,8 @@ Self share(const Complex& z){
     return std::make_shared<Number>(z);
 }
 
+// Self share(const Number& num){}
+
 // -*-
 Self share(const char* sym){
     return std::make_shared<Symbol>(sym);

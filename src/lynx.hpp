@@ -605,6 +605,7 @@ Self share(i64 num);
 Self share(f64 num);
 Self share(f64 x, f64 y);
 Self share(const Complex& z);
+Self share(const Number& num);
 Self share(const char* sym);
 Self share(const Str& str);
 Self share(const Vec<Self>& xs);
