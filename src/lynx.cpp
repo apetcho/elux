@@ -719,6 +719,10 @@ bool Lynx::check_value(const Self& self, bool pred, Error& err){
     return false;
 }
 
+/** @todo
+bool Lynx::check_argc(bool pred, const Str& funcname, Error& err){}
+bool Lynx::check_type(bool pred, const Self& self, Error& err){}
+*/
 // -*-
 bool Lynx::is_reserved_word(const Str& word){
     static std::map<Str, TokenKind> _reserved_words_ = {
@@ -1923,8 +1927,29 @@ Result Lynx::eval_list(const Self& self, Env& env){
     return Result(std::move(err));
 }
 
+// --------------------------------------------------------------------
+// -*-                       Constructors                           -*-
+// --------------------------------------------------------------------
+Result Lynx::fn_bool(const Vec<Self>& args){
+    //! @todo: add doc-string of `bool' to lynxDocs describing it syntax
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==0 || argc==1);
+    if(!Lynx::check_argc(pred, "bool", err)){
+        return Result(std::move(err));
+    }
+    if(argc==0){
+        return Result(share(false));
+    }
+    auto self = args[0];
+    auto val = Lynx::to_bool(self);
+    return Result(share(val));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
+
+    check_argc(argc, expected_argc, funcname, err)
     
     Error err;
     if(!Lynx::check_type(Symbol("list"), self, err)){
@@ -1933,10 +1958,6 @@ Result Lynx::eval_list(const Self& self, Env& env){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-
-
-// Constructors
-Result Lynx::fn_bool(const Vec<Self>& args){}
 Result Lynx::fn_integer(const Vec<Self>& args){}
 Result Lynx::fn_float(const Vec<Self>& args){}
 Result Lynx::fn_complex(const Vec<Self>& args){}

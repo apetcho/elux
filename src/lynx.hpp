@@ -813,6 +813,8 @@ private:
 public:
     static bool check_argc(int argc, int expected, const Str& funcname, Error& err);
     static bool check_type(const Symbol& ty, const Self& self, Error& err);
+    static bool check_argc(bool pred, const Str& funcname, Error& err);
+    static bool check_type(bool pred, const Self& self, Error& err);
     static bool check_value(const Self& self, bool (*fn)(const Self&), Error& err);
     static bool check_value(const Self& self, bool pred, Error& err);
 
