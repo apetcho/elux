@@ -2066,6 +2066,60 @@ Result Lynx::fn_float(const Vec<Self>& args){
     return Result(share(num));
 }
 
+// -*-
+Result Lynx::fn_complex(const Vec<Self>& args){
+    //! @todo: add doc-string of `complex' to lynxDocs describing it syntax
+    /*
+        (complex 1)                 => 1+0i
+        (complex 1.0)               => 1+0i
+        (complex 1 2)               => 1+2i
+        (complex (complex 2 3))     => 2+3i
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1 || argc==2);
+    if(!Lynx::check_argc(pred, "complex", err)){
+        return Result(std::move(err));
+    }
+    if(argc==1){
+        auto self = args[0];
+        pred = (self->is_number());
+        if(!Lynx::check_type(pred, self, err)){
+            return Result(std::move(err));
+        }
+        auto num = *dynamic_cast<Number*>(self.get());
+        if(!num.is_complex()){
+            auto x = num.as_float();
+            auto y = 0.0;
+            return Result(share(x, y));
+        }
+        auto z = num.as_complex();
+        return Result(share(z));
+    }
+    auto lhs = args[0];
+    auto rhs = args[1];
+    if(!Lynx::check_type(lhs->is_number(), lhs, err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(rhs->is_number(), rhs, err)){
+        return Result(std::move(err));
+    }
+    auto xnum = *dynamic_cast<Number*>(lhs.get());
+    auto ynum = *dynamic_cast<Number*>(rhs.get());
+    if(!Lynx::check_type(xnum.is_scalar(), lhs, err)){
+        err.message() += ".\nExpect a scalar type (i.e an integer or a float)";
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(ynum.is_scalar(), rhs, err)){
+        err.message() += ".\nExpect a scalar type (i.e an integer or a float)";
+        return Result(std::move(err));
+    }
+    auto x = xnum.as_float();
+    auto y = ynum.as_float();
+    
+    return Result(share(x, y));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -2078,7 +2132,6 @@ Result Lynx::fn_float(const Vec<Self>& args){
     auto xs = *dynamic_cast<List*>(self.get());
     auto vec = xs.as_vector();
 
-Result Lynx::fn_complex(const Vec<Self>& args){}
 Result Lynx::fn_string(const Vec<Self>& args){}
 Result Lynx::fn_list(const Vec<Self>& args){}
 

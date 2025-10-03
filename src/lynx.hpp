@@ -282,6 +282,9 @@ public:
     i64 as_integer(void) const;
     f64 as_float(void) const;
     Complex as_complex(void) const;
+    bool is_scalar(void) const{
+        return this->is_integer() || this->is_float();
+    }
 
     Number operator-();
 
