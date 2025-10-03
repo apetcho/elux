@@ -719,8 +719,14 @@ bool Lynx::check_value(const Self& self, bool pred, Error& err){
     return false;
 }
 
+bool Lynx::check_argc(bool pred, const Str& funcname, Error& err){
+    if(pred){ return true; }
+    std::stringstream ss;
+    ss << "invalid number of argument to `" << funcname << "'.";
+    err = Error(Error::Kind::ValueError, ss.str());
+    return false;
+}
 /** @todo
-bool Lynx::check_argc(bool pred, const Str& funcname, Error& err){}
 bool Lynx::check_type(bool pred, const Self& self, Error& err){}
 */
 // -*-
@@ -2116,7 +2122,7 @@ Result Lynx::fn_complex(const Vec<Self>& args){
     }
     auto x = xnum.as_float();
     auto y = ynum.as_float();
-    
+
     return Result(share(x, y));
 }
 
