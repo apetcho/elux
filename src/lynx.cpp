@@ -5366,14 +5366,10 @@ Result Lynx::fn_today(const Vec<Self>& args){
     ss << std::ctime(&myTime);
     auto mystr = ss.str();
     Str ans{};
-    Str tmp;
+    Str day, month, mday;
     std::istringstream is(ss.str());
-    is >> tmp;
-    ans = tmp + " ";
-    is >> tmp;
-    ans += tmp + " ";
-    is >> tmp;
-    ans += tmp;
+    is >> day >> month >> mday;
+    ans = day + " " + month + " " + mday;
 
     return Result(share(ans));
 }
