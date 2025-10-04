@@ -4264,11 +4264,11 @@ Result Lynx::fn_exp(const Vec<Self>& args){
     Error err;
     auto argc = args.size();
     auto pred = (argc==1);
-    if(!Lynx::check_argc(pred, "math::log1p", err)){
+    if(!Lynx::check_argc(pred, "math::exp", err)){
         return Result(std::move(err));
     }
     if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
-        err.message() += "\nExpect the argument of `math::log1p' to be a number";
+        err.message() += "\nExpect the argument of `math::exp' to be a number";
         return Result(std::move(err));
     }
 
@@ -4276,6 +4276,34 @@ Result Lynx::fn_exp(const Vec<Self>& args){
     try{
         num = *dynamic_cast<Number*>(args[0].get());
         num = num.exp();
+    }catch(const Error& err_){
+        err = err_;
+        return Result(std::move(err));
+    }
+    return Result(share(num));
+}
+
+// -*-
+Result Lynx::fn_exp2(const Vec<Self>& args){
+    //! @todo: add doc-string of `math::exp2' to lynxDocs describing it syntax
+    /*
+        (math::exp2 x)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "math::exp2", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
+        err.message() += "\nExpect the argument of `math::exp2' to be a number";
+        return Result(std::move(err));
+    }
+
+    Number num{};
+    try{
+        num = *dynamic_cast<Number*>(args[0].get());
+        num = num.exp2();
     }catch(const Error& err_){
         err = err_;
         return Result(std::move(err));
@@ -4298,8 +4326,6 @@ Result Lynx::fn_exp(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-
-Result Lynx::fn_exp2(const Vec<Self>& args){}
 Result Lynx::fn_expm1(const Vec<Self>& args){}
 Result Lynx::fn_pow(const Vec<Self>& args){}
 Result Lynx::fn_sqrt(const Vec<Self>& args){}
