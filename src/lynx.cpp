@@ -4013,7 +4013,12 @@ Result Lynx::fn_min(const Vec<Self>& args){
             return Result(std::move(err));
         }
         auto x = *dynamic_cast<Number*>(tmp.get());
-        num = (num < x) ? num : x;
+        try{
+            num = (num < x) ? num : x;
+        }catch(const Error& err_){
+            err = err_;
+            return Result(std::move(err));
+        }
     }
     return Result(share(num));
 }
