@@ -4339,6 +4339,40 @@ Result Lynx::fn_expm1(const Vec<Self>& args){
     return Result(share(num));
 }
 
+// -*-
+Result Lynx::fn_pow(const Vec<Self>& args){
+    //! @todo: add doc-string of `math::pow' to lynxDocs describing it syntax
+    /*
+        (math::pow base x)  ==> base^x
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "math::pow", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
+        err.message() += "\nExpect the argument argument of `math::pow' to be a number";
+        return Result(std::move(err));
+    }
+
+    if(!Lynx::check_type(args[1]->is_number(), args[1], err)){
+        err.message() += "\nExpect the second argument of `math::pow' to be a number";
+        return Result(std::move(err));
+    }
+
+    Number num{};
+    try{
+        auto base = *dynamic_cast<Number*>(args[0].get());
+        auto x = *dynamic_cast<Number*>(args[1].get());
+        num = base.pow(x);
+    }catch(const Error& err_){
+        err = err_;
+        return Result(std::move(err));
+    }
+    return Result(share(num));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -4355,7 +4389,6 @@ Result Lynx::fn_expm1(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-Result Lynx::fn_pow(const Vec<Self>& args){}
 Result Lynx::fn_sqrt(const Vec<Self>& args){}
 Result Lynx::fn_cbrt(const Vec<Self>& args){}
 Result Lynx::fn_sin(const Vec<Self>& args){}
