@@ -3730,7 +3730,7 @@ Result Lynx::fn_str_split(const Vec<Self>& args){
 Result Lynx::fn_str_join(const Vec<Self>& args){
     //! @todo: add doc-string of `string.join' to lynxDocs describing it syntax
     /*
-        (string.split strvec)
+        (string.join strvec)
     */
     Error err;
     auto argc = args.size();
@@ -3770,7 +3770,7 @@ Result Lynx::fn_str_join(const Vec<Self>& args){
 Result Lynx::fn_str_replace(const Vec<Self>& args){
     //! @todo: add doc-string of `string.replace' to lynxDocs describing it syntax
     /*
-        (string.split str old new)
+        (string.replace str old new)
     */
     Error err;
     auto argc = args.size();
@@ -3796,9 +3796,52 @@ Result Lynx::fn_str_replace(const Vec<Self>& args){
     auto neo = *dynamic_cast<String*>(args[2].get());
     Vec<String> vec{};
     
-    auto ans = text.replace(old, neo);
+    // auto ans = text.replace(old, neo);
     
-    return Result(share(ans.str()));
+    return Result(share());
+}
+
+// -*-
+Result Lynx::fn_str_substr(const Vec<Self>& args){
+    //! @todo: add doc-string of `string.substr' to lynxDocs describing it syntax
+    /*
+        (string.substr str startIdx endIdx)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==3);
+    if(!Lynx::check_argc(pred, "string.substr", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_string(), args[0], err)){
+        err.message() += "\nExpect the first argument of `string.substr' to be a string";
+        return Result(std::move(err));
+    }
+    
+    if(!Lynx::check_type(args[1]->is_integer(), args[1], err)){
+        err.message() += "\nExpect the second argument of `string.substr' to be a integer";
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[2]->is_integer(), args[2], err)){
+        err.message() += "\nExpect the third argument of `string.substr' to be a integer";
+        return Result(std::move(err));
+    }
+    
+    if(!Lynx::check_type(args[1]->is_integer(), args[1], err)){
+        err.message() += "\nExpect the second arguments of `string.substr' to an integer.";
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[2]->is_integer(), args[2], err)){
+        err.message() += "\nExpect the second arguments of `string.substr' to an integer.";
+        return Result(std::move(err));
+    }
+    auto text = *dynamic_cast<String*>(args[0].get());
+    auto start = *dynamic_cast<Number*>(args[1].get());
+    auto stop = *dynamic_cast<Number*>(args[2].get());
+    
+    auto ans = text.substr(start.as_integer(), stop.as_integer());
+    
+    return Result(share());
 }
 
 
@@ -3817,7 +3860,6 @@ Result Lynx::fn_str_replace(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-Result Lynx::fn_str_substr(const Vec<Self>& args){}
 Result Lynx::fn_str_ltrim(const Vec<Self>& args){}
 Result Lynx::fn_str_rtrim(const Vec<Self>& args){}
 Result Lynx::fn_str_trim(const Vec<Self>& args){}
