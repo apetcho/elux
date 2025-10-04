@@ -4717,6 +4717,34 @@ Result Lynx::fn_tgamma(const Vec<Self>& args){
     return Result(share(num));
 }
 
+// -*-
+Result Lynx::fn_lgamma(const Vec<Self>& args){
+    //! @todo: add doc-string of `math::lgamma' to lynxDocs describing it syntax
+    /*
+        (math::lgamma x)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "math::lgamma", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
+        err.message() += "\nExpect the argument of `math::lgamma' to be a number";
+        return Result(std::move(err));
+    }
+    
+    Number num{};
+    try{
+        num = *dynamic_cast<Number*>(args[0].get());
+        num = num.lgamma();
+    }catch(const Error& err_){
+        err = err_;
+        return Result(std::move(err));
+    }
+    return Result(share(num));
+}
+
 
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
@@ -4733,7 +4761,7 @@ Result Lynx::fn_tgamma(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-Result Lynx::fn_lgamma(const Vec<Self>& args){}
+
 Result Lynx::fn_isfinite(const Vec<Self>& args){}
 Result Lynx::fn_isinf(const Vec<Self>& args){}
 Result Lynx::fn_isnan(const Vec<Self>& args){}
