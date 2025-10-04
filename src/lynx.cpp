@@ -5374,6 +5374,28 @@ Result Lynx::fn_today(const Vec<Self>& args){
     return Result(share(ans));
 }
 
+// -*-
+Result Lynx::fn_sleep(const Vec<Self>& args){
+    //! @todo: add doc-string of `sleep' to lynxDocs describing it syntax
+    /*
+        (sleep delay_ms)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "today", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_integer(), args[0], err)){
+        return Result(std::move(err));
+    }
+    auto delay_ = dynamic_cast<Number*>(args[0].get());
+    auto delay = delay_->as_integer();
+    std::chrono::milliseconds delay_ms{delay};
+    std::this_thread::sleep_for(delay_ms);
+    
+    return Result(share());
+}
 
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
@@ -5391,7 +5413,6 @@ Result Lynx::fn_today(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-Result Lynx::fn_sleep(const Vec<Self>& args){}
 Result Lynx::fn_timeit(const Vec<Self>& args){}
 Result Lynx::fn_eval(const Vec<Self>& args){}
 Result Lynx::fn_declare_module(const Vec<Self>& args){}
