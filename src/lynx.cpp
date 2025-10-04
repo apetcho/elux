@@ -2,6 +2,7 @@
 
 #include<iostream>
 #include<random>
+#include<thread> // std::sleep_for
 #include<chrono>
 #include<stack>
 
@@ -5334,7 +5335,7 @@ Result Lynx::fn_now(const Vec<Self>& args){
     Error err;
     auto argc = args.size();
     auto pred = (argc==0);
-    if(!Lynx::check_argc(pred, "sort", err)){
+    if(!Lynx::check_argc(pred, "now", err)){
         return Result(std::move(err));
     }
 
@@ -5345,6 +5346,38 @@ Result Lynx::fn_now(const Vec<Self>& args){
 
     return Result(share(ss.str()));
 }
+
+// -*-
+Result Lynx::fn_today(const Vec<Self>& args){
+    //! @todo: add doc-string of `today' to lynxDocs describing it syntax
+    /*
+        (today)           ; Thu Oct 3
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==0);
+    if(!Lynx::check_argc(pred, "today", err)){
+        return Result(std::move(err));
+    }
+
+    const auto now = std::chrono::system_clock::now();
+    const std::time_t myTime = std::chrono::system_clock::to_time_t(now);
+    std::stringstream ss;
+    ss << std::ctime(&myTime);
+    auto mystr = ss.str();
+    Str ans{};
+    Str tmp;
+    std::istringstream is(ss.str());
+    is >> tmp;
+    ans = tmp + " ";
+    is >> tmp;
+    ans += tmp + " ";
+    is >> tmp;
+    ans += tmp;
+
+    return Result(share(ans));
+}
+
 
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
@@ -5362,7 +5395,6 @@ Result Lynx::fn_now(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-Result Lynx::fn_today(const Vec<Self>& args){}
 Result Lynx::fn_sleep(const Vec<Self>& args){}
 Result Lynx::fn_timeit(const Vec<Self>& args){}
 Result Lynx::fn_eval(const Vec<Self>& args){}
