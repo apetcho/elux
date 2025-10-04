@@ -4968,6 +4968,38 @@ Result Lynx::fn_complex_conj(const Vec<Self>& args){
     return Result(share(num));
 }
 
+// -*-
+Result Lynx::fn_complex_polar(const Vec<Self>& args){
+    //! @todo: add doc-string of `math::complex.polar' to lynxDocs describing it syntax
+    /*
+        (math::complex.polar rho theta)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "math::complex.polar", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
+        err.message() += "\nExpect the first argument of `math::complex.polar' to be a number";
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[1]->is_number(), args[1], err)){
+        err.message() += "\nExpect the second argument of `math::complex.polar' to be a number";
+        return Result(std::move(err));
+    }
+    
+    Number num{};
+    try{
+        auto rho = *dynamic_cast<Number*>(args[0].get());
+        auto theta = *dynamic_cast<Number*>(args[1].get());
+        num = num.polar(rho.as_float(), theta.as_float());
+    }catch(const Error& err_){
+        err = err_;
+        return Result(std::move(err));
+    }
+    return Result(share(num));
+}
 
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
@@ -4983,10 +5015,6 @@ Result Lynx::fn_complex_conj(const Vec<Self>& args){
 
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
-
-
-Result Lynx::fn_complex_polar(const Vec<Self>& args){}
-
 
 // Miscellaneous functions
 Result Lynx::fn_random(const Vec<Self>& args){}
