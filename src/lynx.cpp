@@ -4485,6 +4485,34 @@ Result Lynx::fn_cos(const Vec<Self>& args){
     return Result(share(num));
 }
 
+// -*-
+Result Lynx::fn_tan(const Vec<Self>& args){
+    //! @todo: add doc-string of `math::tan' to lynxDocs describing it syntax
+    /*
+        (math::tan x)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "math::tan", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
+        err.message() += "\nExpect the argument of `math::tan' to be a number";
+        return Result(std::move(err));
+    }
+
+    Number num{};
+    try{
+        num = *dynamic_cast<Number*>(args[0].get());
+        num = num.tan();
+    }catch(const Error& err_){
+        err = err_;
+        return Result(std::move(err));
+    }
+    return Result(share(num));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -4500,8 +4528,6 @@ Result Lynx::fn_cos(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-
-Result Lynx::fn_tan(const Vec<Self>& args){}
 Result Lynx::fn_asin(const Vec<Self>& args){}
 Result Lynx::fn_acos(const Vec<Self>& args){}
 Result Lynx::fn_atan(const Vec<Self>& args){}
