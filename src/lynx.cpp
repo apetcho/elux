@@ -3995,7 +3995,7 @@ Result Lynx::fn_min(const Vec<Self>& args){
     Error err;
     auto argc = args.size();
     auto pred = (argc>=1);
-    if(!Lynx::check_argc(pred, "math::abs", err)){
+    if(!Lynx::check_argc(pred, "math::min", err)){
         return Result(std::move(err));
     }
     if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
@@ -4023,6 +4023,43 @@ Result Lynx::fn_min(const Vec<Self>& args){
     return Result(share(num));
 }
 
+// -*-
+Result Lynx::fn_max(const Vec<Self>& args){
+    //! @todo: add doc-string of `math::max' to lynxDocs describing it syntax
+    /*
+        (math::max x0 x1 ...)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc>=1);
+    if(!Lynx::check_argc(pred, "math::max", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
+        err.message() += "\nExpect arguments of `math::max' to be numbers";
+        return Result(std::move(err));
+    }
+    auto num = *dynamic_cast<Number*>(args[0].get());
+    if(argc==1){
+        return Result(share(num));
+    }
+    for(size_t i=0; i < argc; i++){
+        auto tmp = args[i];
+        if(!Lynx::check_type(tmp->is_number(), tmp, err)){
+            err.message() += "\nExpect arguments of `math::max' to be numbers";
+            return Result(std::move(err));
+        }
+        auto x = *dynamic_cast<Number*>(tmp.get());
+        try{
+            num = (num > x) ? num : x;
+        }catch(const Error& err_){
+            err = err_;
+            return Result(std::move(err));
+        }
+    }
+    return Result(share(num));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -4039,7 +4076,6 @@ Result Lynx::fn_min(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-Result Lynx::fn_max(const Vec<Self>& args){}
 Result Lynx::fn_ceil(const Vec<Self>& args){}
 Result Lynx::fn_floor(const Vec<Self>& args){}
 Result Lynx::fn_round(const Vec<Self>& args){}
