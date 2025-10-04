@@ -4103,11 +4103,39 @@ Result Lynx::fn_floor(const Vec<Self>& args){
         err.message() += "\nExpect the argument of `math::floor' to be a number";
         return Result(std::move(err));
     }
-    
+
     Number num{};
     try{
         num = *dynamic_cast<Number*>(args[0].get());
         num = num.floor();
+    }catch(const Error& err_){
+        err = err_;
+        return Result(std::move(err));
+    }
+    return Result(share(num));
+}
+
+// -*-
+Result Lynx::fn_round(const Vec<Self>& args){
+    //! @todo: add doc-string of `math::round' to lynxDocs describing it syntax
+    /*
+        (math::round x)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "math::round", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
+        err.message() += "\nExpect the argument of `math::round' to be a number";
+        return Result(std::move(err));
+    }
+
+    Number num{};
+    try{
+        num = *dynamic_cast<Number*>(args[0].get());
+        num = num.round();
     }catch(const Error& err_){
         err = err_;
         return Result(std::move(err));
@@ -4131,7 +4159,6 @@ Result Lynx::fn_floor(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-Result Lynx::fn_round(const Vec<Self>& args){}
 Result Lynx::fn_log(const Vec<Self>& args){}
 Result Lynx::fn_log2(const Vec<Self>& args){}
 Result Lynx::fn_log10(const Vec<Self>& args){}
