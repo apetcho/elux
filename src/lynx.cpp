@@ -5413,11 +5413,13 @@ Result Lynx::fn_timeit(const Vec<Self>& args){
     using Milli = std::chrono::milliseconds;
     using Micro = std::chrono::microseconds;
     using Nano = std::chrono::nanoseconds;
+
+    Env ctx(&Lynx::m_runtime);
     
-    auto run = [](const Self& expr){
+    auto run = [ctx](const Self& expr) mutable {
         try{
             auto start = Clock::now();
-            [[maybe_unused]] auto ans = Lynx::eval(expr, Lynx::m_runtime);
+            [[maybe_unused]] auto ans = Lynx::eval(expr, ctx);
             auto stop = Clock::now();
             auto delta = std::chrono::duration_cast<Micro>(stop-start);
             return delta;
@@ -5430,7 +5432,7 @@ Result Lynx::fn_timeit(const Vec<Self>& args){
     Error err;
     auto argc = args.size();
     auto pred = (argc==1);
-    if(!Lynx::check_argc(pred, "today", err)){
+    if(!Lynx::check_argc(pred, "timeit", err)){
         return Result(std::move(err));
     }
     auto expr = args[0];
@@ -5465,6 +5467,27 @@ Result Lynx::fn_timeit(const Vec<Self>& args){
     return Result(share());
 }
 
+// -*-
+Result Lynx::fn_eval(const Vec<Self>& args){
+    //! @todo: add doc-string of `evalt' to lynxDocs describing it syntax
+    /*
+        (eval expr)
+
+        Examples:
+            (eval (+ (range 1000)))
+            (eval (+ (linspace 0.0 1000.0 1000)))
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "eval", err)){
+        return Result(std::move(err));
+    }
+    auto expr = args[0];
+    Env ctx(&Lynx::m_runtime);    
+
+    return Lynx::eval(expr, ctx);
+}
 
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
@@ -5482,8 +5505,6 @@ Result Lynx::fn_timeit(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-
-Result Lynx::fn_eval(const Vec<Self>& args){}
 Result Lynx::fn_declare_module(const Vec<Self>& args){}
 Result Lynx::fn_declare_error(const Vec<Self>& args){}
 Result Lynx::fn_has_feature(const Vec<Self>& args){}
