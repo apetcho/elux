@@ -3860,6 +3860,31 @@ Result Lynx::fn_str_ltrim(const Vec<Self>& args){
     return Result(share(ans.str()));
 }
 
+// -*-
+Result Lynx::fn_str_rtrim(const Vec<Self>& args){
+    //! @todo: add doc-string of `string.rtrim' to lynxDocs describing it syntax
+    /*
+        (string.rtrim str)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "string.rtrim", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_string(), args[0], err)){
+        err.message() += "\nExpect the argument of `string.rtrim' to be a string";
+        return Result(std::move(err));
+    }
+    
+    auto text = *dynamic_cast<String*>(args[0].get());
+    
+    auto ans = text.rtrim();
+    
+    return Result(share(ans.str()));
+}
+
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -3875,7 +3900,6 @@ Result Lynx::fn_str_ltrim(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-Result Lynx::fn_str_rtrim(const Vec<Self>& args){}
 Result Lynx::fn_str_trim(const Vec<Self>& args){}
 Result Lynx::fn_str_startswith(const Vec<Self>& args){}
 Result Lynx::fn_str_endswith(const Vec<Self>& args){}
