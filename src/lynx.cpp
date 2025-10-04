@@ -3726,6 +3726,46 @@ Result Lynx::fn_str_split(const Vec<Self>& args){
     return Result(share(vec));
 }
 
+// -*-
+Result Lynx::fn_str_join(const Vec<Self>& args){
+    //! @todo: add doc-string of `string.join' to lynxDocs describing it syntax
+    /*
+        (string.split strvec)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "string.join", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_string(), args[0], err)){
+        err.message() += "\nExpect the argument of `string.join' to be a string";
+        return Result(std::move(err));
+    }
+    auto text = *dynamic_cast<String*>(args[0].get());
+    
+    if(!Lynx::check_type(args[1]->is_list(), args[1], err)){
+        err.message() += "\nExpect the second argument of `string.join' to be a list of string";
+        return Result(std::move(err));
+    }
+    auto svec = *dynamic_cast<List*>(args[1].get());
+    auto vec_ = svec.as_vector();
+    Vec<String> vec{};
+    for(const auto& x: vec_){
+        if(!Lynx::check_type(x->is_string(), x, err)){
+            err.message() += "\nExpect the second argument of `string.join' to be a list of string";
+            err.message() += "Got element of type `" + x->type().str() + "'";
+            return Result(std::move(err));
+        }
+        auto xstr = *dynamic_cast<String*>(x.get());
+        vec.push_back(xstr);
+    }
+
+    auto ans = text.join(vec);
+    
+    return Result(share(ans.str()));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -3741,7 +3781,6 @@ Result Lynx::fn_str_split(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-Result Lynx::fn_str_join(const Vec<Self>& args){}
 Result Lynx::fn_str_replace(const Vec<Self>& args){}
 Result Lynx::fn_str_substr(const Vec<Self>& args){}
 Result Lynx::fn_str_ltrim(const Vec<Self>& args){}
