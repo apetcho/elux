@@ -4076,8 +4076,43 @@ Result Lynx::fn_ceil(const Vec<Self>& args){
         err.message() += "\nExpect the argument of `math::ceil' to be a number";
         return Result(std::move(err));
     }
-    auto num = *dynamic_cast<Number*>(args[0].get());
-    return Result(share(num.ceil()));
+    Number num{};
+    try{
+        num = *dynamic_cast<Number*>(args[0].get());
+        num = num.ceil();
+    }catch(const Error& err_){
+        err = err_;
+        return Result(std::move(err));
+    }
+    return Result(share(num));
+}
+
+// -*-
+Result Lynx::fn_floor(const Vec<Self>& args){
+    //! @todo: add doc-string of `math::floor' to lynxDocs describing it syntax
+    /*
+        (math::floor x)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "math::floor", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
+        err.message() += "\nExpect the argument of `math::floor' to be a number";
+        return Result(std::move(err));
+    }
+    
+    Number num{};
+    try{
+        num = *dynamic_cast<Number*>(args[0].get());
+        num = num.floor();
+    }catch(const Error& err_){
+        err = err_;
+        return Result(std::move(err));
+    }
+    return Result(share(num));
 }
 
 /*
@@ -4096,7 +4131,6 @@ Result Lynx::fn_ceil(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-Result Lynx::fn_floor(const Vec<Self>& args){}
 Result Lynx::fn_round(const Vec<Self>& args){}
 Result Lynx::fn_log(const Vec<Self>& args){}
 Result Lynx::fn_log2(const Vec<Self>& args){}
