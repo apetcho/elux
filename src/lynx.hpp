@@ -1237,6 +1237,12 @@ public:
     static Result fn_isfinite(const Vec<Self>& args);
     static Result fn_isinf(const Vec<Self>& args);
     static Result fn_isnan(const Vec<Self>& args);
+    static Result fn_complex_real(const Vec<Self>& args);
+    static Result fn_complex_imag(const Vec<Self>& args);
+    static Result fn_complex_arg(const Vec<Self>& args);
+    static Result fn_complex_norm(const Vec<Self>& args);
+    static Result fn_complex_conj(const Vec<Self>& args);
+    static Result fn_complex_polar(const Vec<Self>& args);
 
     // Miscellaneous functions
     static Result fn_random(const Vec<Self>& args);
