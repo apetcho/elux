@@ -5489,6 +5489,51 @@ Result Lynx::fn_eval(const Vec<Self>& args){
     return Lynx::eval(expr, ctx);
 }
 
+// -*-
+Result Lynx::fn_declare_module(const Vec<Self>& args){
+    //! @todo: add doc-string of `declare-module' to lynxDocs describing it syntax
+    /*
+        (declare-module name path)
+
+        Examples:
+            (declare-module plotter "path/to/my/nice/plotting/library.lynx")
+            (import plotter)
+            (defvar N 100)
+            (var xdata (linspace (- PI) PI N))
+            (var ydata '())
+            (for (x xdata)
+                (list.push ydata x))
+            (var handle (plotter::plot xdata ydata :xlabel "x-data" :ylabel "y = sin(x)"))
+            (plotter::legend handle "My market simulation")
+            (plotter::show)
+
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "declare-module", err)){
+        return Result(std::move(err));
+    }
+
+    if(!Lynx::check_type(args[0]->is_symbol(), args[0], err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[1]->is_string(), args[1], err)){
+        return Result(std::move(err));
+    }
+    auto name_ = dynamic_cast<Symbol*>(args[0].get());
+    auto name = name_->str();
+    auto path_ = dynamic_cast<String*>(args[1].get());
+    auto my_module = Module(name, fs::path(path_->str()), &Lynx::m_runtime);
+    // Lynx::libraries[name] = my_module;
+    Lynx::push_module(my_module);
+    //! @note: something need to be done to take into account name collision
+    // by adopting for example the notation "modulename::symbol" to prevent
+    // the problem.
+
+    return Result(share());
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -5505,7 +5550,7 @@ Result Lynx::fn_eval(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-Result Lynx::fn_declare_module(const Vec<Self>& args){}
+
 Result Lynx::fn_declare_error(const Vec<Self>& args){}
 Result Lynx::fn_has_feature(const Vec<Self>& args){}
 Result Lynx::fn_help(const Vec<Self>& args){}
