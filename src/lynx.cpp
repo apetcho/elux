@@ -3936,6 +3936,34 @@ Result Lynx::fn_str_startswith(const Vec<Self>& args){
     return Result(share(ans));
 }
 
+// -*-
+Result Lynx::fn_str_endswith(const Vec<Self>& args){
+    //! @todo: add doc-string of `string.endswith' to lynxDocs describing it syntax
+    /*
+        (string.endswith str prefix)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "string.endswith", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_string(), args[0], err)){
+        err.message() += "\nExpect the argument of `string.endswith' to be a string";
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[1]->is_string(), args[1], err)){
+        err.message() += "\nExpect the argument of `string.endswith' to be a string";
+        return Result(std::move(err));
+    }
+    auto text = *dynamic_cast<String*>(args[0].get());
+    auto suffix = *dynamic_cast<String*>(args[1].get());
+    
+    auto ans = text.startswith(suffix);
+    
+    return Result(share(ans));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -3951,8 +3979,6 @@ Result Lynx::fn_str_startswith(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-
-Result Lynx::fn_str_endswith(const Vec<Self>& args){}
 
 // Mathetical functions
 Result Lynx::fn_abs(const Vec<Self>& args){}
