@@ -3983,7 +3983,7 @@ Result Lynx::fn_abs(const Vec<Self>& args){
         return Result(std::move(err));
     }
     auto num = *dynamic_cast<Number*>(args[0].get());
-    return Result(share(num));
+    return Result(share(num.abs()));
 }
 
 // -*-
@@ -4060,6 +4060,26 @@ Result Lynx::fn_max(const Vec<Self>& args){
     return Result(share(num));
 }
 
+// -*-
+Result Lynx::fn_ceil(const Vec<Self>& args){
+    //! @todo: add doc-string of `math::ceil' to lynxDocs describing it syntax
+    /*
+        (math::ceil x)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "math::ceil", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
+        err.message() += "\nExpect the argument of `math::ceil' to be a number";
+        return Result(std::move(err));
+    }
+    auto num = *dynamic_cast<Number*>(args[0].get());
+    return Result(share(num.ceil()));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -4076,7 +4096,6 @@ Result Lynx::fn_max(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-Result Lynx::fn_ceil(const Vec<Self>& args){}
 Result Lynx::fn_floor(const Vec<Self>& args){}
 Result Lynx::fn_round(const Vec<Self>& args){}
 Result Lynx::fn_log(const Vec<Self>& args){}
