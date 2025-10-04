@@ -5534,6 +5534,39 @@ Result Lynx::fn_declare_module(const Vec<Self>& args){
     return Result(share());
 }
 
+// -*-
+Result Lynx::fn_declare_error(const Vec<Self>& args){
+    //! @todo: add doc-string of `declare-error' to lynxDocs describing it syntax
+    /*
+        (declare-error MyErrorSymbol)
+
+        Examples:
+            (declare-module FileNotFoundError)
+            (defvar filename "path/to/my/filename")
+            (var handle (fs::open filename :read))
+            (if (nil? handle)
+                (panic FileNotFoundError (format "could not open the file '{filename}'"))
+                (println (format "The file '{filename}' is ready for read operations")))
+            ...
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "declare-error", err)){
+        return Result(std::move(err));
+    }
+
+    if(!Lynx::check_type(args[0]->is_symbol(), args[0], err)){
+        return Result(std::move(err));
+    }
+    
+    auto name_ = dynamic_cast<Symbol*>(args[0].get());
+    auto name = name_->str();
+    Lynx::m_runtime.put(name, share(name.c_str()));
+    return Result(share());
+}
+
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -5550,8 +5583,6 @@ Result Lynx::fn_declare_module(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-
-Result Lynx::fn_declare_error(const Vec<Self>& args){}
 Result Lynx::fn_has_feature(const Vec<Self>& args){}
 Result Lynx::fn_help(const Vec<Self>& args){}
 Result Lynx::fn_assert(const Vec<Self>& args){}
