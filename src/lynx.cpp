@@ -4597,6 +4597,39 @@ Result Lynx::fn_atan(const Vec<Self>& args){
     return Result(share(num));
 }
 
+// -*-
+Result Lynx::fn_atan2(const Vec<Self>& args){
+    //! @todo: add doc-string of `math::atan2' to lynxDocs describing it syntax
+    /*
+        (math::atan2 y x)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "math::atan2", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
+        err.message() += "\nExpect the first argument of `math::atan2' to be a number";
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[1]->is_number(), args[1], err)){
+        err.message() += "\nExpect the second argument of `math::atan2' to be a number";
+        return Result(std::move(err));
+    }
+
+    Number num{};
+    try{
+        auto ynum = *dynamic_cast<Number*>(args[0].get());
+        auto xnum = *dynamic_cast<Number*>(args[1].get());
+        num = ynum.atan2(xnum);
+    }catch(const Error& err_){
+        err = err_;
+        return Result(std::move(err));
+    }
+    return Result(share(num));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -4612,7 +4645,7 @@ Result Lynx::fn_atan(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-Result Lynx::fn_atan2(const Vec<Self>& args){}
+
 Result Lynx::fn_erf(const Vec<Self>& args){}
 Result Lynx::fn_erfc(const Vec<Self>& args){}
 Result Lynx::fn_tgamma(const Vec<Self>& args){}
