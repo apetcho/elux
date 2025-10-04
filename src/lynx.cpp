@@ -5136,7 +5136,7 @@ Result Lynx::fn_linspace(const Vec<Self>& args){
     */
     Error err;
     auto argc = args.size();
-    auto pred = (argc==2 && argc==3);
+    auto pred = (argc==2 || argc==3);
     if(!Lynx::check_argc(pred, "linspace", err)){
         return Result(std::move(err));
     }
@@ -5188,6 +5188,142 @@ Result Lynx::fn_linspace(const Vec<Self>& args){
     return Result(share(result));
 }
 
+// -*-
+Result Lynx::fn_sort(const Vec<Self>& args){
+    //! @todo: add doc-string of `sort' to lynxDocs describing it syntax
+    /*
+        (sort xs)
+        (sort xs cmpfn)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1 || argc==2);
+    if(!Lynx::check_argc(pred, "sort", err)){
+        return Result(std::move(err));
+    }
+    
+    if(!Lynx::check_type(args[0]->is_list(), args[0], err)){
+        return Result(std::move(err));
+    }
+    auto xs = dynamic_cast<List*>(args[0].get());
+    auto result = xs->as_vector();
+
+    if(argc==1){    
+        auto my_cmp_fn = [](const Self& lhs, const Self& rhs){
+            bool ans{};
+            try{
+                ans = (lhs < rhs);
+            }catch(const Error& err_){
+                throw Error(err_);
+            }
+            return ans;
+        };
+
+        try{
+            std::sort(result.begin(), result.end(), my_cmp_fn);
+        }catch(const Error& err_){
+            err = err_;
+            return Result(std::move(err));
+        }
+    }else{
+        // -
+        if(!Lynx::check_type(args[1]->is_callable(), args[1], err)){
+            err.message() += "\nExpect the second argument of `sort' to be a callable.";
+            return Result(std::move(err));
+        }
+        if(args[1]->is_builtin()){
+            auto fun = *dynamic_cast<Builtin*>(args[1].get());
+            if(!(fun.min_argc()==2 && fun.max_argc()==2)){
+                auto err_ = Error(Error::Kind::ValueError, "");
+                err_.message() += "the second argument of `sort' must be a binary callable.";
+                throw Error(err_);
+            }
+            auto my_cmp_fn = [&fun](const Self& lhs, const Self& rhs) mutable {
+                bool ans{};
+                Vec<Self> argv{lhs, rhs};
+                try{
+                    auto res = fun(argv);
+                    if(!res.is_ok()){
+                        throw Error(res.err());
+                    }
+                    if(!res.ok()->is_bool()){
+                        auto err_ = Error(Error::Kind::ValueError, "");
+                        err_.message() += "the second argument of `sort' must be a binary predicate.";
+                        throw Error(err_);
+                    }
+                    auto ok_ = res.ok();
+                    auto ok = dynamic_cast<Bool*>(ok_.get());
+                    ans = ok->as_bool();
+                }catch(const Error& myErr){
+                    throw Error(myErr);
+                }
+                return ans;
+            };
+            std::sort(result.begin(), result.end(), my_cmp_fn);
+        }else if(args[1]->is_closure()){
+            auto fun = *dynamic_cast<Closure*>(args[1].get());
+            if(!(fun.argc()==2)){
+                auto err_ = Error(Error::Kind::ValueError, "");
+                err_.message() += "the second argument of `sort' must be a binary callable.";
+                throw Error(err_);
+            }
+            auto my_cmp_fn = [&fun](const Self& lhs, const Self& rhs){
+                bool ans{};
+                Vec<Self> argv{lhs, rhs};
+                try{
+                    auto res = fun(argv);
+                    if(!res.is_ok()){
+                        throw Error(res.err());
+                    }
+                    if(!res.ok()->is_bool()){
+                        auto err_ = Error(Error::Kind::ValueError, "");
+                        err_.message() += "the second argument of `sort' must be a binary predicate.";
+                        throw Error(err_);
+                    }
+                    auto ok_ = res.ok();
+                    auto ok = dynamic_cast<Bool*>(ok_.get());
+                    ans = ok->as_bool();
+                }catch(const Error& myErr){
+                    throw Error(myErr);
+                }
+                return ans;
+            };
+            std::sort(result.begin(), result.end(), my_cmp_fn);
+        }else{
+            auto fun = *dynamic_cast<Macro*>(args[1].get());
+            if(!(fun.argc()==2)){
+                auto err_ = Error(Error::Kind::ValueError, "");
+                err_.message() += "the second argument of `sort' must be a binary callable.";
+                throw Error(err_);
+            }
+            auto my_cmp_fn = [&fun](const Self& lhs, const Self& rhs){
+                bool ans{};
+                Vec<Self> argv{lhs, rhs};
+                try{
+                    auto res = fun(argv);
+                    if(!res.is_ok()){
+                        throw Error(res.err());
+                    }
+                    if(!res.ok()->is_bool()){
+                        auto err_ = Error(Error::Kind::ValueError, "");
+                        err_.message() += "the second argument of `sort' must be a binary predicate.";
+                        throw Error(err_);
+                    }
+                    auto ok_ = res.ok();
+                    auto ok = dynamic_cast<Bool*>(ok_.get());
+                    ans = ok->as_bool();
+                }catch(const Error& myErr){
+                    throw Error(myErr);
+                }
+                return ans;
+            };
+            std::sort(result.begin(), result.end(), my_cmp_fn);
+        }
+    }
+
+    return Result(share(result));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -5204,8 +5340,6 @@ Result Lynx::fn_linspace(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-
-Result Lynx::fn_sort(const Vec<Self>& args){}
 Result Lynx::fn_now(const Vec<Self>& args){}
 Result Lynx::fn_today(const Vec<Self>& args){}
 Result Lynx::fn_sleep(const Vec<Self>& args){}
