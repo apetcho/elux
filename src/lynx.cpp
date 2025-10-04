@@ -5076,6 +5076,58 @@ Result Lynx::fn_random(const Vec<Self>& args){
     return Result(share(num));
 }
 
+// -*-
+Result Lynx::fn_range(const Vec<Self>& args){
+    //! @todo: add doc-string of `range' to lynxDocs describing it syntax
+    /*
+        (random stop)
+        (random start stop)
+        (random start stop step)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc>=1 && argc<=3);
+    if(!Lynx::check_argc(pred, "range", err)){
+        return Result(std::move(err));
+    }
+    for(const auto& arg: args){
+        if(!Lynx::check_type(arg->is_integer(), arg, err)){
+            err.message() += "\nExpect arguments of `range' to be integers.";
+            return Result(std::move(err));
+        }
+    }
+
+    Vec<Self> result{};
+    i64 start, stop;
+    i64 step = 1;
+    if(args.size()==1){
+        auto num = dynamic_cast<Number*>(args[0].get());
+        stop = num->as_integer() < 0 ? 0 : num->as_integer();
+        start = num->as_integer() < 0 ? num->as_integer() : 0;
+    }else if(args.size()==2){
+        start = dynamic_cast<Number*>(args[0].get())->as_integer();
+        stop = dynamic_cast<Number*>(args[1].get())->as_integer();
+    }else{
+        start = dynamic_cast<Number*>(args[0].get())->as_integer();
+        stop = dynamic_cast<Number*>(args[1].get())->as_integer();
+        step = dynamic_cast<Number*>(args[2].get())->as_integer();
+    }
+    if(stop < start){
+        Str msg{
+            "error while applying `range'.\nExpect the first two arguments "
+            "'start' and 'stop' to satisfy `start < stop`"
+        };
+        err = Error(Error::Kind::ValueError, msg);
+        return Result(std::move(err));
+    }
+    for(i64 i=start; i < stop; i++){
+        result.push_back(share((start + i*step)));
+    }
+
+    return Result(share(result));
+}
+
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -5092,7 +5144,6 @@ Result Lynx::fn_random(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-Result Lynx::fn_range(const Vec<Self>& args){}
 Result Lynx::fn_linspace(const Vec<Self>& args){}
 Result Lynx::fn_sort(const Vec<Self>& args){}
 Result Lynx::fn_now(const Vec<Self>& args){}
