@@ -3683,6 +3683,49 @@ Result Lynx::fn_str_find(const Vec<Self>& args){
     return Result(share(self.find(needle)));
 }
 
+// -*-
+Result Lynx::fn_str_split(const Vec<Self>& args){
+    //! @todo: add doc-string of `string.split' to lynxDocs describing it syntax
+    /*
+        (string.split str)
+        (string.split str sep)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1 || argc==2);
+    if(!Lynx::check_argc(pred, "string.split", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_string(), args[0], err)){
+        err.message() += "\nExpect the argument of `string.split' to be a string";
+        return Result(std::move(err));
+    }
+    auto text = *dynamic_cast<String*>(args[0].get());
+    
+    if(argc==1){
+        auto ans = text.split();
+        Vec<Self> vec{};
+        std::transform(
+            ans.begin(), ans.end(), vec.begin(),
+            [](const String& xstr){ return share(xstr.str()); }
+        );
+        return Result(share(vec));
+    }
+    if(!Lynx::check_type(args[1]->is_string(), args[1], err)){
+        err.message() += "\nExpect the second argument of `string.split' to be a string";
+        return Result(std::move(err));
+    }
+    auto delim = *dynamic_cast<String*>(args[1].get());
+    auto ans = text.split(delim);
+    Vec<Self> vec{};
+    std::transform(ans.begin(), ans.end(), vec.begin(),
+        [](const String& xstr){
+            return share(xstr.str());
+        }
+    );
+    return Result(share(vec));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -3698,7 +3741,6 @@ Result Lynx::fn_str_find(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-Result Lynx::fn_str_split(const Vec<Self>& args){}
 Result Lynx::fn_str_join(const Vec<Self>& args){}
 Result Lynx::fn_str_replace(const Vec<Self>& args){}
 Result Lynx::fn_str_substr(const Vec<Self>& args){}
