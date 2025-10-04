@@ -5383,7 +5383,7 @@ Result Lynx::fn_sleep(const Vec<Self>& args){
     Error err;
     auto argc = args.size();
     auto pred = (argc==1);
-    if(!Lynx::check_argc(pred, "today", err)){
+    if(!Lynx::check_argc(pred, "sleep", err)){
         return Result(std::move(err));
     }
     if(!Lynx::check_type(args[0]->is_integer(), args[0], err)){
@@ -5393,9 +5393,78 @@ Result Lynx::fn_sleep(const Vec<Self>& args){
     auto delay = delay_->as_integer();
     std::chrono::milliseconds delay_ms{delay};
     std::this_thread::sleep_for(delay_ms);
+
+    return Result(share());
+}
+
+// -*-
+Result Lynx::fn_timeit(const Vec<Self>& args){
+    //! @todo: add doc-string of `timeit' to lynxDocs describing it syntax
+    /*
+        (timeit expr)
+
+        Examples:
+            (timeit (+ (range 1000)))
+            (timeit (+ (linspace 0.0 1000.0 1000)))
+    */
+    using namespace std::literals;
+    using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
+    using Clock = std::chrono::high_resolution_clock;
+    using Milli = std::chrono::milliseconds;
+    using Micro = std::chrono::microseconds;
+    using Nano = std::chrono::nanoseconds;
+    
+    auto run = [](const Self& expr){
+        try{
+            auto start = Clock::now();
+            [[maybe_unused]] auto ans = Lynx::eval(expr, Lynx::m_runtime);
+            auto stop = Clock::now();
+            auto delta = std::chrono::duration_cast<Micro>(stop-start);
+            return delta;
+        }catch(const Error& err){
+            throw Error(err);
+        }
+    };
+
+    // 
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "today", err)){
+        return Result(std::move(err));
+    }
+    auto expr = args[0];
+    Vec<Micro> durations{};
+    constexpr i64 N = 1000;
+    for(i64 i=0; i < N; i++){
+        try{
+            auto delta = run(expr);
+            durations.push_back(delta);
+        }catch(const Error& err_){
+            err = err_;
+            return Result(std::move(err));
+        }
+    }
+
+    // mean
+    Micro acc{};
+    for(const auto& delta: durations){
+        acc = acc + delta;
+    }
+    auto mean = acc / N;
+    // stdev
+    decltype(mean.count()) stddev{};
+    for(const auto& delta: durations){
+        auto dx = delta.count() - mean.count();
+        stddev = stddev + dx*dx;
+    }
+    auto my_std = static_cast<f64>(stddev)/(N-1);
+    std::cout << "Average time: " << (mean / 1ms) << "ms, stddev: ";
+    std::cout << (my_std/1000) << "ms" << std::endl;
     
     return Result(share());
 }
+
 
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
@@ -5413,7 +5482,7 @@ Result Lynx::fn_sleep(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-Result Lynx::fn_timeit(const Vec<Self>& args){}
+
 Result Lynx::fn_eval(const Vec<Self>& args){}
 Result Lynx::fn_declare_module(const Vec<Self>& args){}
 Result Lynx::fn_declare_error(const Vec<Self>& args){}
