@@ -2,6 +2,7 @@
 
 #include<iostream>
 #include<random>
+#include<chrono>
 #include<stack>
 
 // -*----------------------------------------------------------------*-
@@ -5324,6 +5325,27 @@ Result Lynx::fn_sort(const Vec<Self>& args){
     return Result(share(result));
 }
 
+// -*-
+Result Lynx::fn_now(const Vec<Self>& args){
+    //! @todo: add doc-string of `now' to lynxDocs describing it syntax
+    /*
+        (now)           ; Thu Oct 3 13:28:27 2025
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==0);
+    if(!Lynx::check_argc(pred, "sort", err)){
+        return Result(std::move(err));
+    }
+
+    const auto now = std::chrono::system_clock::now();
+    const std::time_t myTime = std::chrono::system_clock::to_time_t(now);
+    std::stringstream ss;
+    ss << std::ctime(&myTime);
+
+    return Result(share(ss.str()));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -5340,7 +5362,6 @@ Result Lynx::fn_sort(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-Result Lynx::fn_now(const Vec<Self>& args){}
 Result Lynx::fn_today(const Vec<Self>& args){}
 Result Lynx::fn_sleep(const Vec<Self>& args){}
 Result Lynx::fn_timeit(const Vec<Self>& args){}
