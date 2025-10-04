@@ -1,6 +1,7 @@
 #include "lynx.hpp"
 
 #include<iostream>
+#include<random>
 #include<stack>
 
 // -*----------------------------------------------------------------*-
@@ -5001,6 +5002,80 @@ Result Lynx::fn_complex_polar(const Vec<Self>& args){
     return Result(share(num));
 }
 
+// --------------------------------------------------------------------
+// -*-                    Miscellaneous functions                   -*-
+// --------------------------------------------------------------------
+Result Lynx::fn_random(const Vec<Self>& args){
+    //! @todo: add doc-string of `random' to lynxDocs describing it syntax
+    /*
+        (random)                    => x in [0.0 1.0]
+        (random vmax)               => x in [0.0 vmax]
+        (random vmin vmax)          => x in [vmin vmax]
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc>=0 && argc<=2);
+    if(!Lynx::check_argc(pred, "random", err)){
+        return Result(std::move(err));
+    }
+
+    auto myRandom = [](f64 vmin, f64 vmax){
+        std::random_device dev;
+        std::mt19937 rng(dev());
+        std::uniform_real_distribution<f64> dist(vmin, vmax);
+        return dist(rng);
+    };
+
+    Number num{};
+    if(argc==0){
+        num = Number(myRandom(0.0, 1.0));
+    }else if(argc==1){
+        if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
+            return Result(std::move(err));
+        }
+        auto self = *dynamic_cast<Number*>(args[0].get());
+        if(!Lynx::check_type(self.is_scalar(), args[0], err)){
+            err.message() += "\nExpect a floating point value.";
+            return Result(std::move(err));
+        }
+        auto vmax = self.as_float();
+        if(!Lynx::check_value(args[0], (vmax>0), err)){
+            err.message() += "\nExpect the argument > 0";
+            return Result(std::move(err));
+        }
+        num = Number(myRandom(0.0, vmax));
+    }else{
+        if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
+            return Result(std::move(err));
+        }
+        if(!Lynx::check_type(args[1]->is_number(), args[1], err)){
+            return Result(std::move(err));
+        }
+        auto xnum = *dynamic_cast<Number*>(args[0].get());
+        auto ynum = *dynamic_cast<Number*>(args[1].get());
+
+        if(!Lynx::check_type(xnum.is_scalar(), args[0], err)){
+            err.message() += "\nExpect a floating point value.";
+            return Result(std::move(err));
+        }
+        if(!Lynx::check_type(ynum.is_scalar(), args[1], err)){
+            err.message() += "\nExpect a floating point value.";
+            return Result(std::move(err));
+        }
+        auto vmin = xnum.as_float();
+        auto vmax = ynum.as_float();
+        if((vmin > vmax)){
+            std::stringstream ss;
+            ss << "error in form `(random vmin vmax)'. Expect vmin < vmax";
+            err = Error(Error::Kind::ValueError, ss.str());
+            return Result(std::move(err));
+        }
+        num = Number(myRandom(vmin, vmax));
+    }
+
+    return Result(share(num));
+}
+
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
@@ -5016,8 +5091,7 @@ Result Lynx::fn_complex_polar(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-// Miscellaneous functions
-Result Lynx::fn_random(const Vec<Self>& args){}
+
 Result Lynx::fn_range(const Vec<Self>& args){}
 Result Lynx::fn_linspace(const Vec<Self>& args){}
 Result Lynx::fn_sort(const Vec<Self>& args){}
@@ -5027,9 +5101,10 @@ Result Lynx::fn_sleep(const Vec<Self>& args){}
 Result Lynx::fn_timeit(const Vec<Self>& args){}
 Result Lynx::fn_eval(const Vec<Self>& args){}
 Result Lynx::fn_declare_module(const Vec<Self>& args){}
-Result Lynx::fn_declare_error(const Vec<Self>& args);
-Result Lynx::fn_has_feature(const Vec<Self>& args);
-Result Lynx::fn_help(const Vec<Self>& args);
+Result Lynx::fn_declare_error(const Vec<Self>& args){}
+Result Lynx::fn_has_feature(const Vec<Self>& args){}
+Result Lynx::fn_help(const Vec<Self>& args){}
+Result Lynx::fn_assert(const Vec<Self>& args){}
 
 */
 
