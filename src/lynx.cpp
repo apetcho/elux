@@ -3979,10 +3979,42 @@ Result Lynx::fn_abs(const Vec<Self>& args){
         return Result(std::move(err));
     }
     if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
-        err.message() += "\nExpect the argument of `string.endswith' to be a string";
+        err.message() += "\nExpect the argument of `math::abs' to be a number";
         return Result(std::move(err));
     }
     auto num = *dynamic_cast<Number*>(args[0].get());
+    return Result(share(num));
+}
+
+// -*-
+Result Lynx::fn_min(const Vec<Self>& args){
+    //! @todo: add doc-string of `math::min' to lynxDocs describing it syntax
+    /*
+        (math::min x0 x1 ...)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc>=1);
+    if(!Lynx::check_argc(pred, "math::abs", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_number(), args[0], err)){
+        err.message() += "\nExpect arguments of `math::min' to be numbers";
+        return Result(std::move(err));
+    }
+    auto num = *dynamic_cast<Number*>(args[0].get());
+    if(argc==1){
+        return Result(share(num));
+    }
+    for(size_t i=0; i < argc; i++){
+        auto tmp = args[i];
+        if(!Lynx::check_type(tmp->is_number(), tmp, err)){
+            err.message() += "\nExpect arguments of `math::min' to be numbers";
+            return Result(std::move(err));
+        }
+        auto x = *dynamic_cast<Number*>(tmp.get());
+        num = (num < x) ? num : x;
+    }
     return Result(share(num));
 }
 
@@ -4002,7 +4034,6 @@ Result Lynx::fn_abs(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-Result Lynx::fn_min(const Vec<Self>& args){}
 Result Lynx::fn_max(const Vec<Self>& args){}
 Result Lynx::fn_ceil(const Vec<Self>& args){}
 Result Lynx::fn_floor(const Vec<Self>& args){}
