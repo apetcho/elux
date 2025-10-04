@@ -3796,7 +3796,7 @@ Result Lynx::fn_str_replace(const Vec<Self>& args){
     auto neo = *dynamic_cast<String*>(args[2].get());
     Vec<String> vec{};
     
-    // auto ans = text.replace(old, neo);
+    auto ans = text.replace(old, neo);
     
     return Result(share());
 }
@@ -3827,14 +3827,6 @@ Result Lynx::fn_str_substr(const Vec<Self>& args){
         return Result(std::move(err));
     }
     
-    if(!Lynx::check_type(args[1]->is_integer(), args[1], err)){
-        err.message() += "\nExpect the second arguments of `string.substr' to an integer.";
-        return Result(std::move(err));
-    }
-    if(!Lynx::check_type(args[2]->is_integer(), args[2], err)){
-        err.message() += "\nExpect the second arguments of `string.substr' to an integer.";
-        return Result(std::move(err));
-    }
     auto text = *dynamic_cast<String*>(args[0].get());
     auto start = *dynamic_cast<Number*>(args[1].get());
     auto stop = *dynamic_cast<Number*>(args[2].get());
@@ -3844,6 +3836,29 @@ Result Lynx::fn_str_substr(const Vec<Self>& args){
     return Result(share());
 }
 
+// -*-
+Result Lynx::fn_str_ltrim(const Vec<Self>& args){
+    //! @todo: add doc-string of `string.ltrim' to lynxDocs describing it syntax
+    /*
+        (string.ltrim str)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==1);
+    if(!Lynx::check_argc(pred, "string.ltrim", err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[0]->is_string(), args[0], err)){
+        err.message() += "\nExpect the argument of `string.ltrim' to be a string";
+        return Result(std::move(err));
+    }
+    
+    auto text = *dynamic_cast<String*>(args[0].get());
+    
+    auto ans = text.ltrim();
+    
+    return Result(share(ans.str()));
+}
 
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
@@ -3860,7 +3875,6 @@ Result Lynx::fn_str_substr(const Vec<Self>& args){
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
-Result Lynx::fn_str_ltrim(const Vec<Self>& args){}
 Result Lynx::fn_str_rtrim(const Vec<Self>& args){}
 Result Lynx::fn_str_trim(const Vec<Self>& args){}
 Result Lynx::fn_str_startswith(const Vec<Self>& args){}
