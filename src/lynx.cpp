@@ -5080,9 +5080,9 @@ Result Lynx::fn_random(const Vec<Self>& args){
 Result Lynx::fn_range(const Vec<Self>& args){
     //! @todo: add doc-string of `range' to lynxDocs describing it syntax
     /*
-        (random stop)
-        (random start stop)
-        (random start stop step)
+        (range stop)
+        (range start stop)
+        (range start stop step)
     */
     Error err;
     auto argc = args.size();
@@ -5127,6 +5127,66 @@ Result Lynx::fn_range(const Vec<Self>& args){
     return Result(share(result));
 }
 
+// -*-
+Result Lynx::fn_linspace(const Vec<Self>& args){
+    //! @todo: add doc-string of `linspace' to lynxDocs describing it syntax
+    /*
+        (linspace vmin vmax)        ; N = 10
+        (linspace vmin vmax N)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==2 && argc==3);
+    if(!Lynx::check_argc(pred, "linspace", err)){
+        return Result(std::move(err));
+    }
+    for(const auto& arg: args){
+        if(!Lynx::check_type((arg->is_integer() || arg->is_float()), arg, err)){
+            err.message() += "\n`linspace' expect arguments of `range' to be a scalars.";
+            return Result(std::move(err));
+        }
+    }
+
+    f64 start, stop;
+    i64 N = 10;
+    if(args.size()==2){
+        start = dynamic_cast<Number*>(args[0].get())->as_float();
+        stop = dynamic_cast<Number*>(args[1].get())->as_float();
+    }else{
+        start = dynamic_cast<Number*>(args[0].get())->as_float();
+        stop = dynamic_cast<Number*>(args[1].get())->as_float();
+        auto num = dynamic_cast<Number*>(args[2].get());
+        if(!num->is_integer()){
+            Str msg{"expect the third argument to `linspace' to be an integer"};
+            err = Error(Error::Kind::TypeError, msg);
+            return Result(std::move(err));
+        }
+        N = num->as_integer();
+    }
+
+    if(start > stop){
+        Str msg{
+            "error while applying `linspace'.\nExpect the two arguments "
+            "'start' and 'stop' to satisfy `start < stop`"
+        };
+        err = Error(Error::Kind::ValueError, msg);
+        return Result(std::move(err));
+    }
+
+    if(N < 1){
+        Str msg{"expect the third argument of `linspace' to be > 1"};
+        err = Error(Error::Kind::ValueError, msg);
+        return Result(std::move(err));
+    }
+
+    Vec<Self> result{};
+    f64 dx = (stop - start)/(N - 1);
+    for(auto i=0; i < N; i++){
+        result.push_back(share((start + i*dx)));
+    }
+
+    return Result(share(result));
+}
 
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
@@ -5144,7 +5204,7 @@ Result Lynx::fn_range(const Vec<Self>& args){
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
 
 
-Result Lynx::fn_linspace(const Vec<Self>& args){}
+
 Result Lynx::fn_sort(const Vec<Self>& args){}
 Result Lynx::fn_now(const Vec<Self>& args){}
 Result Lynx::fn_today(const Vec<Self>& args){}
