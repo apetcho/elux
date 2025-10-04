@@ -1256,8 +1256,8 @@ public:
     static Result fn_eval(const Vec<Self>& args);
     static Result fn_declare_module(const Vec<Self>& args);
     static Result fn_declare_error(const Vec<Self>& args);
-    static Result fn_has_feature(const Vec<Self>& args);
-    static Result fn_help(const Vec<Self>& args);
+    // static Result fn_has_feature(const Vec<Self>& args);
+    // static Result fn_help(const Vec<Self>& args);
     static Result fn_assert(const Vec<Self>& args);
 };
 

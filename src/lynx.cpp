@@ -5566,27 +5566,107 @@ Result Lynx::fn_declare_error(const Vec<Self>& args){
     return Result(share());
 }
 
+// -*-
+/*
+    (has-feature? "feature-name")
+    (has-feature? module-name "feature-name")
+
+    Examples:
+        (has-feature? "sleep")
+        (has-feature? math "hypot")
+*/
+// Result Lynx::fn_has_feature(const Vec<Self>& args){
+//     //! @todo: add doc-string of `has-feature?' to lynxDocs describing it syntax
+//     Error err;
+//     auto argc = args.size();
+//     auto pred = (argc==1 || argc==2);
+//     if(!Lynx::check_argc(pred, "has-feature?", err)){
+//         return Result(std::move(err));
+//     }
+
+//     bool ans{};
+//     if(argc==1){
+//         if(!Lynx::check_type(args[0]->is_string(), args[0], err)){
+//             return Result(std::move(err));
+//         }
+//         // Looking for builtin features
+//         auto feature_ = dynamic_cast<String*>(args[0].get());
+//         auto feature = feature_->str();
+//         ans = Lynx::prelude.contains(feature);
+//     }else{
+//         if(!Lynx::check_type(args[0]->is_symbol(), args[0], err)){
+//             return Result(std::move(err));
+//         }
+//         if(!Lynx::check_type(args[1]->is_string(), args[1], err)){
+//             return Result(std::move(err));
+//         }
+//         auto lib_ = dynamic_cast<Symbol*>(args[0].get());
+//         auto libname = lib_->str();
+//         auto feature_ = dynamic_cast<String*>(args[1].get());
+//         auto feature = feature_->str();
+//         ans = false;
+//         auto entry = Lynx::libraries.find(libname);
+//         if(entry!=Lynx::libraries.end()){
+//             // It is a user library
+//             auto my_module = entry->second;
+//             auto env = my_module.env();
+//             ans = env.contains(feature);
+//         }
+//         if(!ans){
+//             // Look in the Lynx libraries
+//         }
+//         // first look in the user library
+//     }
+
+//     if(!Lynx::check_type(args[0]->is_symbol(), args[0], err)){
+//         return Result(std::move(err));
+//     }
+    
+//     auto name_ = dynamic_cast<Symbol*>(args[0].get());
+//     auto name = name_->str();
+//     Lynx::m_runtime.put(name, share(name.c_str()));
+//     return Result(share(ans));
+// }
+
+// -*-
+Result Lynx::fn_assert(const Vec<Self>& args){
+    //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
+    /*
+        (assert predicate error-message)
+    */
+    Error err;
+    auto argc = args.size();
+    auto pred = (argc==2);
+    if(!Lynx::check_argc(pred, "assert", err)){
+        return Result(std::move(err));
+    }
+    
+    if(!Lynx::check_type(args[0]->is_bool(), args[0], err)){
+        return Result(std::move(err));
+    }
+    if(!Lynx::check_type(args[1]->is_string(), args[1], err)){
+        return Result(std::move(err));
+    }
+
+    // -*-
+    auto pred_ = dynamic_cast<Bool*>(args[0].get());
+    pred = pred_->as_bool();
+    auto msg_ = dynamic_cast<String*>(args[1].get());
+    auto msg = msg_->str();
+    if(!pred){
+        std::cerr << msg << std::endl;
+        std::abort();
+    }
+
+    return Result(share());
+}
 
 /*
 //! @todo: add doc-string of `cond' to lynxDocs describing it syntax
 
-    check_argc(argc, expected_argc, funcname, err)
-    
-    Error err;
-    if(!Lynx::check_type(Symbol("list"), self, err)){
-        return Result(std::move(err));
-    }
-    auto xs = *dynamic_cast<List*>(self.get());
-    auto vec = xs.as_vector();
-
 // Result Lynx::fn_take(const Vec<Self>& args){}
 // Result Lynx::fn_take_while(const Vec<Self>& args){}
-
-
-Result Lynx::fn_has_feature(const Vec<Self>& args){}
-Result Lynx::fn_help(const Vec<Self>& args){}
-Result Lynx::fn_assert(const Vec<Self>& args){}
-
+// Result Lynx::fn_help(const Vec<Self>& args){}
 */
 
 // -*----------------------------------------------------------------*-
