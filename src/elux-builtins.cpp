@@ -1,3 +1,26 @@
+/*
+MIT License
+
+Copyright (c) 2026 Eyram K. Apetcho
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 #include "elux.hpp"
 #include<cmath>
 #include<iomanip>
@@ -10,96 +33,6 @@
 // -*----------------------------------------------------------------*-
 namespace ekasoft::klx{
 // -
-// -*-
-// std::string toString(const Value& v) {
-//     switch (v.type) {
-//         case Type::NIL: return "nil";
-//         case Type::BOOL: return std::get<bool>(v.data) ? "t" : "nil";
-//         case Type::INT: return std::to_string(std::get<long long>(v.data));
-//         case Type::FLOAT: {
-//             std::ostringstream oss;
-//             oss << std::get<double>(v.data);
-//             return oss.str();
-//         }
-//         case Type::STRING:{
-//             return "\"" + std::get<std::string>(v.data) + "\"";
-//         }
-//         case Type::LIST:{
-//             std::ostringstream oss; oss << "(";
-//             const auto& xs = std::get<List>(v.data);
-//             auto ptr = xs.begin();
-//             for(size_t i = 0; i < xs.size(); ++i){
-//                 if(i){ oss << " "; }
-//                 if(i==0){ oss << toString(*ptr); }
-//                 else{
-//                     std::advance(ptr, i);
-//                     oss << toString(*ptr);
-//                 }
-//             }
-//             oss << ")";
-//             return oss.str();
-//         }
-//         case Type::ARRAY:{
-//             std::ostringstream oss; oss << "[";
-//             const auto& a = std::get<Array>(v.data);
-//             for(size_t i = 0; i < a.size(); ++i){
-//                 if(i){ oss << " "; }
-//                 oss << toString(a[i]);
-//             }
-//             oss << "]";
-//             return oss.str();
-//         }
-//         case Type::SET:{
-//             std::ostringstream oss; oss << "#{";
-//             const auto& s = std::get<Set>(v.data);
-//             bool first = true;
-//             for(auto& e : s){
-//                 if(!first){ oss << " "; }
-//                 first = false;
-//                 oss << e;
-//             }
-//             oss << "}";
-//             return oss.str();
-//         }
-//         case Type::DICT:{
-//             std::ostringstream oss; oss << "{";
-//             const auto& d = std::get<Dict>(v.data);
-//             bool first = true;
-//             for(auto& kv : d){
-//                 if(!first){ oss << " "; }
-//                 first = false;
-//                 oss << kv.first << ": " << toString(kv.second);
-//             }
-//             oss << "}";
-//             return oss.str();
-//         }
-//         case Type::FUNCTION:
-//         case Type::MACRO:
-//             return "<function>";
-//     }
-//     return "<?>"; // unreachable
-// }
-
-// // -*-
-// long long asInt(const Value& v){
-//     if(v.type == Type::INT){ return std::get<long long>(v.data); }
-//     if(v.type == Type::FLOAT){
-//         return static_cast<long long>(std::get<double>(v.data));
-//     }
-//     throw std::runtime_error("Expected integer");
-// }
-
-// double asFloat(const Value& v) {
-//     if(v.type == Type::FLOAT){ return std::get<double>(v.data);}
-//     if(v.type == Type::INT){
-//         return static_cast<double>(std::get<long long>(v.data));
-//     }
-//     throw std::runtime_error("Expected number");
-// }
-
-// bool isNumber(const Value& v) {
-//     return v.type == Type::INT || v.type == Type::FLOAT;
-// }
 
 Self add(const Vec<Self>& args) {
     if(args.empty()){ return std::make_shared<Number>();}
