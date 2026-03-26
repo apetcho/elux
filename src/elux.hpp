@@ -385,6 +385,7 @@ private:
     char peek(void) const;
     char peek_next(void) const;
     void advance(void);
+    //void skip_comment(void);
 };
 
 struct Parser {

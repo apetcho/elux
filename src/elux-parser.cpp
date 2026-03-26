@@ -16,6 +16,12 @@ void Lexer::skipSpaces() {
     }
 }
 
+// void Lexer::skip_comment(void){
+//     if(this->peek()==';'){
+//         while(!this->eof() && this->peek() != '\n'){ this->advance(); }
+//     }
+// }
+
 bool Lexer::startsWith(const std::string& s) {
     return m_src.compare(m_pos, s.size(), s) == 0;
 }
@@ -23,6 +29,7 @@ bool Lexer::startsWith(const std::string& s) {
 // -*-
 Token Lexer::next(){
     skipSpaces();
+    //skip_comment();
     if (this->eof()){
          return {TokenKind::END, ""};
     }
