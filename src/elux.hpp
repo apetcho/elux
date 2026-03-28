@@ -226,6 +226,7 @@ struct Number final: public Object {
     }
 
     // -*-
+    bool as_bool(void) const;
     i64 as_integer(void) const;
     f64 as_float(void) const;
     Number abs(void) const;

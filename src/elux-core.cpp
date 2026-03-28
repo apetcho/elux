@@ -41,6 +41,11 @@ namespace ekasoft::klx{
 // --------------
 // -*- Number -*-
 // --------------
+bool Number::as_bool(void) const{
+    auto result = static_cast<bool>(*this);
+    return result;
+}
+
 i64 Number::as_integer(void) const{
     if(this->is_integer()){
         return std::get<i64>(this->m_val);
