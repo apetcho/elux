@@ -852,10 +852,16 @@ Number& Number::operator=(const Number& num) noexcept{
     return *this;
 }
 
-/*
-Number& Number::operator=(Number&&) noexcept{}
-*/
+// -*-
+Number& Number::operator=(Number&& num) noexcept{
+    if(this != &num){
+        this->m_val = std::move(num.m_val);
+    }
+    return *this;
+}
 
+
+// -*-
 bool Number::as_bool(void) const{
     auto result = static_cast<bool>(*this);
     return result;
