@@ -180,11 +180,18 @@ struct Tuple final: public Object, public Iterable{
     Tuple& operator=(Tuple&& tuple) noexcept;
     std::string type(void) const override;
     std::string str(void) const override;
-    Vec<Self> items;
+    
 
-    //! @todo
     Self next(void) override;
     bool done(void) const override;
+
+    const Vec<Self>& value(void) const{ return this->m_items; }
+    Vec<Self>& value(void){ return this->m_items; }
+
+private:
+    Vec<Self> m_items;
+    Vec<Self>::iterator m_ptr;
+    Vec<Self>::iterator m_stop;
 };
 
 // -*-
@@ -359,14 +366,13 @@ private:
 
 // -*-
 struct String final: public Object, public Iterable{
-    explicit String();// : m_val{std::string()}{}
-    explicit String(const std::string& str);//: m_val{std::string(str)}{}
-    explicit String(const char* cstr);//: m_val{std::string(cstr)}{}
-    explicit String(char c); //: m_val{std::string(1, c)}{}
-    String(const String& xs); // : m_val{xs.m_val}{};
-    String(String&& xs);//: m_val{std::move(xs.m_val)}{ xs.m_val = {}; }
+    explicit String();
+    explicit String(const std::string& str);
+    explicit String(const char* cstr);
+    explicit String(char c);
+    String(const String& xs);
+    String(String&& xs);
 
-    //! @todo
     Self next(void) override;
     bool done(void) const override;
 
@@ -415,7 +421,6 @@ struct Set final: public Object, public Iterable {
     HSet& value(void);
     const HSet& value(void) const;
 
-    //! @todo
     Self next(void) override;
     bool done(void) const override;
     
@@ -471,7 +476,6 @@ struct List final: public Object, public Iterable{
     std::list<Self>& value(void);
     const std::list<Self>& value(void) const;
 
-    //! @todo
     Self next(void) override;
     bool done(void) const override;
 
@@ -503,7 +507,6 @@ struct Array final: public Object, public Iterable{
         return *this;
     }
 
-    //! @todo
     Self next(void) override;
     bool done(void) const override;
 

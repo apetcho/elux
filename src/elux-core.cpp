@@ -227,22 +227,6 @@ bool Iterable::all(Function func, Context env){
     return result;
 }
 
-/*
-struct Iterable : public Object {
-    virtual ~Iterable() = default;
-    
-    virtual Self next(void) = 0;
-    virtual bool done(void) const = 0;
-
-
-std::string Iterable::type(void) const{}
-std::string Iterable::str(void) const{}
-
-private:
-    Object* m_data;
-};
-
-*/
 
 // --------------
 // -*- Symbol -*-
@@ -355,84 +339,117 @@ std::string Pair::str(void) const{
 // -------------
 Tuple::Tuple()
 : Iterable(this)
-, items{}{}
+, m_items{}{
+    this->m_ptr = this->m_items.begin();
+    this->m_stop = this->m_items.end();
+}
 
 Tuple::Tuple(const std::initializer_list<Self>& xs)
 : Iterable(this)
-, items{Vec<Self>(xs.begin(), xs.end())}
-{}
+, m_items{Vec<Self>(xs.begin(), xs.end())}
+{
+    this->m_ptr = this->m_items.begin();
+    this->m_stop = this->m_items.end();
+}
 
 Tuple::Tuple(const Vec<Self>& xs)
 : Iterable(this)
-, items{xs}
-{}
+, m_items{xs}
+{
+    this->m_ptr = this->m_items.begin();
+    this->m_stop = this->m_items.end();
+}
 
 Tuple::Tuple(const std::list<Self>& xs)
 : Iterable(this)
-, items{Vec<Self>(xs.begin(), xs.end())}
-{}
+, m_items{Vec<Self>(xs.begin(), xs.end())}
+{
+    this->m_ptr = this->m_items.begin();
+    this->m_stop = this->m_items.end();
+}
 
 Tuple::Tuple(const Pair& xs)
 : Iterable(this)
-, items{Vec<Self>{xs.key, xs.val}}
-{}
+, m_items{Vec<Self>{xs.key, xs.val}}
+{
+    this->m_ptr = this->m_items.begin();
+    this->m_stop = this->m_items.end();
+}
 
 Tuple::Tuple(const List& xs)
 : Iterable(this)
 {
     auto data = xs.value();
-    this->items = Vec<Self>(data.begin(), data.end());
+    this->m_items = Vec<Self>(data.begin(), data.end());
+    this->m_ptr = this->m_items.begin();
+    this->m_stop = this->m_items.end();
 }
 
 Tuple::Tuple(const Array& xs)
 : Iterable(this)
-, items{xs.value()}
-{}
+, m_items{xs.value()}
+{
+    this->m_ptr = this->m_items.begin();
+    this->m_stop = this->m_items.end();
+}
 
 Tuple::Tuple(const Set& xs)
 : Iterable(this)
 {
     auto data = xs.value();
-    this->items = {};
+    this->m_items = {};
     for(auto item: data){
-        this->items.push_back(ELux::share(item));
+        this->m_items.push_back(ELux::share(item));
     }
+    this->m_ptr = this->m_items.begin();
+    this->m_stop = this->m_items.end();
 }
 
 Tuple::Tuple(const Dict& xs)
 : Iterable(this){
     auto data = xs.value();
-    this->items = {};
+    this->m_items = {};
     for(auto [key, val]: data){
         auto xkey = ELux::share(key);
         auto xval = val;
         Pair pair(xkey, xval);
-        this->items.push_back(ELux::share(pair));
+        this->m_items.push_back(ELux::share(pair));
     }
+    this->m_ptr = this->m_items.begin();
+    this->m_stop = this->m_items.end();
 }
 
 Tuple::Tuple(const Tuple& tuple) noexcept
 : Iterable(this)
-, items{tuple.items}
-{}
+, m_items{tuple.m_items}
+{
+    this->m_ptr = this->m_items.begin();
+    this->m_stop = this->m_items.end();
+}
 
 Tuple::Tuple(Tuple&& tuple) noexcept
 : Iterable(this)
-, items{std::move(tuple.items)}{
-    tuple.items = {};
+, m_items{std::move(tuple.m_items)}{
+    tuple.m_items = {};
+    this->m_ptr = this->m_items.begin();
+    this->m_stop = this->m_items.end();
 }
 
 Tuple& Tuple::operator=(const Tuple& tuple) noexcept{
     if(this != &tuple){
-        this->items = tuple.items;
+        this->m_items = tuple.m_items;
+        this->m_ptr = this->m_items.begin();
+        this->m_stop = this->m_items.end();
     }
     return *this;
 }
 
 Tuple& Tuple::operator=(Tuple&& tuple) noexcept{
     if(this != &tuple){
-        this->items = std::move(tuple.items);
-        tuple.items = {};
+        this->m_items = std::move(tuple.m_items);
+        this->m_ptr = this->m_items.begin();
+        this->m_stop = this->m_items.end();
+        tuple.m_items = {};
     }
     return *this;
 }
@@ -444,14 +461,26 @@ std::string Tuple::type(void) const{
 std::string Tuple::str(void) const{
     std::stringstream ss;
     ss << "#[";
-    for(size_t i=0; i < this->items.size(); i++){
+    for(size_t i=0; i < this->m_items.size(); i++){
         if(i > 0){ ss << " "; }
-        ss << this->items[i]->str();
+        ss << this->m_items[i]->str();
     }
     ss << "]";
 
     return ss.str();
 }
+
+// -*-
+Self Tuple::next(void){
+    auto self = *this->m_ptr;
+    this->m_ptr = std::next(this->m_ptr);
+
+    return std::move(self);
+}
+/*
+
+bool Tuple::done(void) const{}
+*/
 
 // -----------------
 // -*- ELuxError -*-
@@ -942,6 +971,18 @@ bool operator>=(const Number& lhs, const Number& rhs){
 // --------------
 // -*- String -*-
 // --------------
+
+//! @todo
+/*
+String::String(){}
+String::String(const std::string& str){}
+String::String(const char* cstr){}
+String::String(char c){}
+String::String(const String& xs){}
+String::String(String&& xs){}
+Self String::next(void){}
+bool String::done(void) const{}
+*/
 // -*-
 std::string String::str(void) const{
     std::stringstream ss;
@@ -1048,6 +1089,12 @@ HSet& Set::value(void){ return this->m_hset; }
 
 // -*-
 const HSet& Set::value(void) const{ return this->m_hset; }
+
+//! @todo
+/*
+Self Set::next(void){}
+bool Set::done(void) const{}
+*/
 
 // ------------
 // -*- Dict -*-
@@ -1207,6 +1254,12 @@ HMap& Dict::value(void){ return this->m_hmap; }
 
 const HMap& Dict::value(void) const{ return this->m_hmap; }
 
+//! @todo
+/*
+Self Dict::next(void){}
+bool Dict::done(void) const{}
+*/
+
 // ------------
 // -*- List -*-
 // ------------
@@ -1309,6 +1362,12 @@ std::list<Self>& List::value(void){
 const std::list<Self>& List::value(void) const{
     return this->m_xs;
 }
+
+//! @todo
+/*
+Self List::next(void){}
+bool List::done(void) const{}
+*/
 
 // -------------
 // -*- Array -*-
@@ -1420,7 +1479,11 @@ const Vec<Self>& Array::value(void) const{
     return this->m_xs;
 }
 
-
+//! @todo
+/*
+Self Array::next(void){}
+bool Array::done(void) const{}
+*/
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::ekasoft::klx                                 -*-
 // -*----------------------------------------------------------------*-
