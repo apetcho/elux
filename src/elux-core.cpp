@@ -103,6 +103,24 @@ Iterator Iterable::zip(Vec<Iterator> iterators, Context env){
         Tuple tuple(record);
         vec.push_back(ELux::share(tuple));
     }
+
+    return std::make_shared<Array>(vec);
+}
+
+// -*-
+Iterator Iterable::chain(Vec<Iterator> iterators){
+    Vec<Self> vec{};
+    
+    std::for_each(
+        iterators.begin(), iterators.end(),
+        [&vec](Iterator iter){
+            while(!iter->done()){
+                vec.push_back(std::move(iter->next()));
+            }
+        }
+    );
+
+    return std::make_shared<Array>(vec);
 }
 
 /*
@@ -112,11 +130,10 @@ struct Iterable : public Object {
     virtual Self next(void) = 0;
     virtual bool done(void) const = 0;
 
-Iterator Iterable::chain(const Vec<Iterator>& iterators){}
-Iterator Iterable::take(const Vec<Iterator>& iterators){}
-Iterator Iterable::enumerate(const Vec<Iterator>& iterators){}
-Iterator Iterable::drop_while(Function func, Context env, const Vec<Iterator>& iterators){}
-Iterator Iterable::take_while(Function func, Context env, const Vec<Iterator>& iterators){}
+Iterator Iterable::take(Vec<Iterator> iterators){}
+Iterator Iterable::enumerate(Vec<Iterator> iterators){}
+Iterator Iterable::drop_while(Function func, Context env, Vec<Iterator> iterators){}
+Iterator Iterable::take_while(Function func, Context env, Vec<Iterator> iterators){}
 bool Iterable::any(Function func, Context env) const;
 bool Iterable::all(Function func, Context env) const;
 
