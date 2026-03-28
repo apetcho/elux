@@ -149,9 +149,9 @@ struct Pair final : public Object{
 
 struct Tuple final: public Object{
     explicit Tuple();
-    explicit Tuple(std::initializer_list<Self> xs);
-    explicit Tuple(Vec<Self> xs);
-    explicit Tuple(std::list<Self> xs);
+    explicit Tuple(const std::initializer_list<Self>& xs);
+    explicit Tuple(const Vec<Self>& xs);
+    explicit Tuple(const std::list<Self>& xs);
     explicit Tuple(const Pair& xs);
     explicit Tuple(const List& xs);
     explicit Tuple(const Array& xs);

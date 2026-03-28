@@ -150,11 +150,14 @@ std::string Pair::str(void) const{
 Tuple::Tuple()
 : items{}{}
 
+Tuple::Tuple(const std::initializer_list<Self>& xs)
+: items{Vec<Self>(xs.begin(), xs.end())}
+{}
+
 /*
 
 struct Tuple final: public Object{
 
-Tuple::Tuple(const std::initializer_list<Self>& xs){}
 Tuple::Tuple(const Vec<Self> x&){}
 Tuple::Tuple(const std::list<Self>& xs){}
 Tuple::Tuple(const Pair& xs){}
