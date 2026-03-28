@@ -646,6 +646,31 @@ bool Tuple::done(void) const{
     return (this->m_ptr==this->m_stop ? true: false);
 }
 
+// -*-
+usize Tuple::hash(void) const{
+    auto check = std::all_of(
+        this->m_items.begin(), this->m_items.end(),
+        [](const Self& self){
+            return ELux::is_hashable(self);
+        }
+    );
+    if(check){
+        usize ans = std::hash<std::string>{}("Tuple");
+        std::for_each(
+            this->m_items.begin(), this->m_items.end(),
+            [&ans](const Self& self){
+                auto item = dynamic_cast<Hashable*>(self.get());
+                ans = ans ^ item->hash();
+            }
+        );
+        return ans;
+    }
+}
+
+/*
+bool Tuple::equal(Object* other) const{}
+*/
+
 // -----------------
 // -*- ELuxError -*-
 // -----------------
