@@ -101,10 +101,14 @@ Pair::Pair(Self key_, Self val_)
     val_ = nullptr;
 }
 
+Pair::Pair(const Pair& pair) noexcept
+: key{pair.key}
+, val{pair.val}
+{}
+
 /*
 struct Pair final : public Object{
 
-Pair::Pair(const Pair& pair) noexcept{}
 Pair::Pair(Pair&& pair) noexcept{}
 Pair& Pair::operator=(const Pair& pair) noexcept{}
 Pair& Pair::operator=(Pair&& pair) noexcept{}
