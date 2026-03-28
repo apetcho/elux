@@ -599,55 +599,72 @@ i64 ELux::len(const Self& self){
 }
 
 // -*-
-std::string ELux::repr(const Self& self){
-    //auto expr = valueToExpr(self);
-    struct ToExpr{
-        Expr toExpr(const Self& self){
-            if(ELux::is_list(self)){
-                auto xs = ELux::as_list(self);
-                return this->toExpr(xs);
-            }
-            if(ELux::is_string(self)){
-                return std::make_shared<SymbolExpr>(ELux::as_string(self).value());
-            }
-            return std::make_shared<LiteralExpr>(self);
-        }
-
-    private:
-        Expr toExpr(const List& xs){
-            auto expr = std::make_shared<ListExpr>();
-            for(auto item: xs.value()){
-                expr->elements.push_back(this->toExpr(item));
-            }
-            return expr;
-        }
-    };
-
-    struct ToString{
-        void to_str(const Expr& expr, std::stringstream& ss){
-            if(auto self = dynamic_cast<ListExpr*>(expr.get())){
-                ss << "(";
-                auto idx = 0;
-                for(auto item: self->elements){
-                    if(idx > 0){ ss << " "; }
-                    to_str(item, ss);
-                }
-                ss << ")";
-            }else if(auto self=dynamic_cast<SymbolExpr*>(expr.get())){
-                ss << " " << self->name;
-            }else if(auto self=dynamic_cast<LiteralExpr*>(expr.get())){
-                ss << self->value->str();
-            }else{
-                ss << "";
-            }
-        }
-    };
-
-    std::stringstream ss;
-    auto expr = ToExpr().toExpr(self);
-    ToString().to_str(expr, ss);
-    return ss.str();
+void ELux::check_type(bool pred, const std::string& message){
+    if(!pred){
+        throw ELuxError(ELuxError::TypeError, message);
+    }
 }
+
+/*
+void ELux::check_value(bool pred, const std::string& message){}
+void ELux::check_syntax(bool pred, const std::string& message){}
+void ELux::check_runtime(bool pred, const std::string& message){}
+void ELux::check_key(bool pred, const std::string& message){}
+void ELux::check_index(bool pred, const std::string& message){}
+void ELux::check(bool pred, const std::string& message){}
+void ELux::check_argc(bool pred, const std::string& message){}
+*/
+
+// // -*-
+// std::string ELux::repr(const Self& self){
+//     //auto expr = valueToExpr(self);
+//     struct ToExpr{
+//         Expr toExpr(const Self& self){
+//             if(ELux::is_list(self)){
+//                 auto xs = ELux::as_list(self);
+//                 return this->toExpr(xs);
+//             }
+//             if(ELux::is_string(self)){
+//                 return std::make_shared<SymbolExpr>(ELux::as_string(self).value());
+//             }
+//             return std::make_shared<LiteralExpr>(self);
+//         }
+
+//     private:
+//         Expr toExpr(const List& xs){
+//             auto expr = std::make_shared<ListExpr>();
+//             for(auto item: xs.value()){
+//                 expr->elements.push_back(this->toExpr(item));
+//             }
+//             return expr;
+//         }
+//     };
+
+//     struct ToString{
+//         void to_str(const Expr& expr, std::stringstream& ss){
+//             if(auto self = dynamic_cast<ListExpr*>(expr.get())){
+//                 ss << "(";
+//                 auto idx = 0;
+//                 for(auto item: self->elements){
+//                     if(idx > 0){ ss << " "; }
+//                     to_str(item, ss);
+//                 }
+//                 ss << ")";
+//             }else if(auto self=dynamic_cast<SymbolExpr*>(expr.get())){
+//                 ss << " " << self->name;
+//             }else if(auto self=dynamic_cast<LiteralExpr*>(expr.get())){
+//                 ss << self->value->str();
+//             }else{
+//                 ss << "";
+//             }
+//         }
+//     };
+
+//     std::stringstream ss;
+//     auto expr = ToExpr().toExpr(self);
+//     ToString().to_str(expr, ss);
+//     return ss.str();
+// }
 
 // -*-
 Self ELux::visit(LiteralExpr& e, Context env){

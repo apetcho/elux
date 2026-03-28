@@ -62,6 +62,10 @@ struct Env;
 struct ExprBase;
 struct ExprVisitor;
 struct Iterable;
+struct Hashable;
+struct Equalable;
+struct Comparable;
+struct TotalOrdering;
 
 struct Object;
 struct Number;
@@ -74,10 +78,12 @@ struct Function;
 struct Symbol;
 struct Pair;
 
+using i8 = std::int8_t;
 using i64 = std::int64_t;
 using u64 = std::uint64_t;
 using u32 = std::uint32_t;
 using f64 = double;
+using usize = std::size_t;
 // using List  = std::list<Value>;
 // using Array = std::vector<Value>;
 using Self = std::shared_ptr<Object>;
@@ -102,7 +108,6 @@ struct Object{
     }
 };
 
-//! @todo
 // ----------------
 // -*- Iterable -*-
 // ----------------
@@ -118,7 +123,7 @@ struct Iterable{
     virtual Iterator zip(Vec<Iterator> iterators);
     virtual Iterator chain(Vec<Iterator> iterators);
     virtual Iterator take(u32 n);
-    virtual Iterator enumerate(Vec<Iterator> iterators);
+    virtual Iterator enumerate(void);
     virtual Iterator drop_while(Function func, Context env);
     virtual Iterator take_while(Function func, Context env);
     virtual bool any(Function func, Context env);
@@ -135,9 +140,55 @@ private:
     Object* m_data;
 };
 
+// -*-
+struct Hashable{
+    Hashable(Object* obj): m_data{obj}{}
+    virtual ~Hashable() = default;
+    virtual usize hash(void) const = 0;
+
+private:
+    Object* m_data;
+};
 
 // -*-
-struct Nil final : public Object {
+struct Equalable{
+    Equalable(Object* obj);
+    virtual ~Equalable() = default;
+    virtual bool equal(Object* other) const = 0;
+    virtual bool not_equal(Object* other){
+        return !this->equal(other);
+    }
+
+private:
+    Object* m_data;
+};
+
+// -*-
+struct Comparable{
+    Comparable(Object* obj): m_data{obj}{}
+    virtual ~Comparable() = default;
+    virtual int compare(Object* other) const = 0;
+
+private:
+    Object* m_data;
+};
+
+// -*-;
+struct TotalOrdering : public Equalable, public Comparable{
+    TotalOrdering(Object* obj)
+    : Equalable(obj), Comparable(obj){}
+    virtual ~TotalOrdering() = default;
+};
+
+
+// -*-
+struct Nil final : public Object, public Hashable, public Equalable{
+    Nil(): Hashable(this), Equalable(this){}
+    Nil(const Nil&) noexcept = default;
+    Nil(Nil&&) noexcept = default;
+    Nil& operator=(const Nil&) noexcept = default;
+    Nil& operator=(Nil&&) noexcept = default;
+
     std::string type(void) const override{
         return "Nil";
     }
@@ -145,10 +196,14 @@ struct Nil final : public Object {
     std::string str(void) const override{
         return "nil";
     }
+
+    usize hash(void) const override;
+    bool equal(Object* other) const override;
+
 };
 
 // -*-
-struct Symbol final : public Object{
+struct Symbol final : public Object, public Hashable, public Equalable{
     explicit Symbol(const std::string& val);
     Symbol(const Symbol& sym) noexcept;
     Symbol(Symbol&& sym) noexcept;
@@ -158,10 +213,13 @@ struct Symbol final : public Object{
     std::string type(void) const override;
     std::string str(void) const override;
     std::string value;
+
+    usize hash(void) const override;
+    bool equal(Object* other) const override;
 };
 
 // -*-
-struct Pair final : public Object{
+struct Pair final : public Object, public Hashable, public Equalable{
     explicit Pair(Self key, Self val);
     Pair(const Pair& pair) noexcept;
     Pair(Pair&& pair) noexcept;
@@ -170,11 +228,14 @@ struct Pair final : public Object{
     std::string type(void) const override;
     std::string str(void) const override;
 
+    usize hash(void) const override;
+    bool equal(Object* other) const override;
+
     Self key;
     Self val;
 };
 
-struct Tuple final: public Object, public Iterable{
+struct Tuple final: public Object, public Iterable, public Hashable, public Equalable{
     explicit Tuple();
     explicit Tuple(const std::initializer_list<Self>& xs);
     explicit Tuple(const Vec<Self>& xs);
@@ -198,6 +259,9 @@ struct Tuple final: public Object, public Iterable{
     Self next(void) override;
     bool done(void) const override;
 
+    usize hash(void) const override;
+    bool equal(Object* other) const override;
+
     const Vec<Self>& value(void) const{ return this->m_items; }
     Vec<Self>& value(void){ return this->m_items; }
 
@@ -208,21 +272,24 @@ private:
 };
 
 // -*-
-class ELuxError final: public Object, public std::runtime_error {
+class ELuxError final: public Object, public Hashable, public Equalable{
 public:
     explicit ELuxError();
     explicit ELuxError(const Symbol& sym);
     explicit ELuxError(const Symbol& sym, const std::string& msg);
-    ELuxError(const ELuxError& err) noexcept = default;
-    ELuxError(ELuxError&& err) noexcept = default;
-    ELuxError& operator=(const ELuxError& err) noexcept = default;
-    ELuxError& operator=(ELuxError&& err) noexcept = default;
+    ELuxError(const ELuxError& err) noexcept;// = default;
+    ELuxError(ELuxError&& err) noexcept;// = default;
+    ELuxError& operator=(const ELuxError& err) noexcept;// = default;
+    ELuxError& operator=(ELuxError&& err) noexcept;// = default;
 
     std::string describe(void) const;
     const Symbol& kind(void) const;
     Symbol& kind(void);
     std::string type(void) const override;
     std::string str(void) const override;
+
+    usize hash(void) const override;
+    bool equal(Object* other) const override;
 
     static Symbol ValueError;
     static Symbol TypeError;
@@ -233,16 +300,31 @@ public:
     
 private:
     Symbol m_kind;
+    std::string m_msg;
 };
 
 // -*-
-struct Bool final: public Object{
-    explicit Bool() : m_val{false}{}
-    explicit Bool(bool b) : m_val{b}{}
-    Bool(const Bool&) = default;
-    Bool(Bool&&) = default;
-    Bool& operator=(const Bool&) = default;
-    Bool& operator=(Bool&&) = default;
+struct Bool final: public Object, public Hashable, public TotalOrdering {
+    explicit Bool()
+    : Hashable(this)
+    , TotalOrdering(this)
+    , m_val{false}{}
+    explicit Bool(bool b)
+    : Hashable(this)
+    , TotalOrdering(this)
+    , m_val{b}{}
+    Bool(const Bool& other) noexcept
+    : Hashable(this)
+    , TotalOrdering(this)
+    , m_val{other.m_val}
+    {}
+    Bool(Bool&& other) noexcept
+    : Hashable(this)
+    , TotalOrdering(this)
+    , m_val{std::move(other.m_val)}
+    {}
+    Bool& operator=(const Bool&) noexcept;
+    Bool& operator=(Bool&&) noexcept;
     operator bool() const{ return this->m_val; }
 
     std::string type(void) const override{
@@ -253,19 +335,32 @@ struct Bool final: public Object{
         return (this->m_val ? "true" : "false");
     }
 
+    usize hash(void) const override;
+    bool equal(Object*) const override;
+    int compare(Object*) const override;
+
 private:
     bool m_val;
 };
 
 // -*-
-struct Number final: public Object {
-    explicit Number(): m_val{i64(0)}{}
-    explicit Number(i64 num): m_val{num}{}
-    explicit Number(f64 num): m_val{num}{}
-    Number(const Number&) = default;
-    Number(Number&&) = default;
-    Number& operator=(const Number&) = default;
-    Number& operator=(Number&&) = default;
+struct Number final: public Object, public Hashable, public TotalOrdering {
+    explicit Number()
+    : Hashable(this)
+    , TotalOrdering(this)
+    , m_val{i64(0)}{}
+    explicit Number(i64 num)
+    : Hashable(this)
+    , TotalOrdering(this)
+    , m_val{num}{}
+    explicit Number(f64 num)
+    : Hashable(this)
+    , TotalOrdering(this)
+    , m_val{num}{}
+    Number(const Number&) noexcept; //= default;
+    Number(Number&&) noexcept; //= default;
+    Number& operator=(const Number&) noexcept;//= default;
+    Number& operator=(Number&&) noexcept;//= default;
 
     operator i64() const{
         i64 num = (
@@ -306,6 +401,10 @@ struct Number final: public Object {
     bool is_integer(void) const{
         return std::holds_alternative<i64>(this->m_val);
     }
+
+    usize hash(void) const override;
+    bool equal(Object*) const override;
+    int compare(Object*) const override;
 
     // -*-
     bool as_bool(void) const;
@@ -378,7 +477,7 @@ private:
 };
 
 // -*-
-struct String final: public Object, public Iterable{
+struct String final: public Object, public Iterable, public Hashable, public TotalOrdering {
     explicit String();
     explicit String(const std::string& str);
     explicit String(const char* cstr);
@@ -388,6 +487,9 @@ struct String final: public Object, public Iterable{
 
     Self next(void) override;
     bool done(void) const override;
+    usize hash(void) const override;
+    bool equal(Object*) const override;
+    int compare(Object*) const override;
 
     String& operator=(const String& xs){
         if(this != &xs){
@@ -586,7 +688,7 @@ struct Function final: public Object {
         return ss.str();
     }
 
-    //! @todo
+    //! -*-
     Self call(const Vec<Self>& args, Context env);
     Expr expand(const Vec<Self>& args, Context env);
 };
@@ -594,7 +696,6 @@ struct Function final: public Object {
 // =========================
 // Environment
 // =========================
-
 struct Env : std::enable_shared_from_this<Env> {
     std::map<std::string, Self> vars;
     std::set<std::string> immutables;
@@ -746,6 +847,9 @@ public:
     static bool is_pair(const Self& self);
     static bool is_tuple(const Self& self);
     static bool is_iterable(const Self& self);
+    static bool is_hashable(const Self& self);
+    static bool is_equalable(const Self& self);
+    static bool is_comparable(const Self& self);
 
     static i64 len(const Self& self){
         return self->len();
@@ -773,14 +877,11 @@ public:
     static void collect(Iterator iter, Set& result);
     static void collect(Iterator iter, Dict& result);
 
-
     static bool is_collection(const Self& self);
     static i64 len(const Self& self);
 
-    static std::string repr(const Self& self);
+    //static std::string repr(const Self& self);
 
-    //! @todo
-    /*
     static void check_type(bool pred, const std::string& message);
     static void check_value(bool pred, const std::string& message);
     static void check_syntax(bool pred, const std::string& message);
@@ -789,9 +890,6 @@ public:
     static void check_index(bool pred, const std::string& message);
     static void check(bool pred, const std::string& message);
     static void check_argc(bool pred, const std::string& message);
-
-    */
-
     
 public:
     Self visit(LiteralExpr& e, Context env) override;
