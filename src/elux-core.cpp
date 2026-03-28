@@ -159,9 +159,13 @@ Number Number::acosh(void) const{
     return Number(std::acosh(this->as_float()));
 }
 
+// -*-
+Number Number::atanh(void) const{
+    return Number(std::atanh(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::atanh(void) const{}
 Number Number::exp(void) const{}
 Number Number::expm1(void) const{}
 Number Number::exp2(void) const{}
