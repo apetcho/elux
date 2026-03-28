@@ -776,73 +776,77 @@ Self ELux::eval(const Vec<Expr>& elems, Context env) {
     if (!ELux::is_callable(headVal)){
         throw std::runtime_error("First element is not callable: " + headVal->str());
     }
+
     auto fn = dynamic_cast<Function*>(headVal.get());
-    // macro: receive unevaluated args as Values (AST->Value), expand, then eval
-    if(fn->isMacro || ELux::is_macro(headVal)){
-        auto expr = valueToExpr(expand(elems, env));
-        return eval(expr, env);
-    }
-    // normal function
-    Vec<Self> argv;
-    for(size_t i = 1; i < elems.size(); ++i){
-        argv.push_back(elems[i]->eval(*this, env));
-    }
-
-    if(fn->isNative){ return fn->native(argv, env); }
-
-    if(argv.size() != fn->params.size()){
-        throw std::runtime_error("function arg count mismatch");
-    }
-    auto callEnv = std::make_shared<Env>(fn->closure);
-    for(size_t i = 0; i < fn->params.size(); ++i){
-        callEnv->define(fn->params[i], argv[i]);
-    }
-    return fn->body->eval(*this, callEnv);
-}
-
-// -*-
-Self ELux::expand(const Vec<Expr>& elems, Context env){
-    auto headVal = elems[0]->eval(*this, env);
-    // function or macro call
-    // headVal must be function or macro
-    // if (!ELux::is_callable(headVal)){
-    //     throw std::runtime_error("First element is not callable: " + headVal->str());
+    auto argv = this->eval_args(Vec<Expr>(elems.begin()+1, elems.end()), env);
+    
+    // // macro: receive unevaluated args as Values (AST->Value), expand, then eval
+    // if(fn->isMacro || ELux::is_macro(headVal)){
+    //     //auto expr = valueToExpr(expand(elems, env));
+    //     return fn->call(argv, env);
     // }
-    auto fn = *dynamic_cast<Function*>(headVal.get());
-    struct Handler{
-        Self handle(Expr expr){
-            if(auto self = dynamic_cast<LiteralExpr*>(expr.get())){
-                return self->value;
-            }
-            if(auto self = dynamic_cast<SymbolExpr*>(expr.get())){
-                return ELux::share(self->name);
-            }
-            if(auto le = dynamic_cast<ListExpr*>(expr.get())){
-                Array array{};
-                for(auto& elem : le->elements){
-                    array.push(this->handle(elem));
-                }
+    // // normal function
+    // // Vec<Self> argv;
+    // // for(size_t i = 1; i < elems.size(); ++i){
+    // //     argv.push_back(elems[i]->eval(*this, env));
+    // // }
 
-                return ELux::share(List(array));
-            }
-            return ELux::share();
-        }
-    };
-    Vec<Self> argv;
-    Handler handler;
-    for(size_t i = 1; i < elems.size(); ++i){
-        argv.push_back(handler.handle(elems[i]));
-    }
-    if(argv.size() != fn.params.size()){
-        throw std::runtime_error("macro arg count mismatch");
-    }
-    auto callEnv = std::make_shared<Env>(fn.closure);
-    for(size_t i = 0; i < fn.params.size(); ++i){
-        callEnv->define(fn.params[i], argv[i]);
-    }
-    // macro body returns Value representing code
-    return fn.body->eval(*this, callEnv);
+    // if(fn->isNative){ return fn->native(argv, env); }
+
+    // if(argv.size() != fn->params.size()){
+    //     throw std::runtime_error("function arg count mismatch");
+    // }
+    // auto callEnv = std::make_shared<Env>(fn->closure);
+    // for(size_t i = 0; i < fn->params.size(); ++i){
+    //     callEnv->define(fn->params[i], argv[i]);
+    // }
+    // return fn->body->eval(*this, callEnv);
+    return fn->call(argv, env);
 }
+
+// // -*-
+// Self ELux::expand(const Vec<Expr>& elems, Context env){
+//     auto headVal = elems[0]->eval(*this, env);
+//     // function or macro call
+//     // headVal must be function or macro
+//     // if (!ELux::is_callable(headVal)){
+//     //     throw std::runtime_error("First element is not callable: " + headVal->str());
+//     // }
+//     auto fn = *dynamic_cast<Function*>(headVal.get());
+//     struct Handler{
+//         Self handle(Expr expr){
+//             if(auto self = dynamic_cast<LiteralExpr*>(expr.get())){
+//                 return self->value;
+//             }
+//             if(auto self = dynamic_cast<SymbolExpr*>(expr.get())){
+//                 return ELux::share(self->name);
+//             }
+//             if(auto le = dynamic_cast<ListExpr*>(expr.get())){
+//                 Array array{};
+//                 for(auto& elem : le->elements){
+//                     array.push(this->handle(elem));
+//                 }
+
+//                 return ELux::share(List(array));
+//             }
+//             return ELux::share();
+//         }
+//     };
+//     Vec<Self> argv;
+//     Handler handler;
+//     for(size_t i = 1; i < elems.size(); ++i){
+//         argv.push_back(handler.handle(elems[i]));
+//     }
+//     if(argv.size() != fn.params.size()){
+//         throw std::runtime_error("macro arg count mismatch");
+//     }
+//     auto callEnv = std::make_shared<Env>(fn.closure);
+//     for(size_t i = 0; i < fn.params.size(); ++i){
+//         callEnv->define(fn.params[i], argv[i]);
+//     }
+//     // macro body returns Value representing code
+//     return fn.body->eval(*this, callEnv);
+// }
 
 // -*-
 Vec<Self> ELux::eval_args(const Vec<Expr>& elems, Context env){

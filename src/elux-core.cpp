@@ -1759,21 +1759,37 @@ bool Array::done(void) const{
 // -*- Function -*-
 // ----------------
 Self Function::call(const Vec<Self>& args, Context env){
-    auto expr = this->expand(args, env);
-    return this->elux.eval(expr, env);
-}
-
-// -*-
-Expr Function::expand(const Vec<Self>& args, Context env){
+    // check argc
     if(args.size() != this->params.size()){
-        throw std::runtime_error("macro arg count mismatch");
+        std::stringstream ss;
+        ss << (this->isMacro ? "macro " : "function ");
+        ss << "arg count mismatch";
+        throw std::runtime_error(ss.str());
+    }
+    // (1) builtin-function
+    if(this->isNative){
+        return this->native(args, env);
     }
     auto callEnv = std::make_shared<Env>(this->closure);
     for(size_t i = 0; i < this->params.size(); ++i){
         callEnv->define(this->params[i], args[i]);
     }
+
+    // (2) macro
+    if(this->isMacro){
+        auto expr = this->expand(args, callEnv);
+        return this->elux.eval(expr, callEnv);
+    }
+    
+    // (3) user-defined function
+    return this->body->eval(this->elux, callEnv);
+}
+
+// -*-
+Expr Function::expand(const Vec<Self>& args, Context env){
+    auto self = this->body->eval(this->elux, env);
     // macro body returns Value representing code
-    return this->elux.to_expr(this->body->eval(this->elux, callEnv));
+    return this->elux.to_expr(self);
 }
 
 
