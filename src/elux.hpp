@@ -25,12 +25,12 @@ SOFTWARE.
 #define LYNX_HPP
 
 #include<initializer_list>
+#include<unordered_map>
+#include<unordered_set>
+#include<filesystem>
 #include<functional>
-#include<algorithm>
 #include<stdexcept>
-#include<optional>
 #include<cstdint>
-#include<iostream>
 #include<sstream>
 #include<fstream>
 #include<variant>
@@ -57,6 +57,7 @@ namespace ekasoft::klx{
 // =========================
 
 class ELux;
+class Module;
 struct Env;
 struct ExprBase;
 struct ExprVisitor;
@@ -69,6 +70,8 @@ struct Set;
 struct Dict;
 struct String;
 struct Function;
+struct Symbol;
+struct Pair;
 
 using i64 = std::int64_t;
 using f64 = double;
@@ -83,12 +86,26 @@ using Vec = std::vector<T>;
 using Expr = std::shared_ptr<ExprBase>;
 using NativeFunc = std::function<Self(const Vec<Self>&, Context)>;
 
+// -*-
 struct Object{
     virtual ~Object() = default;
     virtual std::string type(void) const = 0;
     virtual std::string str(void) const = 0;
 };
 
+//! @todo
+/*
+struct Iterable : public Object {
+    explicit Iterable(Object* data): m_data{data};
+    virtual ~Iterable() = default;
+    virtual Self next(void) = 0;
+    virtual bool done(void) const = 0;
+private:
+    Object* m_data;
+};
+*/
+
+// -*-
 struct Nil final : public Object {
     std::string type(void) const override{
         return "Nil";
@@ -98,6 +115,44 @@ struct Nil final : public Object {
         return "nil";
     }
 };
+
+//! @todo
+// struct Symbol final : public Object{
+//     //! @todo
+//     std::string type(void) const override{
+//         return "Symbol";
+//     }
+//     std::string str(void) const override{
+//         return "XXXXX";
+//     }
+// };
+// struct Pair final : public Object{
+//     //! @todo
+//     std::string type(void) const override{
+//         return "Pair";
+//     }
+//     std::string str(void) const override{
+//         return "XXX";
+//     }
+// };
+// // -*-
+// class ELuxError final: public std::runtime_error {
+// public:
+//     explicit ELuxError();
+//     explicit ELuxError(const Symbol& sym);
+//     explicit ELuxError(const Symbol& sym, const std::string& msg);
+//     static Symbol ValueError;
+//     static Symbol TypeError;
+//     static Symbol SyntaxError;
+//     static Symbol RuntimeError;
+//     static Symbol KeyError;
+//     static Symbol IndexError;
+//     std::string describe(void) const;
+//     const Symbol& kind(void) const;
+//     Symbol& kind(void);
+// private:
+//     Symbol m_kind;
+// };
 
 struct Bool final: public Object{
     explicit Bool() : m_val{false}{}
@@ -122,9 +177,9 @@ private:
 
 // -*-
 struct Number final: public Object {
-    explicit Number(): m_fixed{true}, m_val{i64(0)}{}
-    explicit Number(i64 num): m_fixed{true}, m_val{num}{}
-    explicit Number(f64 num): m_fixed{false}, m_val{num}{}
+    explicit Number(): m_val{i64(0)}{}
+    explicit Number(i64 num): m_val{num}{}
+    explicit Number(f64 num): m_val{num}{}
     Number(const Number&) = default;
     Number(Number&&) = default;
     Number& operator=(const Number&) = default;
@@ -132,7 +187,7 @@ struct Number final: public Object {
 
     operator i64() const{
         i64 num = (
-            this->m_fixed ?
+            this->is_integer() ?
             std::get<i64>(m_val) :
             static_cast<i64>(std::get<f64>(m_val))
         );
@@ -141,7 +196,7 @@ struct Number final: public Object {
 
     operator f64() const{
         f64 num = (
-            this->m_fixed ?
+            this->is_integer() ?
             static_cast<f64>(std::get<i64>(m_val)) :
             std::get<f64>(m_val)
         );
@@ -150,27 +205,92 @@ struct Number final: public Object {
 
     operator bool() const{
         return (
-            this->m_fixed ?
+            this->is_integer() ?
             static_cast<i64>(*this)==0 :
             static_cast<f64>(*this)==0.0
         );
     }
 
     std::string type(void) const override{
-        return (this->m_fixed ? "Integer" : "Float");
+        return (this->is_integer() ? "Integer" : "Float");
     }
 
     std::string str(void) const override{
         std::stringstream ss;
-        ss << (this->m_fixed? std::get<i64>(m_val) : std::get<f64>(m_val));
+        ss << (this->is_integer() ? std::get<i64>(m_val) : std::get<f64>(m_val));
         return ss.str();
     }
 
-    bool is_integer(void) const{ return this->m_fixed; }
+    bool is_integer(void) const{
+        return std::holds_alternative<i64>(this->m_val);
+    }
+
+    // -*-
+    i64 as_integer(void) const;
+    f64 as_float(void) const;
+    Number abs(void) const;
+    Number ceil(void) const;
+    Number floor(void) const;
+    Number round(void) const;
+    Number truncate(void) const;
+    Number sin(void) const;
+    Number cos(void) const;
+    Number tan(void) const;
+    Number asin(void) const;
+    Number acos(void) const;
+    Number atan(void) const;
+    Number atan2(const Number& rhs) const;
+    Number sinh(void) const;
+    Number cosh(void) const;
+    Number tanh(void) const;
+    Number asinh(void) const;
+    Number acosh(void) const;
+    Number atanh(void) const;
+    Number exp(void) const;
+    Number expm1(void) const;
+    Number exp2(void) const;
+    Number pow(const Number& rhs) const;
+    Number sqrt(void) const;
+    Number cbrt(void) const;
+    Number log(void) const;
+    Number log2(void) const;
+    Number log10(void) const;
+    Number log1p(void) const;
+    Number erf(void) const;
+    Number erfc(void) const;
+    Number tgamma(void) const;
+    Number lgamma(void) const;
+    bool isnan(void) const;
+    bool isinf(void) const;
+    bool isfinite(void) const;
+    Number& operator!();
+    Number& operator-();
+    Number& operator~();
+
+    friend Number operator+(const Number& lhs, const Number& rhs);
+    friend Number operator-(const Number& lhs, const Number& rhs);
+    friend Number operator*(const Number& lhs, const Number& rhs);
+    friend Number operator/(const Number& lhs, const Number& rhs);
+    friend Number operator%(const Number& lhs, const Number& rhs);
+
+    friend Number operator&(const Number& lhs, const Number& rhs);
+    friend Number operator|(const Number& lhs, const Number& rhs);
+    friend Number operator^(const Number& lhs, const Number& rhs);
+    friend Number operator<<(const Number& lhs, const Number& rhs);
+    friend Number operator>>(const Number& lhs, const Number& rhs);
+
+    friend bool operator&&(const Number& lhs, const Number& rhs);
+    friend bool operator&&(const Number& lhs, const Number& rhs);
+
+    friend bool operator==(const Number& lhs, const Number& rhs);
+    friend bool operator!=(const Number& lhs, const Number& rhs);
+    friend bool operator<(const Number& lhs, const Number& rhs);
+    friend bool operator>(const Number& lhs, const Number& rhs);
+    friend bool operator<=(const Number& lhs, const Number& rhs);
+    friend bool operator>=(const Number& lhs, const Number& rhs);
 
 private:
     using Data = std::variant<i64, f64>;
-    bool m_fixed{};
     Data m_val;
 };
 
@@ -425,6 +545,18 @@ private:
     Expr parse_list();
 };
 
+// =====================
+// -*- Module System -*-
+// =====================
+// class Module final{
+// public:
+// //! @todo
+
+// private:
+//     Symbol m_name;
+
+// };
+
 // ==============================
 // ELux (Visitor) : the evaluator
 // ==============================
@@ -475,6 +607,18 @@ public:
     static i64 len(const Self& self);
 
     static std::string repr(const Self& self);
+
+    //! @todo
+    /*
+    static void check_type(bool pred, const std::string& message);
+    static void check_value(bool pred, const std::string& message);
+    static void check_syntax(bool pred, const std::string& message);
+    static void check_runtime(bool pred, const std::string& message);
+    static void check_key(bool pred, const std::string& message);
+    static void check_index(bool pred, const std::string& message);
+    static void check(bool pred, const std::string& message);
+
+    */
 
     
 public:

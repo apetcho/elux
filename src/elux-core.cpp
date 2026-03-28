@@ -38,6 +38,83 @@ SOFTWARE.
 // -*----------------------------------------------------------------*-
 namespace ekasoft::klx{
 // -
+// --------------
+// -*- Number -*-
+// --------------
+i64 Number::as_integer(void) const{
+    if(this->is_integer()){
+        return std::get<i64>(this->m_val);
+    }
+    auto num = std::get<f64>(this->m_val);
+    return static_cast<i64>(num);
+}
+
+/*
+// -*-
+f64 Number::as_float(void) const{}
+Number Number::abs(void) const{}
+Number Number::ceil(void) const{}
+Number Number::floor(void) const{}
+Number Number::round(void) const{}
+Number Number::truncate(void) const{}
+Number Number::sin(void) const{}
+Number Number::cos(void) const{}
+Number Number::tan(void) const{}
+Number Number::asin(void) const{}
+Number Number::acos(void) const{}
+Number Number::atan(void) const{}
+Number Number::atan2(const Number& rhs) const{}
+Number Number::sinh(void) const{}
+Number Number::cosh(void) const{}
+Number Number::tanh(void) const{}
+Number Number::asinh(void) const{}
+Number Number::acosh(void) const{}
+Number Number::atanh(void) const{}
+Number Number::exp(void) const{}
+Number Number::expm1(void) const{}
+Number Number::exp2(void) const{}
+Number Number::pow(const Number& rhs) const{}
+Number Number::sqrt(void) const{}
+Number Number::cbrt(void) const{}
+Number Number::log(void) const{}
+Number Number::log2(void) const{}
+Number Number::log10(void) const{}
+Number Number::log1p(void) const{}
+Number Number::erf(void) const{}
+Number Number::erfc(void) const{}
+Number Number::tgamma(void) const{}
+Number Number::lgamma(void) const{}
+bool Number::isnan(void) const{}
+bool Number::isinf(void) const{}
+bool Number::isfinite(void) const{}
+Number& Number::operator!(){}
+Number& Number::operator-(){}
+Number& Number::operator~(){}
+
+Number operator+(const Number& lhs, const Number& rhs){}
+Number operator-(const Number& lhs, const Number& rhs){}
+Number operator*(const Number& lhs, const Number& rhs){}
+Number operator/(const Number& lhs, const Number& rhs){}
+Number operator%(const Number& lhs, const Number& rhs){}
+
+Number operator&(const Number& lhs, const Number& rhs){}
+Number operator|(const Number& lhs, const Number& rhs){}
+Number operator^(const Number& lhs, const Number& rhs){}
+Number operator<<(const Number& lhs, const Number& rhs){}
+Number operator>>(const Number& lhs, const Number& rhs){}
+
+bool operator&&(const Number& lhs, const Number& rhs){}
+bool operator&&(const Number& lhs, const Number& rhs){}
+
+bool operator==(const Number& lhs, const Number& rhs){}
+bool operator!=(const Number& lhs, const Number& rhs){}
+bool operator<(const Number& lhs, const Number& rhs){}
+bool operator>(const Number& lhs, const Number& rhs){}
+bool operator<=(const Number& lhs, const Number& rhs){}
+bool operator>=(const Number& lhs, const Number& rhs){}
+
+*/
+
 // -*-
 std::string& String::value(void){
     return this->m_val;
