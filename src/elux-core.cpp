@@ -252,12 +252,17 @@ ELuxError::ELuxError()
 , m_kind{Symbol("Error")}
 {}
 
+// -*-
+ELuxError::ELuxError(const Symbol& sym)
+: std::runtime_error("unexpected error caught.")
+, m_kind{sym}
+{}
+
 /*
 // -*-
 class ELuxError final: public Object, public std::runtime_error {
 public:
 
-ELuxError::ELuxError(const Symbol& sym){}
 ELuxError::ELuxError(const Symbol& sym, const std::string& msg){}
 ELuxError::ELuxError(const ELuxError& err) noexcept{}
 ELuxError::ELuxError(ELuxError&& err) noexcept{}
