@@ -754,6 +754,17 @@ std::string ELuxError::str(void) const{
     return std::string(this->m_msg);
 }
 
+// -*-
+usize ELuxError::hash(void) const{
+    auto x = this->m_kind.hash();
+    auto y = std::hash<std::string>{}(this->m_msg);
+    return (x ^ y);
+}
+
+/*
+bool ELuxError::equal(Object* other) const{}
+*/
+
 // --------------
 // -*- Number -*-
 // --------------
