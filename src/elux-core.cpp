@@ -154,11 +154,14 @@ Tuple::Tuple(const std::initializer_list<Self>& xs)
 : items{Vec<Self>(xs.begin(), xs.end())}
 {}
 
-/*
+Tuple::Tuple(const Vec<Self>& xs)
+: items{xs}
+{}
 
+/*
 struct Tuple final: public Object{
 
-Tuple::Tuple(const Vec<Self> x&){}
+
 Tuple::Tuple(const std::list<Self>& xs){}
 Tuple::Tuple(const Pair& xs){}
 Tuple::Tuple(const List& xs){}
