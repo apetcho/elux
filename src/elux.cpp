@@ -319,8 +319,13 @@ bool ELux::is_pair(const Self& self){
     return (ptr==nullptr ? false : true);
 }
 
+// -*-
+bool ELux::is_tuple(const Self& self){
+    auto ptr = dynamic_cast<Tuple*>(self.get());
+    return (ptr==nullptr ? false : true);
+}
+
 /*
-bool ELux::is_tuple(const Self& self){}
 bool ELux::is_iterable(const Self& self){}
 */
 
