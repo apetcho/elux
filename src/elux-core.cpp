@@ -430,9 +430,11 @@ Tuple::Tuple(const Tuple& tuple) noexcept
 Tuple::Tuple(Tuple&& tuple) noexcept
 : Iterable(this)
 , m_items{std::move(tuple.m_items)}{
-    tuple.m_items = {};
     this->m_ptr = this->m_items.begin();
     this->m_stop = this->m_items.end();
+    tuple.m_items = {};
+    tuple.m_ptr = tuple.m_items.begin();
+    tuple.m_stop = tuple.m_items.end();
 }
 
 Tuple& Tuple::operator=(const Tuple& tuple) noexcept{
@@ -450,6 +452,8 @@ Tuple& Tuple::operator=(Tuple&& tuple) noexcept{
         this->m_ptr = this->m_items.begin();
         this->m_stop = this->m_items.end();
         tuple.m_items = {};
+        tuple.m_ptr = tuple.m_items.begin();
+        tuple.m_stop = tuple.m_items.end();
     }
     return *this;
 }
@@ -1016,8 +1020,19 @@ String::String(const String& xs)
     this->m_stop = this->m_val.end();
 }
 
+// -*-
+String::String(String&& xs)
+: Iterable{this}
+, m_val{xs.m_val}
+{
+    this->m_ptr = this->m_val.begin();
+    this->m_stop = this->m_val.end();
+    xs.m_val = {};
+    xs.m_ptr = xs.m_val.begin();
+    xs.m_stop = xs.m_val.end();
+}
+
 /*
-String::String(String&& xs){}
 Self String::next(void){}
 bool String::done(void) const{}
 */

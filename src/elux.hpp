@@ -379,12 +379,21 @@ struct String final: public Object, public Iterable{
     String& operator=(const String& xs){
         if(this != &xs){
             this->m_val = xs.m_val;
+            this->m_ptr = this->m_val.begin();
+            this->m_stop = this->m_val.end();
         }
         return *this;
     };
 
     String& operator=(String&& xs){
-        if(this != &xs){ this->m_val = std::move(xs.m_val); }
+        if(this != &xs){
+            this->m_val = std::move(xs.m_val);
+            this->m_ptr = this->m_val.begin();
+            this->m_stop = this->m_val.end();
+            xs.m_val = {};
+            xs.m_ptr = xs.m_val.begin();
+            xs.m_stop = xs.m_val.end();
+        }
         return *this;
     }
     
