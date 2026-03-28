@@ -202,9 +202,13 @@ Number Number::log(void) const{
     return Number(std::log(this->as_float()));
 }
 
+// -*-
+Number Number::log2(void) const{
+    return Number(std::log2(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::log2(void) const{}
 Number Number::log10(void) const{}
 Number Number::log1p(void) const{}
 Number Number::erf(void) const{}
