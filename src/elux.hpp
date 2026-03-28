@@ -399,6 +399,8 @@ struct String final: public Object, public Iterable{
 
 private:
     std::string m_val;
+    std::string::iterator m_ptr;
+    std::string::iterator m_stop;
 };
 
 // -*-
