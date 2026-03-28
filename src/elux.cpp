@@ -550,8 +550,12 @@ void ELux::collect(Iterator iter, List& result){
     iter->collect(result);
 }
 
+// -*-
+void ELux::collect(Iterator iter, Set& result){
+    iter->collect(result);
+}
+
 /*
-void ELux::collect(Iterator iter, Set& result){}
 void ELux::collect(Iterator iter, Dict& result){}
 */
 
