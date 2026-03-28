@@ -212,9 +212,13 @@ Number Number::log10(void) const{
     return Number(std::log10(this->as_float()));
 }
 
+// -*-
+Number Number::log1p(void) const{
+    return Number(std::log1p(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::log1p(void) const{}
 Number Number::erf(void) const{}
 Number Number::erfc(void) const{}
 Number Number::tgamma(void) const{}
