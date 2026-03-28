@@ -241,9 +241,13 @@ bool Number::isnan(void) const{
     return std::isnan(this->as_float());
 }
 
+// -*-
+bool Number::isinf(void) const{
+    return std::isinf(this->as_float());
+}
+
 /*
 // -*-
-bool Number::isinf(void) const{}
 bool Number::isfinite(void) const{}
 Number& Number::operator!(){}
 Number& Number::operator-(){}
