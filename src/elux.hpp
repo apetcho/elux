@@ -172,11 +172,11 @@ public:
     explicit ELuxError();
     explicit ELuxError(const Symbol& sym);
     explicit ELuxError(const Symbol& sym, const std::string& msg);
-    ELuxError(const ELuxError& err) noexcept;
-    ELuxError(ELuxError&& err) noexcept;
-    ELuxError& operator=(const ELuxError& err) noexcept;
-    ELuxError& operator=(ELuxError&& err) noexcept;
-    
+    ELuxError(const ELuxError& err) noexcept = default;
+    ELuxError(ELuxError&& err) noexcept = default;
+    ELuxError& operator=(const ELuxError& err) noexcept = default;
+    ELuxError& operator=(ELuxError&& err) noexcept = default;
+
     std::string describe(void) const;
     const Symbol& kind(void) const;
     Symbol& kind(void);

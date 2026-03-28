@@ -263,25 +263,19 @@ ELuxError::ELuxError(const Symbol& sym, const std::string& msg)
 , m_kind{sym}
 {}
 
-ELuxError::ELuxError(const ELuxError& err) noexcept
-: std::runtime_error(err.what())
-, m_kind{err.m_kind}
-{}
-
-ELuxError::ELuxError(ELuxError&& err) noexcept
-: std::runtime_error(std::move(err.what()))
-, m_kind{std::move(err.m_kind)}
-{}
+// -*-
+std::string ELuxError::describe(void) const{
+    std::stringstream ss;
+    ss << this->m_kind.str() << ": " << this->what();
+    return ss.str();
+}
 
 /*
 // -*-
 class ELuxError final: public Object, public std::runtime_error {
 public:
 
-ELuxError& ELuxError::operator=(const ELuxError& err) noexcept{}
-ELuxError& ELuxError::operator=(ELuxError&& err) noexcept{}
 
-std::string ELuxError::describe(void) const{}
 const Symbol& ELuxError::kind(void) const{}
 Symbol& ELuxError::kind(void){}
 std::string ELuxError::type(void) const{}
