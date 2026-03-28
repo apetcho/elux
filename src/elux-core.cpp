@@ -259,9 +259,20 @@ Number& Number::operator!(){
     return *this;
 }
 
+// -*-
+Number& Number::operator-(){
+    if(this->is_integer()){
+        auto num = this->as_integer();
+        this->m_val = -num;
+    }else{
+        auto num = this->as_float();
+        this->m_val = -num;
+    }
+    return *this;
+}
+
 /*
 // -*-
-Number& Number::operator-(){}
 Number& Number::operator~(){}
 
 Number operator+(const Number& lhs, const Number& rhs){}
