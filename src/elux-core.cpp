@@ -811,6 +811,25 @@ bool ELuxError::equal(Object* other) const{
     return false;
 }
 
+// ------------
+// -*- Bool -*-
+// ------------
+// -*-
+Bool& Bool::operator=(const Bool& other) noexcept{
+    if(this != &other){
+        this->m_val = other.m_val;
+    }
+    return *this;
+}
+
+// -*-
+Bool& Bool::operator=(Bool&& other) noexcept{
+    if(this != &other){
+        this->m_val = std::move(other.m_val);
+    }
+    return *this;
+}
+
 // --------------
 // -*- Number -*-
 // --------------
