@@ -85,11 +85,15 @@ Pair::Pair()
 , val{ELux::share()}
 {}
 
+Pair::Pair(Self key)
+: key{std::move(key)}
+, val{ELux::share()}
+{}
+
 /*
 
 struct Pair final : public Object{
 
-Pair::Pair(Self key){}
 Pair::Pair(Self key, Self val){}
 Pair::Pair(const Pair& pair) noexcept{}
 Pair::Pair(Pair&& pair) noexcept{}
