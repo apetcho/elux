@@ -95,7 +95,11 @@ struct Object{
     virtual ~Object() = default;
     virtual std::string type(void) const = 0;
     virtual std::string str(void) const = 0;
-    virtual i64 len(void) const;
+    virtual i64 len(void) const{
+        std::stringstream ss;
+        ss << "`.len' is not implemented on type " << std::quoted(this->type()) << ".";
+        throw std::runtime_error(ss.str());
+    }
 };
 
 //! @todo
@@ -187,7 +191,9 @@ struct Tuple final: public Object, public Iterable{
     std::string type(void) const override;
     std::string str(void) const override;
 
-    i64 len(void) const override;
+    i64 len(void) const override{
+        return static_cast<i64>(this->m_items.size());
+    }
 
     Self next(void) override;
     bool done(void) const override;
@@ -409,7 +415,9 @@ struct String final: public Object, public Iterable{
     }
 
     std::string str(void) const override;
-    i64 len(void) const override;
+    i64 len(void) const override{
+        return static_cast<i64>(this->m_val.length());
+    }
 
     std::string& value(void);
     const std::string& value(void) const;
@@ -438,7 +446,9 @@ struct Set final: public Object, public Iterable {
 
     std::string type(void) const override;
     std::string str(void) const override;
-    i64 len(void) const override;
+    i64 len(void) const override{
+        return static_cast<i64>(this->m_hset.size());
+    }
 
     HSet& value(void);
     const HSet& value(void) const;
@@ -470,7 +480,9 @@ struct Dict final: public Object, public Iterable{
 
     std::string type(void) const override;
     std::string str(void) const override;
-    i64 len(void) const override;
+    i64 len(void) const override{
+        return static_cast<i64>(this->m_hmap.size());
+    }
 
     HMap& value(void);
     const HMap& value(void) const;
@@ -500,7 +512,9 @@ struct List final: public Object, public Iterable{
 
     std::string type(void) const override;
     std::string str(void) const override;
-    i64 len(void) const override;
+    i64 len(void) const override{
+        return static_cast<i64>(this->m_xs.size());
+    }
 
     std::list<Self>& value(void);
     const std::list<Self>& value(void) const;
@@ -529,7 +543,9 @@ struct Array final: public Object, public Iterable{
 
     std::string type(void) const override;
     std::string str(void) const override;
-    i64 len(void) const override;
+    i64 len(void) const override{
+        return static_cast<i64>(this->m_xs.size());
+    }
 
     Vec<Self>& value(void);
     const Vec<Self>& value(void) const;
@@ -729,6 +745,9 @@ public:
     static bool is_tuple(const Self& self);
     static bool is_iterable(const Self& self);
 
+    static i64 len(const Self& self){
+        return self->len();
+    }
 
     static std::string str(const Self& self);
     static Bool as_bool(const Self& self);
@@ -742,7 +761,6 @@ public:
     static Dict as_dict(const Self& self);
     static Function as_function(const Self& self);
 
-    //! @todo
     static Pair as_pair(const Self& self);
     static Tuple as_tuple(const Self& self);
     static Iterator as_iterator(const Self& self);
