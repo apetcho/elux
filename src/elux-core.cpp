@@ -212,11 +212,17 @@ Tuple& Tuple::operator=(const Tuple& tuple) noexcept{
     return *this;
 }
 
+Tuple& Tuple::operator=(Tuple&& tuple) noexcept{
+    if(this != &tuple){
+        this->items = std::move(tuple.items);
+        tuple.items = {};
+    }
+    return *this;
+}
+
 /*
 struct Tuple final: public Object{
 
-
-Tuple& Tuple::operator=(Tuple&& tuple) noexcept{}
 std::string Tuple::type(void) const{}
 std::string Tuple::str(void) const{}
 };
