@@ -121,9 +121,21 @@ Number Number::atan(void) const{
     return Number(std::atan(this->as_float()));
 }
 
+// -*-
+Number Number::atan2(const Number& rhs) const{
+    auto y = this->as_float();
+    auto x = rhs.as_float();
+    f64 num{};
+    try{
+        num = std::atan2(y, x);
+    }catch(const std::exception& err){
+        throw std::runtime_error(err.what());
+    }
+    return Number(num);
+}
+
 /*
 // -*-
-Number Number::atan2(const Number& rhs) const{}
 Number Number::sinh(void) const{}
 Number Number::cosh(void) const{}
 Number Number::tanh(void) const{}
