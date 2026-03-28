@@ -187,9 +187,13 @@ Number Number::pow(const Number& rhs) const{
     return Number(num);
 }
 
+// -*-
+Number Number::sqrt(void) const{
+    return Number(std::sqrt(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::sqrt(void) const{}
 Number Number::cbrt(void) const{}
 Number Number::log(void) const{}
 Number Number::log2(void) const{}
