@@ -2175,11 +2175,17 @@ bool operator==(const Self& lhs, const Self& rhs){
         auto ysym = *dynamic_cast<Symbol*>(rhs.get());
         return (xsym.str()==ysym.str());
     }
-    return false;
+    std::stringstream ss;
+    ss << "`=' is not support for type " << std::quoted(lhs->type());
+    throw ELuxError(ELuxError::TypeError, ss.str());
+}
+
+// -*-
+bool operator!=(const Self& lhs, const Self& rhs){
+    return !(lhs==rhs);
 }
 
 /*
-bool operator!=(const Self& lhs, const Self& rhs){}
 bool operator<=(const Self& lhs, const Self& rhs){}
 bool operator>=(const Self& lhs, const Self& rhs){}
 bool operator<(const Self& lhs, const Self& rhs){}
