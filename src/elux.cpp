@@ -499,29 +499,11 @@ Pair ELux::as_pair(const Self& self){
 // -*-
 Tuple ELux::as_tuple(const Self& self){
     Vec<Self> vec{};
-    if(ELux::is_pair(self)){
-        auto pair = ELux::as_pair(self); 
-        vec.push_back(std::move(pair.key));
-        vec.push_back(std::move(pair.val));
-    }else if(ELux::is_tuple(self)){
-        vec = dynamic_cast<Tuple*>(self.get())->value();
-    }else if(ELux::is_array(self)){
-        vec = ELux::as_array(self).value();
-    }else if(ELux::is_list(self)){
-        auto xs = ELux::as_list(self).value();
-        vec = Vec<Self>(xs.begin(), xs.end());
-    }else if(ELux::is_set(self)){
-        auto xset = ELux::as_set(self).value();
-        auto xs = Vec<std::string>(xset.begin(), xset.end());
+    if(ELux::is_iterable(self)){
+        auto iter = ELux::as_iterator(self);
         vec = {};
-        for(auto x: xs){
-            vec.push_back(ELux::share(x));
-        }
-    }else if(ELux::is_dict(self)){
-        auto xmap = ELux::as_dict(self);
-        vec = {};
-        while(!xmap.done()){
-            vec.push_back(xmap.next());
+        while(!iter->done()){
+            vec.push_back(iter->next());
         }
     }else{
         std::stringstream ss;
@@ -532,8 +514,12 @@ Tuple ELux::as_tuple(const Self& self){
     return Tuple(vec);
 }
 
+// -*-
+Iterator ELux::as_string_iterator(const Self& self){
+    return std::make_shared<String>(self->str());
+}
+
 /*
-Iterator ELux::as_string_iterator(const Self& self){}
 Iterator ELux::as_array_iterator(const Self& self){}
 Iterator ELux::as_tuple_iterator(const Self& self){}
 Iterator ELux::as_list_iterator(const Self& self){}
