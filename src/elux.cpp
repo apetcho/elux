@@ -337,8 +337,13 @@ bool ELux::is_hashable(const Self& self){
     return (ptr==nullptr ? false : true);
 }
 
+// -*-
+bool ELux::is_equalable(const Self& self){
+    auto ptr = dynamic_cast<Equalable*>(self.get());
+    return (ptr==nullptr ? false : true);
+}
+
 /*
-bool ELux::is_equalable(const Self& self){}
 bool ELux::is_comparable(const Self& self){}
 */
 
