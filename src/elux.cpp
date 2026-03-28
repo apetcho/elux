@@ -430,7 +430,7 @@ Function ELux::as_function(const Self& self){
 Pair ELux::as_pair(const Self& self){
     Pair pair(ELux::share(), ELux::share());
     if(ELux::is_pair(self)){
-        pair = ELux::as_pair(self);
+        pair = *dynamic_cast<Pair*>(self.get());
     }else if(ELux::is_tuple(self)){
         if(self->len() != 2){
             std::stringstream ss;
@@ -489,27 +489,62 @@ Pair ELux::as_pair(const Self& self){
         pair.val = std::move(vec[1]);
     }else{
         std::stringstream ss;
-        ss << "cannot convert " << std::quoted(self->type()) << " to a tuple.";
+        ss << "cannot convert " << std::quoted(self->type()) << " to a pair.";
         throw std::runtime_error(ss.str());
     }
 
     return pair;
 }
 
+// -*-
+Tuple ELux::as_tuple(const Self& self){
+    Vec<Self> vec{};
+    if(ELux::is_pair(self)){
+        auto pair = ELux::as_pair(self); 
+        vec.push_back(std::move(pair.key));
+        vec.push_back(std::move(pair.val));
+    }else if(ELux::is_tuple(self)){
+        vec = dynamic_cast<Tuple*>(self.get())->value();
+    }else if(ELux::is_array(self)){
+        vec = ELux::as_array(self).value();
+    }else if(ELux::is_list(self)){
+        auto xs = ELux::as_list(self).value();
+        vec = Vec<Self>(xs.begin(), xs.end());
+    }else if(ELux::is_set(self)){
+        auto xset = ELux::as_set(self).value();
+        auto xs = Vec<std::string>(xset.begin(), xset.end());
+        vec = {};
+        for(auto x: xs){
+            vec.push_back(ELux::share(x));
+        }
+    }else if(ELux::is_dict(self)){
+        auto xmap = ELux::as_dict(self);
+        vec = {};
+        while(!xmap.done()){
+            vec.push_back(xmap.next());
+        }
+    }else{
+        std::stringstream ss;
+        ss << "cannot convert " << std::quoted(self->type()) << " to a tuple.";
+        throw std::runtime_error(ss.str());
+    }
+
+    return Tuple(vec);
+}
+
 /*
-Tuple as_tuple(const Self& self){}
-Iterator as_string_iterator(const Self& self){}
-Iterator as_array_iterator(const Self& self){}
-Iterator as_tuple_iterator(const Self& self){}
-Iterator as_list_iterator(const Self& self){}
-Iterator as_set_iterator(const Self& self){}
-Iterator as_dict_iterator(const Self& self){}
-void collect(const String& result){}
-void collect(const Tuple& result){}
-void collect(const Array& result){}
-void collect(const List& result){}
-void collect(const Set& result){}
-void collect(const Dict& result){}
+Iterator ELux::as_string_iterator(const Self& self){}
+Iterator ELux::as_array_iterator(const Self& self){}
+Iterator ELux::as_tuple_iterator(const Self& self){}
+Iterator ELux::as_list_iterator(const Self& self){}
+Iterator ELux::as_set_iterator(const Self& self){}
+Iterator ELux::as_dict_iterator(const Self& self){}
+void ELux::collect(const String& result){}
+void ELux::collect(const Tuple& result){}
+void ELux::collect(const Array& result){}
+void ELux::collect(const List& result){}
+void ELux::collect(const Set& result){}
+void ELux::collect(const Dict& result){}
 */
 
 // -*-
