@@ -133,10 +133,14 @@ Pair& Pair::operator=(Pair&& pair) noexcept{
     return *this;
 }
 
+// -*-
+std::string Pair::type(void) const{
+    return "Pair";
+}
+
 /*
 struct Pair final : public Object{
 
-std::string Pair::type(void) const{}
 std::string Pair::str(void) const{}
 Self key;
 Self val;
