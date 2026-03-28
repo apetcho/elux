@@ -2295,9 +2295,22 @@ Self operator*(const Self& lhs, const Self& rhs){
     throw ELuxError(ELuxError::TypeError, ss.str());
 }
 
+// -*-
+Self operator/(const Self& lhs, const Self& rhs){
+    if(ELux::is_number(lhs) && ELux::is_number(rhs)){
+        auto xnum = *dynamic_cast<Number*>(lhs.get());
+        auto ynum = *dynamic_cast<Number*>(rhs.get());
+        auto ans = (xnum / ynum);
+        return ELux::share(ans);
+    }
+
+    std::stringstream ss;
+    ss << "`/' is only supported for numbers.";
+    throw ELuxError(ELuxError::TypeError, ss.str());
+}
+
 
 /*
-Self operator/(const Self& lhs, const Self& rhs){}
 Self operator%(const Self& lhs, const Self& rhs){}
 Self operator<<(const Self& lhs, const Self& rhs){}
 Self operator>>(const Self& lhs, const Self& rhs){}
