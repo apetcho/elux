@@ -38,6 +38,18 @@ SOFTWARE.
 // -*----------------------------------------------------------------*-
 namespace ekasoft::klx{
 // -
+// -----------
+// -*- Nil -*-
+// -----------
+usize Nil::hash(void) const{
+    return std::hash<std::string>{}("nil");
+}
+
+/*
+
+bool Nil::equal(Object* other) const{}
+*/
+
 // ----------------
 // -*- Iterable -*-
 // ----------------
@@ -310,15 +322,21 @@ void Iterable::collect(Dict& result){
 // -*- Symbol -*-
 // --------------
 Symbol::Symbol(const std::string& val)
-: value{val}
+: Hashable(this)
+, Equalable(this)
+, value{val}
 {}
 
 Symbol::Symbol(const Symbol& sym) noexcept
-: value{sym.value}
+: Hashable(this)
+, Equalable(this)
+, value{sym.value}
 {}
 
 Symbol::Symbol(Symbol&& sym) noexcept
-: value{std::move(sym.value)}{
+: Hashable(this)
+, Equalable(this)
+, value{std::move(sym.value)}{
     sym.value = {};
 }
 
@@ -350,7 +368,9 @@ std::string Symbol::str(void) const{
 // ------------
 // -*-
 Pair::Pair(Self key_, Self val_)
-: key{std::move(key_)}
+: Hashable(this)
+, Equalable(this)
+, key{std::move(key_)}
 , val{std::move(val_)}
 {
     key_ = nullptr;
@@ -358,12 +378,16 @@ Pair::Pair(Self key_, Self val_)
 }
 
 Pair::Pair(const Pair& pair) noexcept
-: key{pair.key}
+: Hashable(this)
+, Equalable(this)
+, key{pair.key}
 , val{pair.val}
 {}
 
 Pair::Pair(Pair&& pair) noexcept
-: key{std::move(pair.key)}
+: Hashable(this)
+, Equalable(this)
+, key{std::move(pair.key)}
 , val{std::move(pair.val)}
 {
     pair.key = nullptr;
@@ -405,6 +429,8 @@ std::string Pair::str(void) const{
 // -------------
 Tuple::Tuple()
 : Iterable(this)
+, Hashable(this)
+, Equalable(this)
 , m_items{}{
     this->m_ptr = this->m_items.begin();
     this->m_stop = this->m_items.end();
@@ -412,6 +438,8 @@ Tuple::Tuple()
 
 Tuple::Tuple(const std::initializer_list<Self>& xs)
 : Iterable(this)
+, Hashable(this)
+, Equalable(this)
 , m_items{Vec<Self>(xs.begin(), xs.end())}
 {
     this->m_ptr = this->m_items.begin();
@@ -420,6 +448,8 @@ Tuple::Tuple(const std::initializer_list<Self>& xs)
 
 Tuple::Tuple(const Vec<Self>& xs)
 : Iterable(this)
+, Hashable(this)
+, Equalable(this)
 , m_items{xs}
 {
     this->m_ptr = this->m_items.begin();
@@ -428,6 +458,8 @@ Tuple::Tuple(const Vec<Self>& xs)
 
 Tuple::Tuple(const std::list<Self>& xs)
 : Iterable(this)
+, Hashable(this)
+, Equalable(this)
 , m_items{Vec<Self>(xs.begin(), xs.end())}
 {
     this->m_ptr = this->m_items.begin();
@@ -436,6 +468,8 @@ Tuple::Tuple(const std::list<Self>& xs)
 
 Tuple::Tuple(const Pair& xs)
 : Iterable(this)
+, Hashable(this)
+, Equalable(this)
 , m_items{Vec<Self>{xs.key, xs.val}}
 {
     this->m_ptr = this->m_items.begin();
@@ -444,6 +478,8 @@ Tuple::Tuple(const Pair& xs)
 
 Tuple::Tuple(const List& xs)
 : Iterable(this)
+, Hashable(this)
+, Equalable(this)
 {
     auto data = xs.value();
     this->m_items = Vec<Self>(data.begin(), data.end());
@@ -453,6 +489,8 @@ Tuple::Tuple(const List& xs)
 
 Tuple::Tuple(const Array& xs)
 : Iterable(this)
+, Hashable(this)
+, Equalable(this)
 , m_items{xs.value()}
 {
     this->m_ptr = this->m_items.begin();
@@ -461,6 +499,8 @@ Tuple::Tuple(const Array& xs)
 
 Tuple::Tuple(const Set& xs)
 : Iterable(this)
+, Hashable(this)
+, Equalable(this)
 {
     auto data = xs.value();
     this->m_items = {};
@@ -472,7 +512,10 @@ Tuple::Tuple(const Set& xs)
 }
 
 Tuple::Tuple(const Dict& xs)
-: Iterable(this){
+: Iterable(this)
+, Hashable(this)
+, Equalable(this)
+{
     auto data = xs.value();
     this->m_items = {};
     for(auto [key, val]: data){
@@ -487,6 +530,8 @@ Tuple::Tuple(const Dict& xs)
 
 Tuple::Tuple(const Tuple& tuple) noexcept
 : Iterable(this)
+, Hashable(this)
+, Equalable(this)
 , m_items{tuple.m_items}
 {
     this->m_ptr = this->m_items.begin();
@@ -495,6 +540,8 @@ Tuple::Tuple(const Tuple& tuple) noexcept
 
 Tuple::Tuple(Tuple&& tuple) noexcept
 : Iterable(this)
+, Hashable(this)
+, Equalable(this)
 , m_items{std::move(tuple.m_items)}{
     this->m_ptr = this->m_items.begin();
     this->m_stop = this->m_items.end();
@@ -565,25 +612,31 @@ Symbol ELuxError::IndexError = Symbol("IndexError");
 
 // -*-
 ELuxError::ELuxError()
-: std::runtime_error("unexpected error caught.")
+: Hashable(this)
+, Equalable(this)
 , m_kind{Symbol("Error")}
+, m_msg{"unexpected error caught."}
 {}
 
 // -*-
 ELuxError::ELuxError(const Symbol& sym)
-: std::runtime_error("unexpected error caught.")
+: Hashable(this)
+, Equalable(this)
 , m_kind{sym}
+, m_msg{"unexpected error caught."}
 {}
 
 ELuxError::ELuxError(const Symbol& sym, const std::string& msg)
-: std::runtime_error(msg)
+: Hashable(this)
+, Equalable(this)
 , m_kind{sym}
+, m_msg{msg}
 {}
 
 // -*-
 std::string ELuxError::describe(void) const{
     std::stringstream ss;
-    ss << this->m_kind.str() << ": " << this->what();
+    ss << this->m_kind.str() << ": " << this->m_msg;
     return ss.str();
 }
 
@@ -601,7 +654,7 @@ std::string ELuxError::type(void) const{
 }
 
 std::string ELuxError::str(void) const{
-    return std::string(this->what());
+    return std::string(this->m_msg);
 }
 
 // --------------
@@ -1045,6 +1098,8 @@ bool operator>=(const Number& lhs, const Number& rhs){
 // -*-
 String::String()
 : Iterable(this)
+, Hashable(this)
+, TotalOrdering(this)
 , m_val{}
 {
     this->m_ptr = this->m_val.begin();
@@ -1054,6 +1109,8 @@ String::String()
 // -*-
 String::String(const std::string& str)
 : Iterable(this)
+, Hashable(this)
+, TotalOrdering(this)
 , m_val{str}
 {
     this->m_ptr = this->m_val.begin();
@@ -1063,6 +1120,8 @@ String::String(const std::string& str)
 // -*-
 String::String(const char* cstr)
 : Iterable(this)
+, Hashable(this)
+, TotalOrdering(this)
 , m_val{std::string(cstr)}
 {
     this->m_ptr = this->m_val.begin();
@@ -1072,6 +1131,8 @@ String::String(const char* cstr)
 // -*-
 String::String(char c)
 : Iterable(this)
+, Hashable(this)
+, TotalOrdering(this)
 , m_val{std::string(1, c)}
 {
     this->m_ptr = this->m_val.begin();
@@ -1080,6 +1141,8 @@ String::String(char c)
 
 String::String(const String& xs)
 : Iterable(this)
+, Hashable(this)
+, TotalOrdering(this)
 , m_val(xs.m_val)
 {
     this->m_ptr = this->m_val.begin();
@@ -1089,6 +1152,8 @@ String::String(const String& xs)
 // -*-
 String::String(String&& xs)
 : Iterable{this}
+, Hashable(this)
+, TotalOrdering(this)
 , m_val{xs.m_val}
 {
     this->m_ptr = this->m_val.begin();
