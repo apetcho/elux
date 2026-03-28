@@ -1325,19 +1325,28 @@ Dict::Dict(const Vec<Pair>& pairs)
 // -*-
 Dict::Dict(const Dict& xs) noexcept
 : Iterable(this)
-, m_hmap{xs.m_hmap} {}
+, m_hmap{xs.m_hmap} {
+    this->m_ptr = this->m_hmap.begin();
+    this->m_stop = this->m_hmap.end();
+}
 
 // -*-
 Dict::Dict(Dict&& xs) noexcept
 : Iterable(this)
 , m_hmap{std::move(xs.m_hmap)}{
+    this->m_ptr = this->m_hmap.begin();
+    this->m_stop = this->m_hmap.end();
     xs.m_hmap = {};
+    xs.m_ptr = xs.m_hmap.begin();
+    xs.m_stop = xs.m_hmap.end();
 }
 
 // -*-
 Dict& Dict::operator=(const Dict& xs) noexcept{
     if(this != &xs){
         this->m_hmap = xs.m_hmap;
+        this->m_ptr = this->m_hmap.begin();
+        this->m_stop = this->m_hmap.end();
     }
     return *this;
 }
@@ -1346,7 +1355,11 @@ Dict& Dict::operator=(const Dict& xs) noexcept{
 Dict& Dict::operator=(Dict&& xs) noexcept{
     if(this != &xs){
         this->m_hmap = std::move(xs.m_hmap);
+        this->m_ptr = this->m_hmap.begin();
+        this->m_stop = this->m_hmap.end();
         xs.m_hmap = {};
+        xs.m_ptr = xs.m_hmap.begin();
+        xs.m_stop = xs.m_hmap.end();
     }
     return *this;
 }
@@ -1378,9 +1391,17 @@ HMap& Dict::value(void){ return this->m_hmap; }
 
 const HMap& Dict::value(void) const{ return this->m_hmap; }
 
-//! @todo
+// -*-
+Self Dict::next(void){
+    auto self = *this->m_ptr;
+    this->m_ptr = std::next(this->m_ptr);
+    auto key = ELux::share(self.first);
+    auto val = std::move(self.second);
+
+    return ELux::share(Pair(key, val));
+}
+
 /*
-Self Dict::next(void){}
 bool Dict::done(void) const{}
 */
 
