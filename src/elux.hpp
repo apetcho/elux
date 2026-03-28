@@ -275,6 +275,7 @@ private:
 class ELuxError final: public Object, public Hashable, public Equalable{
 public:
     explicit ELuxError();
+    explicit ELuxError(const std::string& msg);
     explicit ELuxError(const Symbol& sym);
     explicit ELuxError(const Symbol& sym, const std::string& msg);
     ELuxError(const ELuxError& err) noexcept;// = default;

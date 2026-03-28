@@ -716,6 +716,14 @@ ELuxError::ELuxError()
 {}
 
 // -*-
+ELuxError::ELuxError(const std::string& msg)
+: Hashable(this)
+, Equalable(this)
+, m_kind{Symbol("Error")}
+, m_msg{msg}
+{}
+
+// -*-
 ELuxError::ELuxError(const Symbol& sym)
 : Hashable(this)
 , Equalable(this)
@@ -1433,7 +1441,7 @@ int String::compare(Object* other) const{
         ss << "cannot compare " << std::quoted(other->str()) << " object to string.";
         throw std::runtime_error(ss.str());
     }
-    
+
     return this->m_val.compare(self->m_val);
 }
 

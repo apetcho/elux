@@ -640,8 +640,14 @@ void ELux::check_index(bool pred, const std::string& message){
     }
 }
 
+// -*-
+void ELux::check(bool pred, const std::string& message){
+    if(!pred){
+        throw ELuxError(message);
+    }
+}
+
 /*
-void ELux::check(bool pred, const std::string& message){}
 void ELux::check_argc(bool pred, const std::string& message){}
 */
 
