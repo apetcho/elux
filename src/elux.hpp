@@ -801,10 +801,10 @@ public:
     Self eval(const Vec<Expr>& elems, Context env);
     // quasiquote helpers
     Self quasiquote(const Self& v, Context env, int depth = 1);
-    Self evalValueAsExpr(const Self& v, Context env);
-    Expr valueToExpr(const Self& v);
-    Expr valueListToExpr(const List& lst);
-    Self expand(const Vec<Expr>& elems, Context env);
+    // Self evalValueAsExpr(const Self& v, Context env);
+    // Expr valueToExpr(const Self& v);
+    // Expr valueListToExpr(const List& lst);
+    //Self expand(const Vec<Expr>& elems, Context env);
 
     Vec<Self> eval_args(const Vec<Expr>& elems, Context env);
     Expr to_expr(const Self& self);

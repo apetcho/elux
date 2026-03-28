@@ -659,7 +659,7 @@ Self ELux::quasiquote(const Self& val, Context env, int depth){
     if(xdata.value().size()==2 && ELux::is_string(xdata.value().front()) &&
         xdata.value().front()->str()=="unquote" && depth==1){
         auto self = xdata.value().back();
-        return evalValueAsExpr(self, env);
+        return this->eval_as_expr(self, env);
     }
 
     // (unquote-splicing x) only valid inside list
@@ -672,7 +672,7 @@ Self ELux::quasiquote(const Self& val, Context env, int depth){
                 if(items.size()!=2){
                     throw std::runtime_error("unquote-splicing i.e ',@' expect exactly 1 argument.");
                 }
-                auto obj =evalValueAsExpr(items.back(), env);
+                auto obj = this->eval_as_expr(items.back(), env);
                 if(!ELux::is_list(obj)){
                     throw std::runtime_error("unquote-splicing expects list");
                 }
@@ -682,7 +682,7 @@ Self ELux::quasiquote(const Self& val, Context env, int depth){
                 if(items.size()!=2){
                     throw std::runtime_error("unquote i.e ',' expect exactly 1 argument.");
                 }
-                auto obj =evalValueAsExpr(items.back(), env);
+                auto obj = this->eval_as_expr(items.back(), env);
                 array.push(obj);
             }else{
                 array.push(ELux::share(ELux::as_list(self)));
@@ -697,11 +697,12 @@ Self ELux::quasiquote(const Self& val, Context env, int depth){
 }
 
 // -*-
-Self ELux::evalValueAsExpr(const Self& v, Context env) {
+// evalValueAsExpr
+Self ELux::eval_as_expr(const Self& v, Context env) {
     // interpret Value as code (Expr) and evaluate
     if(ELux::is_list(v)){
-        const auto& lst = *dynamic_cast<List*>(v.get());
-        auto expr = valueListToExpr(lst);
+        const auto& xs = *dynamic_cast<List*>(v.get());
+        auto expr = this->to_expr(xs);
         return this->eval(expr, env);
     }else if(ELux::is_string(v)){
         auto expr = std::make_shared<SymbolExpr>(v->str());
@@ -713,10 +714,11 @@ Self ELux::evalValueAsExpr(const Self& v, Context env) {
 }
 
 // -*-
-Expr ELux::valueToExpr(const Self& v) {
+// valueToExpr
+Expr ELux::to_expr(const Self& v) {
     if(ELux::is_list(v)){
-        const auto& lst = *dynamic_cast<List*>(v.get());
-        return valueListToExpr(lst);
+        const auto& xs = *dynamic_cast<List*>(v.get());
+        return this->to_expr(xs);
     }else if(ELux::is_string(v)){
         return std::make_shared<SymbolExpr>(v->str());
     }else{
@@ -724,10 +726,11 @@ Expr ELux::valueToExpr(const Self& v) {
     }
 }
 
-Expr ELux::valueListToExpr(const List& lst) {
+// valueListToExpr
+Expr ELux::to_expr(const List& lst) {
     auto expr = std::make_shared<ListExpr>();
     for(auto& item : lst.value()){
-        expr->elements.push_back(std::move(valueToExpr(item)));
+        expr->elements.push_back(std::move(this->to_expr(item)));
     }
     return expr;
 }
