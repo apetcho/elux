@@ -246,8 +246,16 @@ void Iterable::collect(String& result){
     result = String(ss.str());
 }
 
+// -*-
+void Iterable::collect(Array& result){
+    Vec<Self> vec{};
+    while(!this->done()){
+        vec.push_back(std::move(this->next()));
+    }
+    result = Array(vec);
+}
+
 /*
-void Iterable::collect(Array& result);
 void Iterable::collect(List& result);
 void Iterable::collect(Tuple& result);
 void Iterable::collect(Set& result);
