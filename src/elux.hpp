@@ -499,6 +499,8 @@ struct List final: public Object, public Iterable{
 
 private:
     std::list<Self> m_xs;
+    std::list<Self>::iterator m_ptr;
+    std::list<Self>::iterator m_stop;
 };
 
 // -*-
