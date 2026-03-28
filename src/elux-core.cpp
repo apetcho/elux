@@ -166,10 +166,15 @@ Tuple::Tuple(const Pair& xs)
 : items{Vec<Self>{xs.key, xs.val}}
 {}
 
+Tuple::Tuple(const List& xs)
+{
+    auto data = xs.value();
+    this->items = Vec<Self>(data.begin(), data.end());
+}
+
 /*
 struct Tuple final: public Object{
 
-Tuple::Tuple(const List& xs){}
 Tuple::Tuple(const Array& xs){}
 Tuple::Tuple(const Set& xs){}
 Tuple::Tuple(const Dict& xs){}
