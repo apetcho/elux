@@ -45,10 +45,14 @@ usize Nil::hash(void) const{
     return std::hash<std::string>{}("nil");
 }
 
-/*
+// -*-
+bool Nil::equal(Object* other) const{
+    if(this->type()==other->type()){
+        return this->str()==other->str();
+    }
 
-bool Nil::equal(Object* other) const{}
-*/
+    return false;
+}
 
 // ----------------
 // -*- Iterable -*-
