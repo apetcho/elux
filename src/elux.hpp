@@ -412,7 +412,9 @@ private:
     std::string::iterator m_stop;
 };
 
-// -*-
+// -----------
+// -*- Set -*-
+// -----------
 struct Set final: public Object, public Iterable {
     explicit Set();
     explicit Set(std::initializer_list<Self> xs);
@@ -437,6 +439,8 @@ struct Set final: public Object, public Iterable {
     
 private:
     HSet m_hset;
+    HSet::iterator m_ptr;
+    HSet::iterator m_stop;
 };
 
 // -*-

@@ -1064,7 +1064,10 @@ const std::string& String::value(void) const{
 // -----------
 Set::Set()
 : Iterable(this)
-, m_hset{} {}
+, m_hset{} {
+    this->m_ptr = this->m_hset.begin();
+    this->m_stop = this->m_hset.end();
+}
 
 // -*-
 Set::Set(std::initializer_list<Self> xs)
@@ -1082,6 +1085,8 @@ Set::Set(const Array& xs)
     for(auto x: xs.value()){
         this->m_hset.insert(ELux::str(x));
     }
+    this->m_ptr = this->m_hset.begin();
+    this->m_stop = this->m_hset.end();
 }
 
 // -*-
@@ -1091,24 +1096,46 @@ Set::Set(const List& xs)
     for(auto x: xs.value()){
         this->m_hset.insert(ELux::str(x));
     }
+    this->m_ptr = this->m_hset.begin();
+    this->m_stop = this->m_hset.end();
+}
+
+// -*-
+Set::Set(const Vec<Self>& xs)
+: Iterable(this)
+, m_hset{}{
+    for(auto x: xs){
+        this->m_hset.insert(ELux::str(x));
+    }
+    this->m_ptr = this->m_hset.begin();
+    this->m_stop = this->m_hset.end();
 }
 
 // -*-
 Set::Set(const Set& xs) noexcept
 : Iterable(this)
-, m_hset{xs.m_hset} {}
+, m_hset{xs.m_hset} {
+    this->m_ptr = this->m_hset.begin();
+    this->m_stop = this->m_hset.end();
+}
 
 // -*-
 Set::Set(Set&& xs) noexcept
 : Iterable(this)
 , m_hset{std::move(xs.m_hset)}{
+    this->m_ptr = this->m_hset.begin();
+    this->m_stop = this->m_hset.end();
     xs.m_hset = {};
+    xs.m_ptr = xs.m_hset.begin();
+    xs.m_stop = xs.m_hset.end();
 }
 
 // -*-
 Set& Set::operator=(const Set& xs) noexcept{
     if(this != &xs){
         this->m_hset = xs.m_hset;
+        this->m_ptr = this->m_hset.begin();
+        this->m_stop = this->m_hset.end();
     }
 
     return *this;
@@ -1118,7 +1145,11 @@ Set& Set::operator=(const Set& xs) noexcept{
 Set& Set::operator=(Set&& xs) noexcept{
     if(this != &xs){
         this->m_hset = std::move(xs.m_hset);
+        this->m_ptr = this->m_hset.begin();
+        this->m_stop = this->m_hset.end();
         xs.m_hset = {};
+        xs.m_ptr = xs.m_hset.begin();
+        xs.m_stop = xs.m_hset.end();
     }
 
     return *this;
@@ -1151,9 +1182,14 @@ HSet& Set::value(void){ return this->m_hset; }
 // -*-
 const HSet& Set::value(void) const{ return this->m_hset; }
 
-//! @todo
+// -*-
+Self Set::next(void){
+    auto self = *this->m_ptr;
+    this->m_ptr = std::next(this->m_ptr);
+    return ELux::share(self);
+}
+
 /*
-Self Set::next(void){}
 bool Set::done(void) const{}
 */
 
