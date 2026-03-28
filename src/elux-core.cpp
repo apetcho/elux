@@ -224,10 +224,22 @@ std::string Tuple::type(void) const{
     return "Tuple";
 }
 
+std::string Tuple::str(void) const{
+    std::stringstream ss;
+    ss << "#[";
+    for(size_t i=0; i < this->items.size(); i++){
+        if(i > 0){ ss << " "; }
+        ss << this->items[i]->str();
+    }
+    ss << "]";
+
+    return ss.str();
+}
+
 /*
 struct Tuple final: public Object{
 
-std::string Tuple::str(void) const{}
+
 };
 // -*-
 class ELuxError final: public Object, public std::runtime_error {
