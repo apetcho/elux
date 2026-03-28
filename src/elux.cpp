@@ -314,6 +314,17 @@ bool ELux::is_callable(const Self& self){
 }
 
 // -*-
+bool ELux::is_pair(const Self& self){
+    auto ptr = dynamic_cast<Pair*>(self.get());
+    return (ptr==nullptr ? false : true);
+}
+
+/*
+bool ELux::is_tuple(const Self& self){}
+bool ELux::is_iterable(const Self& self){}
+*/
+
+// -*-
 std::string ELux::str(const Self& self){
     return self->str();
 }
