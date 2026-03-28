@@ -1425,9 +1425,18 @@ bool String::equal(Object* other) const{
 }
 
 
-/*
-int String::compare(Object*) const{}
-*/
+// -*-
+int String::compare(Object* other) const{
+    auto self = dynamic_cast<String*>(other);
+    if(self==nullptr){
+        std::stringstream ss;
+        ss << "cannot compare " << std::quoted(other->str()) << " object to string.";
+        throw std::runtime_error(ss.str());
+    }
+    
+    return this->m_val.compare(self->m_val);
+}
+
 
 // -*-
 std::string String::str(void) const{
