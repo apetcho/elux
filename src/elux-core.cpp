@@ -981,8 +981,16 @@ String::String()
     this->m_stop = this->m_val.end();
 }
 
+// -*-
+String::String(const std::string& str)
+: Iterable(this)
+, m_val{str}
+{
+    this->m_ptr = this->m_val.begin();
+    this->m_stop = this->m_val.end();
+}
+
 /*
-String::String(const std::string& str){}
 String::String(const char* cstr){}
 String::String(char c){}
 String::String(const String& xs){}
