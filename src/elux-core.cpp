@@ -1548,10 +1548,11 @@ Self List::next(void){
     this->m_ptr = std::next(this->m_ptr);
     return self;
 }
-/*
 
-bool List::done(void) const{}
-*/
+// -*-
+bool List::done(void) const{
+    return (this->m_ptr == this->m_stop ? true : false);
+}
 
 // -------------
 // -*- Array -*-
