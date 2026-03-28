@@ -185,6 +185,20 @@ Self ELux::share(const Dict& val){
     return std::make_shared<Dict>(val);
 }
 
+Self ELux::share(const Symbol& val){
+    return std::make_shared<Symbol>(val);
+}
+
+/*
+Self ELux::share(const Pair& val){}
+Self ELux::share(const Tuple& val){}
+Self ELux::share(const ELuxError& val){}
+Expr ELux::share(const LiteralExpr& expr){}
+Expr ELux::share(const SymbolExpr& expr){}
+Expr ELux::share(const ListExpr& expr){}
+
+*/
+
 // -*-
 bool ELux::is_nil(const Self& self){
     auto ptr = dynamic_cast<Nil*>(self.get());
