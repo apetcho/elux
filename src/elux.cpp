@@ -201,8 +201,11 @@ Self ELux::share(const ELuxError& val){
     return std::make_shared<ELuxError>(val);
 }
 
+Expr ELux::share(const LiteralExpr& expr){
+    return std::make_shared<LiteralExpr>(expr);
+}
+
 /*
-Expr ELux::share(const LiteralExpr& expr){}
 Expr ELux::share(const SymbolExpr& expr){}
 Expr ELux::share(const ListExpr& expr){}
 
