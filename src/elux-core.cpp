@@ -49,10 +49,14 @@ Symbol::Symbol(const Symbol& sym) noexcept
 : value{sym.value}
 {}
 
+Symbol::Symbol(Symbol&& sym) noexcept
+: value{std::move(sym.value)}{
+    sym.value = {};
+}
+
 /*
 struct Symbol final : public Object{
 
-Symbol::Symbol(Symbol&& sym) noexcept{}
 Symbol& Symbol::operator=(const Symbol& sym) noexcept{}
 Symbol& Symbol::operator=(Symbol&& sym) noexcept{}
 
