@@ -162,10 +162,13 @@ Tuple::Tuple(const std::list<Self>& xs)
 : items{Vec<Self>(xs.begin(), xs.end())}
 {}
 
+Tuple::Tuple(const Pair& xs)
+: items{Vec<Self>{xs.key, xs.val}}
+{}
+
 /*
 struct Tuple final: public Object{
 
-Tuple::Tuple(const Pair& xs){}
 Tuple::Tuple(const List& xs){}
 Tuple::Tuple(const Array& xs){}
 Tuple::Tuple(const Set& xs){}
