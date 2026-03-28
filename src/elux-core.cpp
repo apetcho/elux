@@ -116,9 +116,13 @@ Number Number::acos(void) const{
     return Number(std::acos(this->as_float()));
 }
 
+// -*-
+Number Number::atan(void) const{
+    return Number(std::atan(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::atan(void) const{}
 Number Number::atan2(const Number& rhs) const{}
 Number Number::sinh(void) const{}
 Number Number::cosh(void) const{}
