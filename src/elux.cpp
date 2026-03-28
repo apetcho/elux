@@ -540,8 +540,12 @@ void ELux::collect(Iterator iter, Tuple& result){
     iter->collect(result);
 }
 
+// -*-
+void ELux::collect(Iterator iter, Array& result){
+    iter->collect(result);
+}
+
 /*
-void ELux::collect(Iterator iter, Array& result){}
 void ELux::collect(Iterator iter, List& result){}
 void ELux::collect(Iterator iter, Set& result){}
 void ELux::collect(Iterator iter, Dict& result){}
