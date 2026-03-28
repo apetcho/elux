@@ -52,6 +52,26 @@ Iterator Iterable::map(Function func, Context env){
     return std::make_shared<Array>(vec);
 }
 
+// -*-
+Iterator Iterable::filter(Function func, Context env){
+    Vec<Self> vec{};
+    while(!this->done()){
+        Vec<Self> args = {this->next()};
+        auto ans = func.call(args, env);
+        if(!ELux::is_bool(ans)){
+            std::stringstream ss;
+            ss << "`filter: the first argument must be a unary predicate.";
+            throw std::runtime_error(ss.str());
+        }
+
+        if(ELux::as_bool(ans)){
+            vec.push_back(std::move(ans));
+        }
+    }
+    return std::make_shared<Array>(vec);
+}
+
+
 /*
 struct Iterable : public Object {
     virtual ~Iterable() = default;
@@ -59,7 +79,7 @@ struct Iterable : public Object {
     virtual Self next(void) = 0;
     virtual bool done(void) const = 0;
 
-Iterator Iterable::filter(Function func, Context env){}
+
 Self Iterable::reduce(Function func, Context env, const Self& init){}
 Iterator Iterable::zip(const Vec<Iterator>& iterators){}
 Iterator Iterable::chain(const Vec<Iterator>& iterators){}
