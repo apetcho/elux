@@ -999,8 +999,16 @@ String::String(const char* cstr)
     this->m_stop = this->m_val.end();
 }
 
+// -*-
+String::String(char c)
+: Iterable(this)
+, m_val{std::string(1, c)}
+{
+    this->m_ptr = this->m_val.begin();
+    this->m_stop = this->m_val.end();
+}
+
 /*
-String::String(char c){}
 String::String(const String& xs){}
 String::String(String&& xs){}
 Self String::next(void){}
