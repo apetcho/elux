@@ -197,9 +197,13 @@ Number Number::cbrt(void) const{
     return Number(std::cbrt(this->as_float()));
 }
 
+// -*-
+Number Number::log(void) const{
+    return Number(std::log(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::log(void) const{}
 Number Number::log2(void) const{}
 Number Number::log10(void) const{}
 Number Number::log1p(void) const{}
