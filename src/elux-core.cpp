@@ -748,8 +748,17 @@ ELuxError::ELuxError(ELuxError&& err) noexcept
     err.m_msg = {};
 }
 
+// -*-
+ELuxError& ELuxError::operator=(const ELuxError& err) noexcept{
+    if(this != &err){
+        this->m_kind = err.m_kind;
+        this->m_msg = err.m_msg;
+    }
+
+    return *this;
+}
+
 /*
-ELuxError& ELuxError::operator=(const ELuxError& err) noexcept{}
 ELuxError& ELuxError::operator=(ELuxError&& err) noexcept{}
 */
 
