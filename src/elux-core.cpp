@@ -232,9 +232,13 @@ Number Number::tgamma(void) const{
     return Number(std::tgamma(this->as_float()));
 }
 
+// -*-
+Number Number::lgamma(void) const{
+    return Number(std::lgamma(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::lgamma(void) const{}
 bool Number::isnan(void) const{}
 bool Number::isinf(void) const{}
 bool Number::isfinite(void) const{}
