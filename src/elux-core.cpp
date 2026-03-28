@@ -205,11 +205,17 @@ Tuple::Tuple(Tuple&& tuple) noexcept
     tuple.items = {};
 }
 
+Tuple& Tuple::operator=(const Tuple& tuple) noexcept{
+    if(this != &tuple){
+        this->items = tuple.items;
+    }
+    return *this;
+}
+
 /*
 struct Tuple final: public Object{
 
 
-Tuple& Tuple::operator=(const Tuple& tuple) noexcept{}
 Tuple& Tuple::operator=(Tuple&& tuple) noexcept{}
 std::string Tuple::type(void) const{}
 std::string Tuple::str(void) const{}
