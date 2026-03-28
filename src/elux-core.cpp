@@ -199,11 +199,16 @@ Tuple::Tuple(const Tuple& tuple) noexcept
 : items{tuple.items}
 {}
 
+Tuple::Tuple(Tuple&& tuple) noexcept
+: items{std::move(tuple.items)}
+{
+    tuple.items = {};
+}
+
 /*
 struct Tuple final: public Object{
 
 
-Tuple::Tuple(Tuple&& tuple) noexcept{}
 Tuple& Tuple::operator=(const Tuple& tuple) noexcept{}
 Tuple& Tuple::operator=(Tuple&& tuple) noexcept{}
 std::string Tuple::type(void) const{}
