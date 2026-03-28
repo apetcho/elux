@@ -184,10 +184,21 @@ Tuple::Tuple(const Set& xs){
     }
 }
 
+Tuple::Tuple(const Dict& xs){
+    auto data = xs.value();
+    this->items = {};
+    for(auto [key, val]: data){
+        auto xkey = ELux::share(key);
+        auto xval = val;
+        Pair pair(xkey, xval);
+        this->items.push_back(ELux::share(pair));
+    }
+}
+
 /*
 struct Tuple final: public Object{
 
-Tuple::Tuple(const Dict& xs){}
+
 Tuple::Tuple(const Tuple& tuple) noexcept{}
 Tuple::Tuple(Tuple&& tuple) noexcept{}
 Tuple& Tuple::operator=(const Tuple& tuple) noexcept{}
