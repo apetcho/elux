@@ -425,10 +425,13 @@ bool operator&&(const Number& lhs, const Number& rhs){
     return (lhs.as_bool() && rhs.as_bool());
 }
 
+// -*-
+bool operator||(const Number& lhs, const Number& rhs){
+    return (lhs.as_bool() || rhs.as_bool());
+}
+
 /*
 // -*-
-bool operator&&(const Number& lhs, const Number& rhs){}
-
 bool operator==(const Number& lhs, const Number& rhs){}
 bool operator!=(const Number& lhs, const Number& rhs){}
 bool operator<(const Number& lhs, const Number& rhs){}

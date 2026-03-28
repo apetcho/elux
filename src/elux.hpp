@@ -281,7 +281,7 @@ struct Number final: public Object {
     friend Number operator>>(const Number& lhs, const Number& rhs);
 
     friend bool operator&&(const Number& lhs, const Number& rhs);
-    friend bool operator&&(const Number& lhs, const Number& rhs);
+    friend bool operator||(const Number& lhs, const Number& rhs);
 
     friend bool operator==(const Number& lhs, const Number& rhs);
     friend bool operator!=(const Number& lhs, const Number& rhs);
