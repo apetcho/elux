@@ -325,9 +325,11 @@ bool ELux::is_tuple(const Self& self){
     return (ptr==nullptr ? false : true);
 }
 
-/*
-bool ELux::is_iterable(const Self& self){}
-*/
+// -*-
+bool ELux::is_iterable(const Self& self){
+    auto ptr = dynamic_cast<Iterable*>(self.get());
+    return (ptr==nullptr ? false : true);
+}
 
 // -*-
 std::string ELux::str(const Self& self){
