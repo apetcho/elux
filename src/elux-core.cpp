@@ -134,9 +134,13 @@ Number Number::atan2(const Number& rhs) const{
     return Number(num);
 }
 
+// -*-
+Number Number::sinh(void) const{
+    return Number(std::sinh(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::sinh(void) const{}
 Number Number::cosh(void) const{}
 Number Number::tanh(void) const{}
 Number Number::asinh(void) const{}
