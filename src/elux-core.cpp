@@ -372,9 +372,14 @@ usize Symbol::hash(void) const{
     return std::hash<std::string>{}(this->value);
 }
 
-/*
-bool Symbol::equal(Object* other) const{}
-*/
+// -*-
+bool Symbol::equal(Object* other) const{
+    if(this->type()==other->type()){
+        return (this->str()==other->str());
+    }
+
+    return false;
+}
 
 // ------------
 // -*- Pair -*-
