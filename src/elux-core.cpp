@@ -348,18 +348,6 @@ std::string Symbol::str(void) const{
 // ------------
 // -*- Pair -*-
 // ------------
-Pair::Pair()
-: key{ELux::share()}
-, val{ELux::share()}
-{}
-
-Pair::Pair(Self key_)
-: key{std::move(key_)}
-, val{ELux::share()}
-{
-    key_ = nullptr;
-}
-
 // -*-
 Pair::Pair(Self key_, Self val_)
 : key{std::move(key_)}

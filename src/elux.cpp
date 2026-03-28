@@ -427,6 +427,92 @@ Function ELux::as_function(const Self& self){
 }
 
 // -*-
+Pair ELux::as_pair(const Self& self){
+    Pair pair(ELux::share(), ELux::share());
+    if(ELux::is_pair(self)){
+        pair = ELux::as_pair(self);
+    }else if(ELux::is_tuple(self)){
+        if(self->len() != 2){
+            std::stringstream ss;
+            ss << "converting a tuple to a pair. Expect a tuple containing 2 elements but\n";
+            ss << "got a tuple containing " << self->len() << " elements.";
+            throw std::runtime_error(ss.str());
+        }
+        auto vec = ELux::as_tuple(self).value();
+        pair.key = std::move(vec[0]);
+        pair.val = std::move(vec[1]);
+    }else if(ELux::is_array(self)){
+        if(self->len() != 2){
+            std::stringstream ss;
+            ss << "converting an array to a pair. Expect an array containing 2 elements but\n";
+            ss << "got an array containing " << self->len() << " elements.";
+            throw std::runtime_error(ss.str());
+        }
+        auto vec = ELux::as_array(self).value();
+        pair.key = std::move(vec[0]);
+        pair.val = std::move(vec[1]);
+    }else if(ELux::is_list(self)){
+        if(self->len() != 2){
+            std::stringstream ss;
+            ss << "converting a list to a pair. Expect a list containing 2 elements but\n";
+            ss << "got a list containing " << self->len() << " elements.";
+            throw std::runtime_error(ss.str());
+        }
+        auto xs = ELux::as_list(self).value();
+        pair.key = std::move(xs.front());
+        pair.val = std::move(xs.back());
+    }else if(ELux::is_set(self)){
+        if(self->len() != 2){
+            std::stringstream ss;
+            ss << "converting a set to a pair. Expect a set containing 2 elements but\n";
+            ss << "got a set containing " << self->len() << " elements.";
+            throw std::runtime_error(ss.str());
+        }
+        auto xset = ELux::as_set(self).value();
+        auto vec = Vec<std::string>(xset.begin(), xset.end());
+        pair.key = std::move(ELux::share(vec[0]));
+        pair.val = std::move(ELux::share(vec[1]));
+    }else if(ELux::is_dict(self)){
+        if(self->len() != 1){
+            std::stringstream ss;
+            ss << "converting a dict to a pair. Expect a dict containing 1 elements but\n";
+            ss << "got a dict containing " << self->len() << " elements.";
+            throw std::runtime_error(ss.str());
+        }
+        auto xdict = ELux::as_dict(self).value();
+        Vec<Self> vec{};
+        for(auto [key, val]: xdict){
+            vec[0] = ELux::share(key);
+            vec[1] = val;
+        }
+        pair.key = std::move(vec[0]);
+        pair.val = std::move(vec[1]);
+    }else{
+        std::stringstream ss;
+        ss << "cannot convert " << std::quoted(self->type()) << " to a tuple.";
+        throw std::runtime_error(ss.str());
+    }
+
+    return pair;
+}
+
+/*
+Tuple as_tuple(const Self& self){}
+Iterator as_string_iterator(const Self& self){}
+Iterator as_array_iterator(const Self& self){}
+Iterator as_tuple_iterator(const Self& self){}
+Iterator as_list_iterator(const Self& self){}
+Iterator as_set_iterator(const Self& self){}
+Iterator as_dict_iterator(const Self& self){}
+void collect(const String& result){}
+void collect(const Tuple& result){}
+void collect(const Array& result){}
+void collect(const List& result){}
+void collect(const Set& result){}
+void collect(const Dict& result){}
+*/
+
+// -*-
 bool ELux::is_collection(const Self& self){
     return (
         ELux::is_list(self) ||
