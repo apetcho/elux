@@ -86,9 +86,13 @@ Number Number::round(void) const{
     return Number(std::round(this->as_float()));
 }
 
+// -*-
+Number Number::truncate(void) const{
+    return Number(std::trunc(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::truncate(void) const{}
 Number Number::sin(void) const{}
 Number Number::cos(void) const{}
 Number Number::tan(void) const{}
