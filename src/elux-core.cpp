@@ -833,6 +833,18 @@ Bool& Bool::operator=(Bool&& other) noexcept{
 // --------------
 // -*- Number -*-
 // --------------
+Number::Number(const Number& num) noexcept
+: Hashable(this)
+, TotalOrdering(this)
+, m_val{num.m_val}{}
+
+/*
+
+Number::Number(Number&&) noexcept{}
+Number& Number::operator=(const Number&) noexcept{}
+Number& Number::operator=(Number&&) noexcept{}
+*/
+
 bool Number::as_bool(void) const{
     auto result = static_cast<bool>(*this);
     return result;
