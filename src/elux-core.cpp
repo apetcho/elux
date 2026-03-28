@@ -123,10 +123,19 @@ Pair& Pair::operator=(const Pair& pair) noexcept{
     return *this;
 }
 
+Pair& Pair::operator=(Pair&& pair) noexcept{
+    if(this != &pair){
+        this->key = std::move(pair.key);
+        this->val = std::move(pair.val);
+        pair.key = nullptr;
+        pair.val = nullptr;
+    }
+    return *this;
+}
+
 /*
 struct Pair final : public Object{
 
-Pair& Pair::operator=(Pair&& pair) noexcept{}
 std::string Pair::type(void) const{}
 std::string Pair::str(void) const{}
 Self key;
