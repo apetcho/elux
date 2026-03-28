@@ -54,10 +54,16 @@ Symbol::Symbol(Symbol&& sym) noexcept
     sym.value = {};
 }
 
+Symbol& Symbol::operator=(const Symbol& sym) noexcept{
+    if(this != &sym){
+        this->value = sym.value;
+    }
+    return *this;
+}
+
 /*
 struct Symbol final : public Object{
 
-Symbol& Symbol::operator=(const Symbol& sym) noexcept{}
 Symbol& Symbol::operator=(Symbol&& sym) noexcept{}
 
 std::string Symbol::type(void) const override{}
