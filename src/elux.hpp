@@ -110,12 +110,12 @@ struct Iterable{
     virtual Iterator map(Function func, Context env);
     virtual Iterator filter(Function func, Context env);
     virtual Self reduce(Function func, Context env, const Self& init);
-    virtual Iterator zip(Vec<Iterator> iterators, Context env);
+    virtual Iterator zip(Vec<Iterator> iterators);
     virtual Iterator chain(Vec<Iterator> iterators);
     virtual Iterator take(u32 n);
     virtual Iterator enumerate(Vec<Iterator> iterators);
-    virtual Iterator drop_while(Function func, Context env, Vec<Iterator> iterators);
-    virtual Iterator take_while(Function func, Context env, Vec<Iterator> iterators);
+    virtual Iterator drop_while(Function func, Context env);
+    virtual Iterator take_while(Function func, Context env);
     virtual bool any(Function func, Context env);
     virtual bool all(Function func, Context env);
 

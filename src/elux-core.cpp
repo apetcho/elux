@@ -84,7 +84,7 @@ Self Iterable::reduce(Function func, Context env, const Self& init){
 }
 
 // -*-
-Iterator Iterable::zip(Vec<Iterator> iterators, Context env){
+Iterator Iterable::zip(Vec<Iterator> iterators){
     Vec<Self> vec{};
     
     while(true){
@@ -148,6 +148,25 @@ Iterator Iterable::enumerate(Vec<Iterator> iterators){
     return std::make_shared<Array>(vec);
 }
 
+// -*-
+Iterator Iterable::drop_while(Function func, Context env){
+    Vec<Self> vec{};
+    while(!this->done()){
+        auto ans = func.call(Vec<Self>{this->next()}, env);
+        if(!ELux::is_bool(ans)){
+            std::stringstream ss;
+            ss << "`drop-while: the first argument must be a unary predicate.";
+            throw std::runtime_error(ss.str());
+        }
+
+        if(!ELux::as_bool(ans)){
+            vec.push_back(std::move(ans));
+        }
+    }
+
+    return std::make_shared<Array>(vec);
+}
+
 /*
 struct Iterable : public Object {
     virtual ~Iterable() = default;
@@ -156,8 +175,8 @@ struct Iterable : public Object {
     virtual bool done(void) const = 0;
 
 
-Iterator Iterable::drop_while(Function func, Context env, Vec<Iterator> iterators){}
-Iterator Iterable::take_while(Function func, Context env, Vec<Iterator> iterators){}
+
+Iterator Iterable::take_while(Function func, Context env){}
 bool Iterable::any(Function func, Context env) const;
 bool Iterable::all(Function func, Context env) const;
 
