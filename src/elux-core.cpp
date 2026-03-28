@@ -236,25 +236,33 @@ std::string Tuple::str(void) const{
     return ss.str();
 }
 
+// -----------------
+// -*- ELuxError -*-
+// -----------------
+Symbol ELuxError::ValueError = Symbol("ValueError");
+Symbol ELuxError::TypeError = Symbol("TypeError");
+Symbol ELuxError::SyntaxError = Symbol("SyntaxError");
+Symbol ELuxError::RuntimeError = Symbol("RuntimeError");
+Symbol ELuxError::KeyError = Symbol("KeyError");
+Symbol ELuxError::IndexError = Symbol("IndexError");
+
+// -*-
+ELuxError::ELuxError()
+: std::runtime_error("unexpected error caught.")
+, m_kind{Symbol("Error")}
+{}
+
 /*
-struct Tuple final: public Object{
-
-
-};
 // -*-
 class ELuxError final: public Object, public std::runtime_error {
 public:
 
-Symbol ELuxError::ValueError;
-Symbol ELuxError::TypeError;
-Symbol ELuxError::SyntaxError;
-Symbol ELuxError::RuntimeError;
-Symbol ELuxError::KeyError;
-Symbol ELuxError::IndexError;
-
-ELuxError::ELuxError(){}
 ELuxError::ELuxError(const Symbol& sym){}
 ELuxError::ELuxError(const Symbol& sym, const std::string& msg){}
+ELuxError::ELuxError(const ELuxError& err) noexcept{}
+ELuxError::ELuxError(ELuxError&& err) noexcept{}
+ELuxError& ELuxError::operator=(const ELuxError& err) noexcept{}
+ELuxError& ELuxError::operator=(ELuxError&& err) noexcept{}
 
 std::string ELuxError::describe(void) const{}
 const Symbol& ELuxError::kind(void) const{}

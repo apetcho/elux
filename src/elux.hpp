@@ -172,17 +172,24 @@ public:
     explicit ELuxError();
     explicit ELuxError(const Symbol& sym);
     explicit ELuxError(const Symbol& sym, const std::string& msg);
+    ELuxError(const ELuxError& err) noexcept;
+    ELuxError(ELuxError&& err) noexcept;
+    ELuxError& operator=(const ELuxError& err) noexcept;
+    ELuxError& operator=(ELuxError&& err) noexcept;
+    
+    std::string describe(void) const;
+    const Symbol& kind(void) const;
+    Symbol& kind(void);
+    std::string type(void) const override;
+    std::string str(void) const override;
+
     static Symbol ValueError;
     static Symbol TypeError;
     static Symbol SyntaxError;
     static Symbol RuntimeError;
     static Symbol KeyError;
     static Symbol IndexError;
-    std::string describe(void) const;
-    const Symbol& kind(void) const;
-    Symbol& kind(void);
-    std::string type(void) const override;
-    std::string str(void) const override;
+    
 private:
     Symbol m_kind;
 };
