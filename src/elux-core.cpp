@@ -61,13 +61,21 @@ Symbol& Symbol::operator=(const Symbol& sym) noexcept{
     return *this;
 }
 
+Symbol& Symbol::operator=(Symbol&& sym) noexcept{
+    if(this != &sym){
+        this->value = std::move(sym.value);
+        sym.value = {};
+    }
+    return *this;
+}
+
 /*
 struct Symbol final : public Object{
 
-Symbol& Symbol::operator=(Symbol&& sym) noexcept{}
 
-std::string Symbol::type(void) const override{}
-std::string Symbol::str(void) const override{}
+
+std::string Symbol::type(void) const{}
+std::string Symbol::str(void) const{}
 std::string value;
 };
 
