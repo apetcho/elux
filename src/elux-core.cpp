@@ -279,13 +279,16 @@ Symbol& ELuxError::kind(void){
     return this->m_kind;
 }
 
+std::string ELuxError::type(void) const{
+    return this->kind().str();
+}
+
 /*
 // -*-
 class ELuxError final: public Object, public std::runtime_error {
 public:
 
 
-std::string ELuxError::type(void) const{}
 std::string ELuxError::str(void) const{}
 
 private:
