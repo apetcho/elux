@@ -246,9 +246,13 @@ bool Number::isinf(void) const{
     return std::isinf(this->as_float());
 }
 
+// -*-
+bool Number::isfinite(void) const{
+    return std::isfinite(this->as_float());
+}
+
 /*
 // -*-
-bool Number::isfinite(void) const{}
 Number& Number::operator!(){}
 Number& Number::operator-(){}
 Number& Number::operator~(){}
