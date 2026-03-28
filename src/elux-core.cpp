@@ -367,6 +367,15 @@ std::string Symbol::str(void) const{
     return this->value;
 }
 
+// -*-
+usize Symbol::hash(void) const{
+    return std::hash<std::string>{}(this->value);
+}
+
+/*
+bool Symbol::equal(Object* other) const{}
+*/
+
 // ------------
 // -*- Pair -*-
 // ------------
