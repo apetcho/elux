@@ -515,12 +515,22 @@ Tuple ELux::as_tuple(const Self& self){
 }
 
 // -*-
-Iterator ELux::as_string_iterator(const Self& self){
-    return std::make_shared<String>(self->str());
+Iterator ELux::as_iterator(const Self& self){
+    Vec<Self> vec{};
+    if(ELux::is_iterable(self)){
+        auto iter = ELux::as_iterator(self);
+        while(!iter->done()){
+            vec.push_back(iter->next());
+        }
+    }else{
+        std::stringstream ss;
+        ss << "type " << std::quoted(self->type()) << " objects are not iterable.";
+    }
+
+    return std::make_shared<Array>(vec);
 }
 
 /*
-Iterator ELux::as_array_iterator(const Self& self){}
 Iterator ELux::as_tuple_iterator(const Self& self){}
 Iterator ELux::as_list_iterator(const Self& self){}
 Iterator ELux::as_set_iterator(const Self& self){}
