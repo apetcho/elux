@@ -195,11 +195,14 @@ Tuple::Tuple(const Dict& xs){
     }
 }
 
+Tuple::Tuple(const Tuple& tuple) noexcept
+: items{tuple.items}
+{}
+
 /*
 struct Tuple final: public Object{
 
 
-Tuple::Tuple(const Tuple& tuple) noexcept{}
 Tuple::Tuple(Tuple&& tuple) noexcept{}
 Tuple& Tuple::operator=(const Tuple& tuple) noexcept{}
 Tuple& Tuple::operator=(Tuple&& tuple) noexcept{}
