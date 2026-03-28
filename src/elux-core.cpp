@@ -77,15 +77,18 @@ std::string Symbol::str(void) const{
     return this->value;
 }
 
+// ------------
+// -*- Pair -*-
+// ------------
+Pair::Pair()
+: key{ELux::share()}
+, val{ELux::share()}
+{}
+
 /*
-struct Symbol final : public Object{
-
-
-std::string value;
-};
 
 struct Pair final : public Object{
-Pair::Pair(){}
+
 Pair::Pair(Self key){}
 Pair::Pair(Self key, Self val){}
 Pair::Pair(const Pair& pair) noexcept{}
