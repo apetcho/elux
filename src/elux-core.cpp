@@ -91,9 +91,13 @@ Number Number::truncate(void) const{
     return Number(std::trunc(this->as_float()));
 }
 
+// -*-
+Number Number::sin(void) const{
+    return Number(std::sin(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::sin(void) const{}
 Number Number::cos(void) const{}
 Number Number::tan(void) const{}
 Number Number::asin(void) const{}
