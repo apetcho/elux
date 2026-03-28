@@ -179,9 +179,16 @@ Number Number::exp2(void) const{
     return Number(std::exp2(this->as_float()));
 }
 
+// -*-
+Number Number::pow(const Number& rhs) const{
+    auto base = this->as_float();
+    auto expo = rhs.as_float();
+    auto num = std::pow(base, expo);
+    return Number(num);
+}
+
 /*
 // -*-
-Number Number::pow(const Number& rhs) const{}
 Number Number::sqrt(void) const{}
 Number Number::cbrt(void) const{}
 Number Number::log(void) const{}
