@@ -647,9 +647,12 @@ void ELux::check(bool pred, const std::string& message){
     }
 }
 
-/*
-void ELux::check_argc(bool pred, const std::string& message){}
-*/
+// -*-
+void ELux::check_argc(bool pred, const std::string& message){
+    if(!pred){
+        throw ELuxError(ELuxError::SyntaxError, message);
+    }
+}
 
 // // -*-
 // std::string ELux::repr(const Self& self){
