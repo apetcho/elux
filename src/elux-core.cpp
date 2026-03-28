@@ -761,9 +761,16 @@ usize ELuxError::hash(void) const{
     return (x ^ y);
 }
 
-/*
-bool ELuxError::equal(Object* other) const{}
-*/
+// -*-
+bool ELuxError::equal(Object* other) const{
+    if(this->type()==other->type()){
+        auto rhs = dynamic_cast<ELuxError*>(other);
+        auto x = this->m_kind.equal(rhs);
+        auto y = (this->m_msg==rhs->m_msg);
+        return (x && y);
+    }
+    return false;
+}
 
 // --------------
 // -*- Number -*-
