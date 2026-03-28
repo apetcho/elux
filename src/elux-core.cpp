@@ -71,6 +71,17 @@ Iterator Iterable::filter(Function func, Context env){
     return std::make_shared<Array>(vec);
 }
 
+// -*-
+Self Iterable::reduce(Function func, Context env, const Self& init){
+    Self acc = init;
+
+    while(!this->done()){
+        Vec<Self> args = {acc, this->next()};
+        acc = func.call(args, env);
+    }
+
+    return std::move(acc);
+}
 
 /*
 struct Iterable : public Object {
@@ -80,7 +91,7 @@ struct Iterable : public Object {
     virtual bool done(void) const = 0;
 
 
-Self Iterable::reduce(Function func, Context env, const Self& init){}
+
 Iterator Iterable::zip(const Vec<Iterator>& iterators){}
 Iterator Iterable::chain(const Vec<Iterator>& iterators){}
 Iterator Iterable::take(const Vec<Iterator>& iterators){}
