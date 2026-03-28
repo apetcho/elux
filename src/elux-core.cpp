@@ -1039,9 +1039,11 @@ Self String::next(void){
     return ELux::share(self);
 }
 
-/*
-bool String::done(void) const{}
-*/
+// -*-
+bool String::done(void) const{
+    return (this->m_ptr==this->m_stop? true : false);
+}
+
 // -*-
 std::string String::str(void) const{
     std::stringstream ss;
