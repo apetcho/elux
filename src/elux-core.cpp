@@ -319,9 +319,26 @@ Number operator*(const Number& lhs, const Number& rhs){
     return Number((x*y));
 }
 
+// -*-
+Number operator/(const Number& lhs, const Number& rhs){
+    if(lhs.is_integer() && rhs.is_integer()){
+        auto x = lhs.as_integer();
+        auto y = rhs.as_integer();
+        if(y==0){
+            throw std::runtime_error("division by zero");
+        }
+        return Number((x/y));
+    }
+    auto x = lhs.as_float();
+    auto y = rhs.as_float();
+    if(y==0.0){
+        throw std::runtime_error("division by zero");
+    }
+    return Number((x/y));
+}
+
 /*
 // -*-
-Number operator/(const Number& lhs, const Number& rhs){}
 Number operator%(const Number& lhs, const Number& rhs){}
 
 Number operator&(const Number& lhs, const Number& rhs){}
