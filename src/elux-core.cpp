@@ -114,10 +114,18 @@ Pair::Pair(Pair&& pair) noexcept
     pair.val = nullptr;
 }
 
+// -*-
+Pair& Pair::operator=(const Pair& pair) noexcept{
+    if(this != &pair){
+        this->key = pair.key;
+        this->val = pair.val;
+    }
+    return *this;
+}
+
 /*
 struct Pair final : public Object{
 
-Pair& Pair::operator=(const Pair& pair) noexcept{}
 Pair& Pair::operator=(Pair&& pair) noexcept{}
 std::string Pair::type(void) const{}
 std::string Pair::str(void) const{}
