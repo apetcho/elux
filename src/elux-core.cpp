@@ -227,9 +227,13 @@ Number Number::erfc(void) const{
     return Number(std::erfc(this->as_float()));
 }
 
+// -*-
+Number Number::tgamma(void) const{
+    return Number(std::tgamma(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::tgamma(void) const{}
 Number Number::lgamma(void) const{}
 bool Number::isnan(void) const{}
 bool Number::isinf(void) const{}
