@@ -69,12 +69,13 @@ Symbol& Symbol::operator=(Symbol&& sym) noexcept{
     return *this;
 }
 
+std::string Symbol::type(void) const{
+    return "Symbol";
+}
+
 /*
 struct Symbol final : public Object{
 
-
-
-std::string Symbol::type(void) const{}
 std::string Symbol::str(void) const{}
 std::string value;
 };
