@@ -1474,19 +1474,28 @@ List::List(const Vec<Self>& xs)
 // -*-
 List::List(const List& xs) noexcept
 : Iterable(this)
-, m_xs{xs.m_xs}{}
+, m_xs{xs.m_xs}{
+    this->m_ptr = this->m_xs.begin();
+    this->m_stop = this->m_xs.end();
+}
 
 // -*-
 List::List(List&& xs) noexcept
 : Iterable(this)
 , m_xs{std::move(xs.m_xs)}{
+    this->m_ptr = this->m_xs.begin();
+    this->m_stop = this->m_xs.end();
     xs.m_xs = {};
+    xs.m_ptr = xs.m_xs.begin();
+    xs.m_stop = xs.m_xs.end();
 }
 
 // -*-
 List& List::operator=(const List& xs) noexcept{
     if(this != &xs){
         this->m_xs = xs.m_xs;
+        this->m_ptr = this->m_xs.begin();
+        this->m_stop = this->m_xs.end();
     }
     return *this;
 }
@@ -1495,7 +1504,11 @@ List& List::operator=(const List& xs) noexcept{
 List& List::operator=(List&& xs) noexcept{
     if(this != &xs){
         this->m_xs = std::move(xs.m_xs);
+        this->m_ptr = this->m_xs.begin();
+        this->m_stop = this->m_xs.end();
         xs.m_xs = {};
+        xs.m_ptr = xs.m_xs.begin();
+        xs.m_stop = xs.m_xs.end();
     }
     return *this;
 }
@@ -1529,9 +1542,14 @@ const std::list<Self>& List::value(void) const{
     return this->m_xs;
 }
 
-//! @todo
+// -*-
+Self List::next(void){
+    auto self = *this->m_ptr;
+    this->m_ptr = std::next(this->m_ptr);
+    return self;
+}
 /*
-Self List::next(void){}
+
 bool List::done(void) const{}
 */
 
