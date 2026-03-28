@@ -1755,6 +1755,20 @@ bool Array::done(void) const{
     return (this->m_ptr==this->m_stop ? true : false);
 }
 
+// ----------------
+// -*- Function -*-
+// ----------------
+Self Function::call(const Vec<Self>& args, Context env){
+    auto expr = this->expand(args, env);
+    return this->elux.eval(expr, env);
+}
+
+/*
+
+Self Function::expand(const Vec<Self>& args, Context env){}
+
+*/
+
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::ekasoft::klx                                 -*-
 // -*----------------------------------------------------------------*-
