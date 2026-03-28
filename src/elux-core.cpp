@@ -479,7 +479,7 @@ Self Tuple::next(void){
     auto self = *this->m_ptr;
     this->m_ptr = std::next(this->m_ptr);
 
-    return std::move(self);
+    return self;
 }
 
 // -*-
@@ -1032,8 +1032,14 @@ String::String(String&& xs)
     xs.m_stop = xs.m_val.end();
 }
 
+// -*-
+Self String::next(void){
+    auto self = *this->m_ptr;
+    this->m_ptr = std::next(this->m_ptr);
+    return ELux::share(self);
+}
+
 /*
-Self String::next(void){}
 bool String::done(void) const{}
 */
 // -*-
