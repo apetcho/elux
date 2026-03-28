@@ -1677,9 +1677,14 @@ const Vec<Self>& Array::value(void) const{
     return this->m_xs;
 }
 
-//! @todo
+// -*-
+Self Array::next(void){
+    auto self = *this->m_ptr;
+    this->m_ptr = std::next(this->m_ptr);
+    return self;
+}
+
 /*
-Self Array::next(void){}
 bool Array::done(void) const{}
 */
 // -*----------------------------------------------------------------*-
