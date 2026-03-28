@@ -1559,7 +1559,10 @@ bool List::done(void) const{
 // -------------
 Array::Array()
 : Iterable(this)
-, m_xs{}{}
+, m_xs{}{
+    this->m_ptr = this->m_xs.begin();
+    this->m_stop = this->m_xs.end();
+}
 
 // -*-
 Array::Array(std::initializer_list<Self> xs)
@@ -1568,6 +1571,8 @@ Array::Array(std::initializer_list<Self> xs)
     for(auto self: xs){
         this->m_xs.push_back(std::move(self));
     }
+    this->m_ptr = this->m_xs.begin();
+    this->m_stop = this->m_xs.end();
 }
 
 // -*-
@@ -1577,14 +1582,9 @@ Array::Array(const List& xs)
     for(auto self: xs.value()){
         this->m_xs.push_back(std::move(self));
     }
+    this->m_ptr = this->m_xs.begin();
+    this->m_stop = this->m_xs.end();
 }
-
-// // -*-
-// Array::Array(const List& xs): m_xs{}{
-//     for(auto self: xs.value()){
-//         this->m_xs.push_back(std::move(self));
-//     }
-// }
 
 // -*-
 Array::Array(const Set& xs)
@@ -1593,6 +1593,8 @@ Array::Array(const Set& xs)
     for(auto self: xs.value()){
         this->m_xs.push_back(std::make_shared<String>(self));
     }
+    this->m_ptr = this->m_xs.begin();
+    this->m_stop = this->m_xs.end();
 }
 
 // -*-
@@ -1606,6 +1608,17 @@ Array::Array(const Dict& xs)
         };
         this->m_xs.push_back(std::make_shared<Array>(data));
     }
+    this->m_ptr = this->m_xs.begin();
+    this->m_stop = this->m_xs.end();
+}
+
+// -*-
+Array::Array(const Vec<Self>& xs)
+: Iterable(this)
+, m_xs{xs}
+{
+    this->m_ptr = this->m_xs.begin();
+    this->m_stop = this->m_xs.end();
 }
 
 // -*-

@@ -532,6 +532,8 @@ struct Array final: public Object, public Iterable{
 
 private:
     Vec<Self> m_xs;
+    Vec<Self>::iterator m_ptr;
+    Vec<Self>::iterator m_stop;
 };
 
 // -*-
