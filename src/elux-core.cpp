@@ -81,9 +81,13 @@ Number Number::floor(void) const{
     return Number(std::floor(this->as_float()));
 }
 
+// -*-
+Number Number::round(void) const{
+    return Number(std::round(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::round(void) const{}
 Number Number::truncate(void) const{}
 Number Number::sin(void) const{}
 Number Number::cos(void) const{}
