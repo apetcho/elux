@@ -430,9 +430,20 @@ bool operator||(const Number& lhs, const Number& rhs){
     return (lhs.as_bool() || rhs.as_bool());
 }
 
+// -*-
+bool operator==(const Number& lhs, const Number& rhs){
+    if(lhs.is_integer() && rhs.is_integer()){
+        auto x = lhs.as_integer();
+        auto y = rhs.as_integer();
+        return (x==y);
+    }
+    auto x = lhs.as_float();
+    auto y = rhs.as_float();
+    return (x==y);
+}
+
 /*
 // -*-
-bool operator==(const Number& lhs, const Number& rhs){}
 bool operator!=(const Number& lhs, const Number& rhs){}
 bool operator<(const Number& lhs, const Number& rhs){}
 bool operator>(const Number& lhs, const Number& rhs){}
