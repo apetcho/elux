@@ -169,9 +169,13 @@ Number Number::exp(void) const{
     return Number(std::exp(this->as_float()));
 }
 
+// -*-
+Number Number::expm1(void) const{
+    return Number(std::expm1(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::expm1(void) const{}
 Number Number::exp2(void) const{}
 Number Number::pow(const Number& rhs) const{}
 Number Number::sqrt(void) const{}
