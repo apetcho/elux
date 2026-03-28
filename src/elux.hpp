@@ -618,8 +618,6 @@ public:
     static Self share(const Array& val);
     static Self share(const Set& val);
     static Self share(const Dict& val);
-
-    //! @todo
     static Self share(const Symbol& val);
     static Self share(const Pair& val);
     static Self share(const Tuple& val);
@@ -627,7 +625,6 @@ public:
     static Expr share(const LiteralExpr& expr);
     static Expr share(const SymbolExpr& expr);
     static Expr share(const ListExpr& expr);
-
 
     static bool is_nil(const Self& self);
     static bool is_bool(const Self& self);
