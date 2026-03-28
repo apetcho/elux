@@ -2128,6 +2128,49 @@ Expr Function::expand(const Vec<Self>& args, Context env){
     return this->elux.to_expr(self);
 }
 
+// -------------------
+// -*- HashHandler -*-
+// -------------------
+usize HashHandler::operator()(const Self& self) const{
+    if(!ELux::is_hashable(self)){
+        std::stringstream ss;
+        ss << "hash function is not supported for " << std::quoted(self->type());
+        ss << " objects.";
+        throw ELuxError(ELuxError::RuntimeError, ss.str());
+    }
+    auto hasher = dynamic_cast<Hashable*>(self.get());
+    return hasher->hash();
+}
+
+/*
+// -*-
+
+
+struct HashHandler:: final{};
+
+// -*-
+bool EqualHandler::operator()(const Self& lhs, const Self& rhs) const{}
+struct EqualHandler{};
+
+bool operator==(const Self& lhs, const Self& rhs){}
+bool operator!=(const Self& lhs, const Self& rhs){}
+bool operator<=(const Self& lhs, const Self& rhs){}
+bool operator>=(const Self& lhs, const Self& rhs){}
+bool operator<(const Self& lhs, const Self& rhs){}
+bool operator>(const Self& lhs, const Self& rhs){}
+Self operator+(const Self& lhs, const Self& rhs){}
+Self operator-(const Self& lhs, const Self& rhs){}
+Self operator*(const Self& lhs, const Self& rhs){}
+Self operator/(const Self& lhs, const Self& rhs){}
+Self operator%(const Self& lhs, const Self& rhs){}
+Self operator<<(const Self& lhs, const Self& rhs){}
+Self operator>>(const Self& lhs, const Self& rhs){}
+Self operator&(const Self& lhs, const Self& rhs){}
+Self operator|(const Self& lhs, const Self& rhs){}
+Self operator^(const Self& lhs, const Self& rhs){}
+Self operator||(const Self& lhs, const Self& rhs){}
+Self operator&&(const Self& lhs, const Self& rhs){}
+*/
 
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::ekasoft::klx                                 -*-

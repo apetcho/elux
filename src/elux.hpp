@@ -66,6 +66,8 @@ struct Hashable;
 struct Equalable;
 struct Comparable;
 struct TotalOrdering;
+struct HashHandler;
+struct EqualHandler;
 
 struct Object;
 struct Number;
@@ -95,6 +97,19 @@ using Vec = std::vector<T>;
 using Expr = std::shared_ptr<ExprBase>;
 using NativeFunc = std::function<Self(const Vec<Self>&, Context)>;
 using Iterator = std::shared_ptr<Iterable>;
+
+// -*-
+struct HashHandler final{
+    usize operator()(const Self& self) const;
+};
+
+// -*-
+struct EqualHandler{
+    bool operator()(const Self& lhs, const Self& rhs) const;
+};
+
+using HashMap = std::unordered_map<Self, Self, HashHandler, EqualHandler>;
+using HashSet = std::unordered_set<Self, HashHandler, EqualHandler>;
 
 // -*-
 struct Object{
@@ -693,6 +708,28 @@ struct Function final: public Object {
     Self call(const Vec<Self>& args, Context env);
     Expr expand(const Vec<Self>& args, Context env);
 };
+
+// -----------------
+// -*- Operators -*-
+// -----------------
+bool operator==(const Self& lhs, const Self& rhs);
+bool operator!=(const Self& lhs, const Self& rhs);
+bool operator<=(const Self& lhs, const Self& rhs);
+bool operator>=(const Self& lhs, const Self& rhs);
+bool operator<(const Self& lhs, const Self& rhs);
+bool operator>(const Self& lhs, const Self& rhs);
+Self operator+(const Self& lhs, const Self& rhs);
+Self operator-(const Self& lhs, const Self& rhs);
+Self operator*(const Self& lhs, const Self& rhs);
+Self operator/(const Self& lhs, const Self& rhs);
+Self operator%(const Self& lhs, const Self& rhs);
+Self operator<<(const Self& lhs, const Self& rhs);
+Self operator>>(const Self& lhs, const Self& rhs);
+Self operator&(const Self& lhs, const Self& rhs);
+Self operator|(const Self& lhs, const Self& rhs);
+Self operator^(const Self& lhs, const Self& rhs);
+Self operator||(const Self& lhs, const Self& rhs);
+Self operator&&(const Self& lhs, const Self& rhs);
 
 // =========================
 // Environment
