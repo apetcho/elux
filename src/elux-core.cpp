@@ -96,9 +96,13 @@ Number Number::sin(void) const{
     return Number(std::sin(this->as_float()));
 }
 
+// -*-
+Number Number::cos(void) const{
+    return Number(std::cos(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::cos(void) const{}
 Number Number::tan(void) const{}
 Number Number::asin(void) const{}
 Number Number::acos(void) const{}

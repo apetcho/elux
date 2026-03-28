@@ -617,6 +617,7 @@ public:
     static void check_key(bool pred, const std::string& message);
     static void check_index(bool pred, const std::string& message);
     static void check(bool pred, const std::string& message);
+    static void check_argc(bool pred, const std::string& message);
 
     */
 

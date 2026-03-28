@@ -22,11 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #include "elux.hpp"
-#include<cmath>
+#include<iostream>
 #include<iomanip>
 #include<sstream>
 #include<limits>
-
+#include<cmath>
 
 // -*----------------------------------------------------------------*-
 // -*- begin::namespace::klx                                        -*-
