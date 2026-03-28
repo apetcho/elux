@@ -442,6 +442,22 @@ std::string Pair::str(void) const{
     return ss.str();
 }
 
+// -*-
+usize Pair::hash(void) const{
+    if(ELux::is_hashable(this->key) && ELux::is_hashable(this->val)){
+        auto lhs = dynamic_cast<Hashable*>(this->key.get());
+        auto rhs = dynamic_cast<Hashable*>(this->val.get());
+        return (lhs->hash() ^ rhs->hash());
+    }
+    std::stringstream ss;
+    ss << "calling `hash' on a pair. The two field (i.e key & val) must be hashable.";
+    throw std::runtime_error(ss.str());
+}
+
+/*
+bool Pair::equal(Object* other) const{}
+*/
+
 // -------------
 // -*- Tuple -*-
 // -------------
