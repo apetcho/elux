@@ -1684,9 +1684,11 @@ Self Array::next(void){
     return self;
 }
 
-/*
-bool Array::done(void) const{}
-*/
+// -*-
+bool Array::done(void) const{
+    return (this->m_ptr==this->m_stop ? true : false);
+}
+
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::ekasoft::klx                                 -*-
 // -*----------------------------------------------------------------*-
