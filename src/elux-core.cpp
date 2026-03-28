@@ -1401,9 +1401,10 @@ Self Dict::next(void){
     return ELux::share(Pair(key, val));
 }
 
-/*
-bool Dict::done(void) const{}
-*/
+// -*-
+bool Dict::done(void) const{
+    return (this->m_ptr==this->m_stop ? true : false);
+}
 
 // ------------
 // -*- List -*-
