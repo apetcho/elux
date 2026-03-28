@@ -1008,8 +1008,15 @@ String::String(char c)
     this->m_stop = this->m_val.end();
 }
 
+String::String(const String& xs)
+: Iterable(this)
+, m_val(xs.m_val)
+{
+    this->m_ptr = this->m_val.begin();
+    this->m_stop = this->m_val.end();
+}
+
 /*
-String::String(const String& xs){}
 String::String(String&& xs){}
 Self String::next(void){}
 bool String::done(void) const{}
