@@ -49,9 +49,18 @@ i64 Number::as_integer(void) const{
     return static_cast<i64>(num);
 }
 
+// -*-
+f64 Number::as_float(void) const{
+    if(this->is_integer()){
+        auto num = std::get<i64>(this->m_val);
+        return static_cast<f64>(num);
+    }
+
+    return std::get<f64>(this->m_val);
+}
+
 /*
 // -*-
-f64 Number::as_float(void) const{}
 Number Number::abs(void) const{}
 Number Number::ceil(void) const{}
 Number Number::floor(void) const{}
