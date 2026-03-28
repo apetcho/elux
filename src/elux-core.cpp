@@ -869,8 +869,17 @@ usize Number::hash(void) const{
     ss << "hashing floating point number is not supported because of precision errors.";
     throw std::runtime_error(ss.str());
 }
+
+// -*-
+bool Number::equal(Object* obj) const{
+    if(this->type()==obj->type()){
+        auto rhs = *dynamic_cast<Number*>(obj);
+        return (*this==rhs);
+    }
+    return false;
+}
+
 /*
-bool Number::equal(Object*) const{}
 int Number::compare(Object*) const{}
 */
 
