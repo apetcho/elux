@@ -403,10 +403,20 @@ Number operator<<(const Number& lhs, const Number& rhs){
     return Number((x << y));
 }
 
+// -*-
+Number operator>>(const Number& lhs, const Number& rhs){
+    if(!(lhs.is_integer() && rhs.is_integer())){
+        std::stringstream ss;
+        ss << "`>>' is only applicable to integers.";
+        throw std::runtime_error(ss.str());
+    }
+    auto x = lhs.as_integer();
+    auto y = rhs.as_integer();
+    return Number((x >> y));
+}
+
 /*
 // -*-
-Number operator>>(const Number& lhs, const Number& rhs){}
-
 bool operator&&(const Number& lhs, const Number& rhs){}
 bool operator&&(const Number& lhs, const Number& rhs){}
 
