@@ -2393,8 +2393,14 @@ Self operator^(const Self& lhs, const Self& rhs){
     throw ELuxError(ELuxError::TypeError, ss.str());
 }
 
+// -*-
+Self operator||(const Self& lhs, const Self& rhs){
+    auto x = ELux::as_bool(lhs);
+    auto y = ELux::as_bool(rhs);
+    return ELux::share(x || y);
+}
+
 /*
-Self operator||(const Self& lhs, const Self& rhs){}
 Self operator&&(const Self& lhs, const Self& rhs){}
 */
 
