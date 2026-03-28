@@ -268,13 +268,16 @@ ELuxError::ELuxError(const ELuxError& err) noexcept
 , m_kind{err.m_kind}
 {}
 
+ELuxError::ELuxError(ELuxError&& err) noexcept
+: std::runtime_error(std::move(err.what()))
+, m_kind{std::move(err.m_kind)}
+{}
+
 /*
 // -*-
 class ELuxError final: public Object, public std::runtime_error {
 public:
 
-
-ELuxError::ELuxError(ELuxError&& err) noexcept{}
 ELuxError& ELuxError::operator=(const ELuxError& err) noexcept{}
 ELuxError& ELuxError::operator=(ELuxError&& err) noexcept{}
 
