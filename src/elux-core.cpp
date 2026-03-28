@@ -110,6 +110,7 @@ Iterator Iterable::zip(Vec<Iterator> iterators){
         );
         if(stop){ break; }
         Vec<Self> record{};
+        record.push_back(this->next());
         std::for_each(
             iterators.begin(), iterators.end(),
             [this, &record](const Iterator& iter){
@@ -126,7 +127,9 @@ Iterator Iterable::zip(Vec<Iterator> iterators){
 // -*-
 Iterator Iterable::chain(Vec<Iterator> iterators){
     Vec<Self> vec{};
-    
+    while(!this->done()){
+        vec.push_back(this->next());
+    }
     std::for_each(
         iterators.begin(), iterators.end(),
         [&vec](Iterator iter){
@@ -151,7 +154,7 @@ Iterator Iterable::take(u32 n){
 }
 
 // -*-
-Iterator Iterable::enumerate(Vec<Iterator> iterators){
+Iterator Iterable::enumerate(void){
     Vec<Self> vec{};
     u32 idx = 0;
     while(!this->done()){
@@ -667,9 +670,32 @@ usize Tuple::hash(void) const{
     }
 }
 
-/*
-bool Tuple::equal(Object* other) const{}
-*/
+// -*-
+bool Tuple::equal(Object* other) const{
+    if(this->type()==other->type()){
+        auto tuple = dynamic_cast<Tuple*>(other);
+        if(this->len()!=tuple->len()){ return false; }
+        auto myIter = ELux::as_iterator(ELux::share(*this));
+        auto tupleIter = ELux::as_iterator(ELux::share(*tuple));
+        auto iter = myIter->zip(Vec<Iterator>{tupleIter});
+        auto ans = true;
+        while(!iter->done()){
+            auto vec = ELux::as_tuple(iter->next()).value();
+            auto lhs = vec[0];
+            auto rhs = vec[1];
+            if(ELux::is_equalable(lhs) && ELux::is_equalable(rhs)){
+                auto x = dynamic_cast<Equalable*>(lhs.get());
+                ans = ans  && x->equal(rhs.get());
+            }else{
+                ans = false;
+                break;
+            }
+        }
+
+        return ans;
+    }
+    return false;
+}
 
 // -----------------
 // -*- ELuxError -*-
