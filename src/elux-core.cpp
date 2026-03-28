@@ -758,9 +758,16 @@ ELuxError& ELuxError::operator=(const ELuxError& err) noexcept{
     return *this;
 }
 
-/*
-ELuxError& ELuxError::operator=(ELuxError&& err) noexcept{}
-*/
+// -*-
+ELuxError& ELuxError::operator=(ELuxError&& err) noexcept{
+    if(this != &err){
+        this->m_kind = std::move(err.m_kind);
+        this->m_msg = std::move(err.m_msg);
+        err.m_msg = {};
+    }
+
+    return *this;
+}
 
 // -*-
 std::string ELuxError::describe(void) const{
