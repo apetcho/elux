@@ -295,9 +295,20 @@ Number operator+(const Number& lhs, const Number& rhs){
     return Number((x+y));
 }
 
+// -*-
+Number operator-(const Number& lhs, const Number& rhs){
+    if(lhs.is_integer() && rhs.is_integer()){
+        auto x = lhs.as_integer();
+        auto y = rhs.as_integer();
+        return Number((x-y));
+    }
+    auto x = lhs.as_float();
+    auto y = rhs.as_float();
+    return Number((x-y));
+}
+
 /*
 // -*-
-Number operator-(const Number& lhs, const Number& rhs){}
 Number operator*(const Number& lhs, const Number& rhs){}
 Number operator/(const Number& lhs, const Number& rhs){}
 Number operator%(const Number& lhs, const Number& rhs){}
