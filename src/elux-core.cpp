@@ -860,6 +860,20 @@ Number& Number::operator=(Number&& num) noexcept{
     return *this;
 }
 
+// -*-
+usize Number::hash(void) const{
+    if(this->is_integer()){
+        return std::hash<i64>{}(this->as_integer());
+    }
+    std::stringstream ss;
+    ss << "hashing floating point number is not supported because of precision errors.";
+    throw std::runtime_error(ss.str());
+}
+/*
+bool Number::equal(Object*) const{}
+int Number::compare(Object*) const{}
+*/
+
 
 // -*-
 bool Number::as_bool(void) const{
