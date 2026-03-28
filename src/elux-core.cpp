@@ -255,8 +255,16 @@ void Iterable::collect(Array& result){
     result = Array(vec);
 }
 
+// -*-
+void Iterable::collect(List& result){
+    Vec<Self> vec{};
+    while(!this->done()){
+        vec.push_back(std::move(this->next()));
+    }
+    result = List(vec);
+}
+
 /*
-void Iterable::collect(List& result);
 void Iterable::collect(Tuple& result);
 void Iterable::collect(Set& result);
 void Iterable::collect(Dict& result);
