@@ -176,10 +176,17 @@ Tuple::Tuple(const Array& xs)
 : items{xs.value()}
 {}
 
+Tuple::Tuple(const Set& xs){
+    auto data = xs.value();
+    this->items = {};
+    for(auto item: data){
+        this->items.push_back(ELux::share(item));
+    }
+}
+
 /*
 struct Tuple final: public Object{
 
-Tuple::Tuple(const Set& xs){}
 Tuple::Tuple(const Dict& xs){}
 Tuple::Tuple(const Tuple& tuple) noexcept{}
 Tuple::Tuple(Tuple&& tuple) noexcept{}
