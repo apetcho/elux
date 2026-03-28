@@ -343,9 +343,11 @@ bool ELux::is_equalable(const Self& self){
     return (ptr==nullptr ? false : true);
 }
 
-/*
-bool ELux::is_comparable(const Self& self){}
-*/
+// -*-
+bool ELux::is_comparable(const Self& self){
+    auto ptr = dynamic_cast<Comparable*>(self.get());
+    return (ptr==nullptr ? false : true);
+}
 
 // -*-
 std::string ELux::str(const Self& self){
