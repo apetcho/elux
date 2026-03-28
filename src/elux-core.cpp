@@ -144,10 +144,16 @@ std::string Pair::str(void) const{
     return ss.str();
 }
 
+// -------------
+// -*- Tuple -*-
+// -------------
+Tuple::Tuple()
+: items{}{}
+
 /*
 
 struct Tuple final: public Object{
-Tuple::Tuple();
+
 Tuple::Tuple(const std::initializer_list<Self>& xs){}
 Tuple::Tuple(const Vec<Self> x&){}
 Tuple::Tuple(const std::list<Self>& xs){}
