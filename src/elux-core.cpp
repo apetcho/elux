@@ -1199,7 +1199,10 @@ bool Set::done(void) const{
 // ------------
 Dict::Dict()
 : Iterable(this)
-, m_hmap{}{}
+, m_hmap{}{
+    this->m_ptr = this->m_hmap.begin();
+    this->m_stop = this->m_hmap.end();
+}
 
 Dict::Dict(std::initializer_list<Self> xs)
 : Iterable(this)
@@ -1230,6 +1233,9 @@ Dict::Dict(std::initializer_list<Self> xs)
             throw std::runtime_error("Dict: expect a key/value pair in the initializer_list");
         }
     }
+
+    this->m_ptr = this->m_hmap.begin();
+    this->m_stop = this->m_hmap.end();
 }
 
 // -*-
@@ -1262,6 +1268,9 @@ Dict::Dict(const Array& xs)
             throw std::runtime_error("Dict: expect a key/value pair in the initializer_list");
         }
     }
+
+    this->m_ptr = this->m_hmap.begin();
+    this->m_stop = this->m_hmap.end();
 }
 
 // -*-
@@ -1294,6 +1303,23 @@ Dict::Dict(const List& xs)
             throw std::runtime_error("Dict: expect a key/value pair in the initializer_list");
         }
     }
+
+    this->m_ptr = this->m_hmap.begin();
+    this->m_stop = this->m_hmap.end();
+}
+
+// -*-
+Dict::Dict(const Vec<Pair>& pairs)
+: Iterable(this)
+{
+    this->m_hmap = {};
+    for(const auto& pair: pairs){
+        auto key = ELux::str(pair.key);
+        auto val = pair.val;
+        this->m_hmap[key] = std::move(val);
+    }
+    this->m_ptr = this->m_hmap.begin();
+    this->m_stop = this->m_hmap.end();
 }
 
 // -*-

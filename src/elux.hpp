@@ -443,7 +443,9 @@ private:
     HSet::iterator m_stop;
 };
 
-// -*-
+// ------------
+// -*- Dict -*-
+// ------------
 struct Dict final: public Object, public Iterable{
     explicit Dict();
     explicit Dict(std::initializer_list<Self> xs);
@@ -463,12 +465,13 @@ struct Dict final: public Object, public Iterable{
     HMap& value(void);
     const HMap& value(void) const;
 
-    //! @todo
     Self next(void) override;
     bool done(void) const override;
 
 private:
     HMap m_hmap;
+    HMap::iterator m_ptr;
+    HMap::iterator m_stop;
     friend class ELux;
 };
 
