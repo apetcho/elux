@@ -2155,9 +2155,30 @@ bool EqualHandler::operator()(const Self& lhs, const Self& rhs) const{
     throw ELuxError(ELuxError::RuntimeError, ss.str());
 }
 
+// -*-
+bool operator==(const Self& lhs, const Self& rhs){
+    if(ELux::is_number(lhs) && ELux::is_number(rhs)){
+        auto xnum = *dynamic_cast<Number*>(lhs.get());
+        auto ynum = *dynamic_cast<Number*>(rhs.get());
+        return (xnum==ynum);
+    }
+
+    if(lhs->type() != rhs->type()){ return false; }
+    if(ELux::is_nil(lhs)){ return true; }
+    if(ELux::is_string(lhs)){
+        auto xstr = *dynamic_cast<String*>(lhs.get());
+        auto ystr = *dynamic_cast<String*>(rhs.get());
+        return (xstr.value()==ystr.value());
+    }
+    if(auto self=dynamic_cast<Symbol*>(lhs.get())){
+        auto xsym = *self;
+        auto ysym = *dynamic_cast<Symbol*>(rhs.get());
+        return (xsym.str()==ysym.str());
+    }
+    return false;
+}
 
 /*
-bool operator==(const Self& lhs, const Self& rhs){}
 bool operator!=(const Self& lhs, const Self& rhs){}
 bool operator<=(const Self& lhs, const Self& rhs){}
 bool operator>=(const Self& lhs, const Self& rhs){}
