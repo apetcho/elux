@@ -463,9 +463,13 @@ bool operator>(const Number& lhs, const Number& rhs){
     return !(lhs <= rhs);
 }
 
+// -*-
+bool operator<=(const Number& lhs, const Number& rhs){
+    return ((lhs < rhs) || (lhs == rhs));
+}
+
 /*
 // -*-
-bool operator<=(const Number& lhs, const Number& rhs){}
 bool operator>=(const Number& lhs, const Number& rhs){}
 
 */
