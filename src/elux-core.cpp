@@ -838,9 +838,13 @@ Number::Number(const Number& num) noexcept
 , TotalOrdering(this)
 , m_val{num.m_val}{}
 
-/*
+// -*-
+Number::Number(Number&& num) noexcept
+: Hashable(this)
+, TotalOrdering(this)
+, m_val{std::move(num.m_val)}{}
 
-Number::Number(Number&&) noexcept{}
+/*
 Number& Number::operator=(const Number&) noexcept{}
 Number& Number::operator=(Number&&) noexcept{}
 */
