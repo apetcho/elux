@@ -362,9 +362,7 @@ struct String final: public Object{
         return "String";
     }
 
-    std::string str(void) const override{
-        return this->m_val;
-    }
+    std::string str(void) const override;
 
     std::string& value(void);
     const std::string& value(void) const;

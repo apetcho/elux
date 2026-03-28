@@ -287,19 +287,6 @@ std::string ELuxError::str(void) const{
     return std::string(this->what());
 }
 
-/*
-// -*-
-class ELuxError final: public Object, public std::runtime_error {
-public:
-
-
-
-private:
-    Symbol m_kind;
-};
-
-*/
-
 // --------------
 // -*- Number -*-
 // --------------
@@ -738,6 +725,13 @@ bool operator>=(const Number& lhs, const Number& rhs){
 // --------------
 // -*- String -*-
 // --------------
+// -*-
+std::string String::str(void) const{
+    std::stringstream ss;
+    ss << std::quoted(this->m_val);
+    return ss.str();
+}
+
 std::string& String::value(void){
     return this->m_val;
 }
