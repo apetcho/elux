@@ -172,10 +172,13 @@ Tuple::Tuple(const List& xs)
     this->items = Vec<Self>(data.begin(), data.end());
 }
 
+Tuple::Tuple(const Array& xs)
+: items{xs.value()}
+{}
+
 /*
 struct Tuple final: public Object{
 
-Tuple::Tuple(const Array& xs){}
 Tuple::Tuple(const Set& xs){}
 Tuple::Tuple(const Dict& xs){}
 Tuple::Tuple(const Tuple& tuple) noexcept{}
