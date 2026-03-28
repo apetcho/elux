@@ -844,8 +844,15 @@ Number::Number(Number&& num) noexcept
 , TotalOrdering(this)
 , m_val{std::move(num.m_val)}{}
 
+// -*-
+Number& Number::operator=(const Number& num) noexcept{
+    if(this != &num){
+        this->m_val = num.m_val;
+    }
+    return *this;
+}
+
 /*
-Number& Number::operator=(const Number&) noexcept{}
 Number& Number::operator=(Number&&) noexcept{}
 */
 
