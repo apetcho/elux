@@ -147,6 +147,25 @@ struct Pair final : public Object{
     Self val;
 };
 
+struct Tuple final: public Object{
+    explicit Tuple();
+    explicit Tuple(std::initializer_list<Self> xs);
+    explicit Tuple(Vec<Self> xs);
+    explicit Tuple(std::list<Self> xs);
+    explicit Tuple(const Pair& xs);
+    explicit Tuple(const List& xs);
+    explicit Tuple(const Array& xs);
+    explicit Tuple(const Set& xs);
+    explicit Tuple(const Dict& xs);
+    Tuple(const Tuple& tuple) noexcept;
+    Tuple(Tuple&& tuple) noexcept;
+    Tuple& operator=(const Tuple& tuple) noexcept;
+    Tuple& operator=(Tuple&& tuple) noexcept;
+    std::string type(void) const override;
+    std::string str(void) const override;
+    Vec<Self> items;
+};
+
 // -*-
 class ELuxError final: public Object, public std::runtime_error {
 public:

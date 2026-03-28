@@ -138,14 +138,31 @@ std::string Pair::type(void) const{
     return "Pair";
 }
 
+std::string Pair::str(void) const{
+    std::stringstream ss;
+    ss << "#(" << key->str() << " " << val->str() << ")";
+    return ss.str();
+}
+
 /*
-struct Pair final : public Object{
 
-std::string Pair::str(void) const{}
-Self key;
-Self val;
+struct Tuple final: public Object{
+Tuple::Tuple();
+Tuple::Tuple(const std::initializer_list<Self>& xs){}
+Tuple::Tuple(const Vec<Self> x&){}
+Tuple::Tuple(const std::list<Self>& xs){}
+Tuple::Tuple(const Pair& xs){}
+Tuple::Tuple(const List& xs){}
+Tuple::Tuple(const Array& xs){}
+Tuple::Tuple(const Set& xs){}
+Tuple::Tuple(const Dict& xs){}
+Tuple::Tuple(const Tuple& tuple) noexcept{}
+Tuple::Tuple(Tuple&& tuple) noexcept{}
+Tuple& Tuple::operator=(const Tuple& tuple) noexcept{}
+Tuple& Tuple::operator=(Tuple&& tuple) noexcept{}
+std::string Tuple::type(void) const{}
+std::string Tuple::str(void) const{}
 };
-
 // -*-
 class ELuxError final: public Object, public std::runtime_error {
 public:
