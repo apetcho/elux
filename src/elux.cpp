@@ -555,9 +555,10 @@ void ELux::collect(Iterator iter, Set& result){
     iter->collect(result);
 }
 
-/*
-void ELux::collect(Iterator iter, Dict& result){}
-*/
+// -*-
+void ELux::collect(Iterator iter, Dict& result){
+    iter->collect(result);
+}
 
 // -*-
 bool ELux::is_collection(const Self& self){
