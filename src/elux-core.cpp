@@ -73,10 +73,14 @@ std::string Symbol::type(void) const{
     return "Symbol";
 }
 
+std::string Symbol::str(void) const{
+    return this->value;
+}
+
 /*
 struct Symbol final : public Object{
 
-std::string Symbol::str(void) const{}
+
 std::string value;
 };
 
