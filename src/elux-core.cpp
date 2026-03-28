@@ -39,6 +39,66 @@ SOFTWARE.
 namespace ekasoft::klx{
 // -
 // --------------
+// -*- Symbol -*-
+// --------------
+Symbol::Symbol(const std::string& val)
+: value{val}
+{}
+
+/*
+struct Symbol final : public Object{
+Symbol::Symbol(const Symbol& sym) noexcept{}
+Symbol::Symbol(Symbol&& sym) noexcept{}
+Symbol& Symbol::operator=(const Symbol& sym) noexcept{}
+Symbol& Symbol::operator=(Symbol&& sym) noexcept{}
+
+std::string Symbol::type(void) const override{}
+std::string Symbol::str(void) const override{}
+std::string value;
+};
+
+struct Pair final : public Object{
+Pair::Pair(){}
+Pair::Pair(Self key){}
+Pair::Pair(Self key, Self val){}
+Pair::Pair(const Pair& pair) noexcept{}
+Pair::Pair(Pair&& pair) noexcept{}
+Pair& Pair::operator=(const Pair& pair) noexcept{}
+Pair& Pair::operator=(Pair&& pair) noexcept{}
+std::string Pair::type(void) const{}
+std::string Pair::str(void) const{}
+Self key;
+Self val;
+};
+
+// -*-
+class ELuxError final: public Object, public std::runtime_error {
+public:
+
+Symbol ELuxError::ValueError;
+Symbol ELuxError::TypeError;
+Symbol ELuxError::SyntaxError;
+Symbol ELuxError::RuntimeError;
+Symbol ELuxError::KeyError;
+Symbol ELuxError::IndexError;
+
+ELuxError::ELuxError(){}
+ELuxError::ELuxError(const Symbol& sym){}
+ELuxError::ELuxError(const Symbol& sym, const std::string& msg){}
+
+std::string ELuxError::describe(void) const{}
+const Symbol& ELuxError::kind(void) const{}
+Symbol& ELuxError::kind(void){}
+std::string ELuxError::type(void) const{}
+std::string ELuxError::str(void) const{}
+
+private:
+    Symbol m_kind;
+};
+
+*/
+
+// --------------
 // -*- Number -*-
 // --------------
 bool Number::as_bool(void) const{
@@ -473,8 +533,9 @@ bool operator>=(const Number& lhs, const Number& rhs){
     return !(lhs < rhs);
 }
 
-
-// -*-
+// --------------
+// -*- String -*-
+// --------------
 std::string& String::value(void){
     return this->m_val;
 }

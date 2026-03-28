@@ -100,6 +100,8 @@ struct Iterable : public Object {
     virtual ~Iterable() = default;
     virtual Self next(void) = 0;
     virtual bool done(void) const = 0;
+    std::string type(void) const override;
+    std::string str(void) const override;
 private:
     Object* m_data;
 };
@@ -116,44 +118,57 @@ struct Nil final : public Object {
     }
 };
 
-//! @todo
-// struct Symbol final : public Object{
-//     //! @todo
-//     std::string type(void) const override{
-//         return "Symbol";
-//     }
-//     std::string str(void) const override{
-//         return "XXXXX";
-//     }
-// };
-// struct Pair final : public Object{
-//     //! @todo
-//     std::string type(void) const override{
-//         return "Pair";
-//     }
-//     std::string str(void) const override{
-//         return "XXX";
-//     }
-// };
-// // -*-
-// class ELuxError final: public std::runtime_error {
-// public:
-//     explicit ELuxError();
-//     explicit ELuxError(const Symbol& sym);
-//     explicit ELuxError(const Symbol& sym, const std::string& msg);
-//     static Symbol ValueError;
-//     static Symbol TypeError;
-//     static Symbol SyntaxError;
-//     static Symbol RuntimeError;
-//     static Symbol KeyError;
-//     static Symbol IndexError;
-//     std::string describe(void) const;
-//     const Symbol& kind(void) const;
-//     Symbol& kind(void);
-// private:
-//     Symbol m_kind;
-// };
+// -*-
+struct Symbol final : public Object{
+    explicit Symbol(const std::string& val);
+    Symbol(const Symbol& sym) noexcept;
+    Symbol(Symbol&& sym) noexcept;
+    Symbol& operator=(const Symbol& sym) noexcept;
+    Symbol& operator=(Symbol&& sym) noexcept;
 
+    std::string type(void) const override;
+    std::string str(void) const override;
+    std::string value;
+};
+
+// -*-
+struct Pair final : public Object{
+    explicit Pair();
+    explicit Pair(Self key);
+    explicit Pair(Self key, Self val);
+    Pair(const Pair& pair) noexcept;
+    Pair(Pair&& pair) noexcept;
+    Pair& operator=(const Pair& pair) noexcept;
+    Pair& operator=(Pair&& pair) noexcept;
+    std::string type(void) const override;
+    std::string str(void) const override;
+
+    Self key;
+    Self val;
+};
+
+// -*-
+class ELuxError final: public Object, public std::runtime_error {
+public:
+    explicit ELuxError();
+    explicit ELuxError(const Symbol& sym);
+    explicit ELuxError(const Symbol& sym, const std::string& msg);
+    static Symbol ValueError;
+    static Symbol TypeError;
+    static Symbol SyntaxError;
+    static Symbol RuntimeError;
+    static Symbol KeyError;
+    static Symbol IndexError;
+    std::string describe(void) const;
+    const Symbol& kind(void) const;
+    Symbol& kind(void);
+    std::string type(void) const override;
+    std::string str(void) const override;
+private:
+    Symbol m_kind;
+};
+
+// -*-
 struct Bool final: public Object{
     explicit Bool() : m_val{false}{}
     explicit Bool(bool b) : m_val{b}{}
