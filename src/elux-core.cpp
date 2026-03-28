@@ -222,9 +222,13 @@ Number Number::erf(void) const{
     return Number(std::erf(this->as_float()));
 }
 
+// -*-
+Number Number::erfc(void) const{
+    return Number(std::erfc(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::erfc(void) const{}
 Number Number::tgamma(void) const{}
 Number Number::lgamma(void) const{}
 bool Number::isnan(void) const{}
