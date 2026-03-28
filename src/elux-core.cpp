@@ -106,10 +106,17 @@ Pair::Pair(const Pair& pair) noexcept
 , val{pair.val}
 {}
 
+Pair::Pair(Pair&& pair) noexcept
+: key{std::move(pair.key)}
+, val{std::move(pair.val)}
+{
+    pair.key = nullptr;
+    pair.val = nullptr;
+}
+
 /*
 struct Pair final : public Object{
 
-Pair::Pair(Pair&& pair) noexcept{}
 Pair& Pair::operator=(const Pair& pair) noexcept{}
 Pair& Pair::operator=(Pair&& pair) noexcept{}
 std::string Pair::type(void) const{}
