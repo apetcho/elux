@@ -454,9 +454,21 @@ usize Pair::hash(void) const{
     throw std::runtime_error(ss.str());
 }
 
-/*
-bool Pair::equal(Object* other) const{}
-*/
+// -*-
+bool Pair::equal(Object* other) const{
+    if(this->type()==other->type()){
+        auto rhs = dynamic_cast<Pair*>(other);
+        auto ans = (ELux::is_equalable(this->key) && ELux::is_equalable(rhs->key));
+        auto xeq = dynamic_cast<Equalable*>(this->key.get());
+        ans = ans && xeq->equal(rhs->key.get());
+        ans = (
+            ans &&
+            dynamic_cast<Equalable*>(this->val.get())->equal(rhs->val.get())
+        );
+        return ans;
+    }
+    return false;
+}
 
 // -------------
 // -*- Tuple -*-
