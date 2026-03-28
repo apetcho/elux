@@ -2142,16 +2142,21 @@ usize HashHandler::operator()(const Self& self) const{
     return hasher->hash();
 }
 
+// -*-
+bool EqualHandler::operator()(const Self& lhs, const Self& rhs) const{
+    if(ELux::is_equalable(lhs) && ELux::is_equalable(rhs)){
+        auto x = dynamic_cast<Equalable*>(lhs.get());
+        return x->equal(rhs.get());
+    }
+
+    std::stringstream ss;
+    ss << "" << std::quoted(lhs->type()) << " and " << std::quoted(rhs->type());
+    ss << " must support equality (i.e `=') operations.";
+    throw ELuxError(ELuxError::RuntimeError, ss.str());
+}
+
+
 /*
-// -*-
-
-
-struct HashHandler:: final{};
-
-// -*-
-bool EqualHandler::operator()(const Self& lhs, const Self& rhs) const{}
-struct EqualHandler{};
-
 bool operator==(const Self& lhs, const Self& rhs){}
 bool operator!=(const Self& lhs, const Self& rhs){}
 bool operator<=(const Self& lhs, const Self& rhs){}
