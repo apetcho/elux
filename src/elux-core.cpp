@@ -271,9 +271,20 @@ Number& Number::operator-(){
     return *this;
 }
 
+// -*-
+Number& Number::operator~(){
+    if(!this->is_integer()){
+        std::stringstream ss;
+        ss << "`~' is only applicable to integers.";
+        throw std::runtime_error(ss.str());
+    }
+    auto num = ~this->as_integer();
+    this->m_val = num;
+    return *this;
+}
+
 /*
 // -*-
-Number& Number::operator~(){}
 
 Number operator+(const Number& lhs, const Number& rhs){}
 Number operator-(const Number& lhs, const Number& rhs){}
