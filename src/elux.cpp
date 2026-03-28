@@ -530,17 +530,17 @@ Iterator ELux::as_iterator(const Self& self){
     return std::make_shared<Array>(vec);
 }
 
+// -*-
+void ELux::collect(Iterator iter, String& result){
+    iter->collect(result);
+}
+
 /*
-Iterator ELux::as_tuple_iterator(const Self& self){}
-Iterator ELux::as_list_iterator(const Self& self){}
-Iterator ELux::as_set_iterator(const Self& self){}
-Iterator ELux::as_dict_iterator(const Self& self){}
-void ELux::collect(const String& result){}
-void ELux::collect(const Tuple& result){}
-void ELux::collect(const Array& result){}
-void ELux::collect(const List& result){}
-void ELux::collect(const Set& result){}
-void ELux::collect(const Dict& result){}
+void ELux::collect(Iterator iter, Tuple& result){}
+void ELux::collect(Iterator iter, Array& result){}
+void ELux::collect(Iterator iter, List& result){}
+void ELux::collect(Iterator iter, Set& result){}
+void ELux::collect(Iterator iter, Dict& result){}
 */
 
 // -*-

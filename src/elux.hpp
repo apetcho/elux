@@ -95,6 +95,7 @@ struct Object{
     virtual ~Object() = default;
     virtual std::string type(void) const = 0;
     virtual std::string str(void) const = 0;
+    virtual i64 len(void) const;
 };
 
 //! @todo
@@ -157,8 +158,6 @@ struct Symbol final : public Object{
 
 // -*-
 struct Pair final : public Object{
-    explicit Pair();
-    explicit Pair(Self key);
     explicit Pair(Self key, Self val);
     Pair(const Pair& pair) noexcept;
     Pair(Pair&& pair) noexcept;
@@ -187,7 +186,8 @@ struct Tuple final: public Object, public Iterable{
     Tuple& operator=(Tuple&& tuple) noexcept;
     std::string type(void) const override;
     std::string str(void) const override;
-    
+
+    i64 len(void) const override;
 
     Self next(void) override;
     bool done(void) const override;
@@ -409,6 +409,7 @@ struct String final: public Object, public Iterable{
     }
 
     std::string str(void) const override;
+    i64 len(void) const override;
 
     std::string& value(void);
     const std::string& value(void) const;
@@ -437,6 +438,7 @@ struct Set final: public Object, public Iterable {
 
     std::string type(void) const override;
     std::string str(void) const override;
+    i64 len(void) const override;
 
     HSet& value(void);
     const HSet& value(void) const;
@@ -468,6 +470,7 @@ struct Dict final: public Object, public Iterable{
 
     std::string type(void) const override;
     std::string str(void) const override;
+    i64 len(void) const override;
 
     HMap& value(void);
     const HMap& value(void) const;
@@ -497,6 +500,7 @@ struct List final: public Object, public Iterable{
 
     std::string type(void) const override;
     std::string str(void) const override;
+    i64 len(void) const override;
 
     std::list<Self>& value(void);
     const std::list<Self>& value(void) const;
@@ -525,6 +529,7 @@ struct Array final: public Object, public Iterable{
 
     std::string type(void) const override;
     std::string str(void) const override;
+    i64 len(void) const override;
 
     Vec<Self>& value(void);
     const Vec<Self>& value(void) const;
@@ -664,6 +669,7 @@ private:
     Expr parse_list();
 };
 
+//! @todo
 // =====================
 // -*- Module System -*-
 // =====================
@@ -719,6 +725,11 @@ public:
     static bool is_macro(const Self& self);
     static bool is_native(const Self& self);
     static bool is_callable(const Self& self);
+    static bool is_pair(const Self& self);
+    static bool is_tuple(const Self& self);
+    static bool is_iterable(const Self& self);
+
+
     static std::string str(const Self& self);
     static Bool as_bool(const Self& self);
     static f64 as_float(const Self& self);
@@ -730,6 +741,19 @@ public:
     static Set as_set(const Self& self);
     static Dict as_dict(const Self& self);
     static Function as_function(const Self& self);
+
+    //! @todo
+    static Pair as_pair(const Self& self);
+    static Tuple as_tuple(const Self& self);
+    static Iterator as_iterator(const Self& self);
+    static void collect(Iterator iter, String& result);
+    static void collect(Iterator iter, Tuple& result);
+    static void collect(Iterator iter, Array& result);
+    static void collect(Iterator iter, List& result);
+    static void collect(Iterator iter, Set& result);
+    static void collect(Iterator iter, Dict& result);
+
+
     static bool is_collection(const Self& self);
     static i64 len(const Self& self);
 
