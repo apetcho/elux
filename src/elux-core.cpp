@@ -38,6 +38,36 @@ SOFTWARE.
 // -*----------------------------------------------------------------*-
 namespace ekasoft::klx{
 // -
+// ----------------
+// -*- Iterable -*-
+// ----------------
+Iterable::Iterable(Object* data): m_data{data}{}
+
+/*
+struct Iterable : public Object {
+    virtual ~Iterable() = default;
+    
+    virtual Self next(void) = 0;
+    virtual bool done(void) const = 0;
+Iterator Iterable::map(Function func){}
+Iterator Iterable::filter(Function func){}
+Self Iterable::reduce(Function func, const Self& init){}
+Iterator Iterable::zip(const Vec<Iterator>& iterators){}
+Iterator Iterable::chain(const Vec<Iterator>& iterators){}
+Iterator Iterable::take(const Vec<Iterator>& iterators){}
+Iterator Iterable::enumerate(const Vec<Iterator>& iterators){}
+Iterator Iterable::drop_while(const Vec<Iterator>& iterators){}
+Iterator Iterable::take_while(const Vec<Iterator>& iterators){}
+
+std::string Iterable::type(void) const{}
+std::string Iterable::str(void) const{}
+
+private:
+    Object* m_data;
+};
+
+*/
+
 // --------------
 // -*- Symbol -*-
 // --------------

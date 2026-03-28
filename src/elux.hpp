@@ -61,6 +61,7 @@ class Module;
 struct Env;
 struct ExprBase;
 struct ExprVisitor;
+struct Iterable;
 
 struct Object;
 struct Number;
@@ -85,6 +86,7 @@ template<typename T>
 using Vec = std::vector<T>;
 using Expr = std::shared_ptr<ExprBase>;
 using NativeFunc = std::function<Self(const Vec<Self>&, Context)>;
+using Iterator = std::shared_ptr<Iterator>;
 
 // -*-
 struct Object{
@@ -94,18 +96,32 @@ struct Object{
 };
 
 //! @todo
-/*
+// ----------------
+// -*- Iterable -*-
+// ----------------
 struct Iterable : public Object {
-    explicit Iterable(Object* data): m_data{data};
+    explicit Iterable(Object* data);
     virtual ~Iterable() = default;
+    
     virtual Self next(void) = 0;
     virtual bool done(void) const = 0;
+    virtual Iterator map(Function func);
+    virtual Iterator filter(Function func);
+    virtual Self reduce(Function func, const Self& init);
+    virtual Iterator zip(const Vec<Iterator>& iterators);
+    virtual Iterator chain(const Vec<Iterator>& iterators);
+    virtual Iterator take(const Vec<Iterator>& iterators);
+    virtual Iterator enumerate(const Vec<Iterator>& iterators);
+    virtual Iterator drop_while(const Vec<Iterator>& iterators);
+    virtual Iterator take_while(const Vec<Iterator>& iterators);
+
     std::string type(void) const override;
     std::string str(void) const override;
+
 private:
     Object* m_data;
 };
-*/
+
 
 // -*-
 struct Nil final : public Object {
