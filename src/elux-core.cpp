@@ -872,16 +872,25 @@ usize Number::hash(void) const{
 
 // -*-
 bool Number::equal(Object* obj) const{
-    if(this->type()==obj->type()){
-        auto rhs = *dynamic_cast<Number*>(obj);
-        return (*this==rhs);
-    }
-    return false;
+    auto self = dynamic_cast<Number*>(obj);
+    if(self == nullptr){ return false; }
+    auto rhs = *dynamic_cast<Number*>(obj);
+    return (*this==rhs);
 }
 
-/*
-int Number::compare(Object*) const{}
-*/
+// -*-
+int Number::compare(Object* obj) const{
+    auto self = dynamic_cast<Number*>(obj);
+    if(self==nullptr){
+        std::stringstream ss;
+        ss << "cannot compare " << std::quoted(obj->type()) << " to numbers.";
+        throw std::runtime_error(ss.str());
+    }
+    auto rhs = *self;
+    if(*this < rhs){ return -1; }
+    if(*this > rhs){ return 1; }
+    return 0;
+}
 
 
 // -*-
