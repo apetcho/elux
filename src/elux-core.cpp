@@ -281,9 +281,31 @@ void Iterable::collect(Set& result){
     result = Set(vec);
 }
 
-/*
-void Iterable::collect(Dict& result);
-*/
+// -*-
+void Iterable::collect(Dict& result){
+    Vec<Pair> vec{};
+    while(!this->done()){
+        auto item = this->next();
+        if(!ELux::is_pair(item)){
+            std::stringstream ss;
+            ss << "`collect(Dict&)': expect each item in the iterator to be a pair but got ";
+            ss << std::quoted(item->type());
+            throw std::runtime_error(ss.str());
+        }
+        auto pair = ELux::as_pair(item);
+        if(!ELux::is_string(pair.key)){
+            std::stringstream ss;
+            ss << "`collect(Dict&)': expect each item in the iterator to be a pair but got ";
+            ss << std::quoted(item->type()) << "\nwhere the `.key' component of each pair ";
+            ss << "is a string. The type of the `.key' here is " << std::quoted(pair.key->type());
+            throw std::runtime_error(ss.str());
+        }
+        vec.push_back(std::move(pair));
+    }
+
+    result = Dict(vec);
+}
+
 // --------------
 // -*- Symbol -*-
 // --------------
