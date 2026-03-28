@@ -237,8 +237,16 @@ Iterator Iterable::reverse(void){
     return std::make_shared<Array>(vec);
 }
 
+// -*-
+void Iterable::collect(String& result){
+    std::stringstream ss;
+    while(!this->done()){
+        ss << this->next()->str();
+    }
+    result = String(ss.str());
+}
+
 /*
-void Iterable::collect(String& result);
 void Iterable::collect(Array& result);
 void Iterable::collect(List& result);
 void Iterable::collect(Tuple& result);
