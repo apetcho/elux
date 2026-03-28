@@ -118,6 +118,13 @@ struct Iterable{
     virtual Iterator take_while(Function func, Context env);
     virtual bool any(Function func, Context env);
     virtual bool all(Function func, Context env);
+    virtual Iterator reverse(void);
+    virtual void collect(String& result);
+    virtual void collect(Array& result);
+    virtual void collect(List& result);
+    virtual void collect(Tuple& result);
+    virtual void collect(Set& result);
+    virtual void collect(Dict& result);
 
 private:
     Object* m_data;

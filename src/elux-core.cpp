@@ -227,7 +227,24 @@ bool Iterable::all(Function func, Context env){
     return result;
 }
 
+// -*-
+Iterator Iterable::reverse(void){
+    Vec<Self> vec{};
+    while(!this->done()){
+        vec.push_back(std::move(this->next()));
+    }
+    vec = Vec<Self>(vec.rbegin(), vec.rend());
+    return std::make_shared<Array>(vec);
+}
 
+/*
+void Iterable::collect(String& result);
+void Iterable::collect(Array& result);
+void Iterable::collect(List& result);
+void Iterable::collect(Tuple& result);
+void Iterable::collect(Set& result);
+void Iterable::collect(Dict& result);
+*/
 // --------------
 // -*- Symbol -*-
 // --------------
