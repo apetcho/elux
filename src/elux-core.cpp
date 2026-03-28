@@ -156,7 +156,7 @@ Iterator Iterable::drop_while(Function func, Context env){
         auto ans = func.call(Vec<Self>{self}, env);
         if(!ELux::is_bool(ans)){
             std::stringstream ss;
-            ss << "`drop-while: the first argument must be a unary predicate.";
+            ss << "`drop-while': the first argument must be a unary predicate.";
             throw std::runtime_error(ss.str());
         }
 
@@ -176,7 +176,7 @@ Iterator Iterable::take_while(Function func, Context env){
         auto ans = func.call(Vec<Self>{self}, env);
         if(!ELux::is_bool(ans)){
             std::stringstream ss;
-            ss << "`take-while: the first argument must be a unary predicate.";
+            ss << "`take-while': the first argument must be a unary predicate.";
             throw std::runtime_error(ss.str());
         }
 
@@ -187,6 +187,26 @@ Iterator Iterable::take_while(Function func, Context env){
     return std::make_shared<Array>(vec);
 }
 
+// -*-
+bool Iterable::any(Function func, Context env){
+    bool result{false};
+    while(!this->done()){
+        auto ans = func.call(Vec<Self>{this->next()}, env);
+        if(!ELux::is_bool(ans)){
+            std::stringstream ss;
+            ss << "`any': the first argument must be a unary predicate.";
+            throw std::runtime_error(ss.str());
+        }
+
+        if(ELux::as_bool(ans)){
+            result = true;
+            break;
+        }
+    }
+
+    return result;
+}
+
 /*
 struct Iterable : public Object {
     virtual ~Iterable() = default;
@@ -194,7 +214,6 @@ struct Iterable : public Object {
     virtual Self next(void) = 0;
     virtual bool done(void) const = 0;
 
-bool Iterable::any(Function func, Context env) const;
 bool Iterable::all(Function func, Context env) const;
 
 std::string Iterable::type(void) const{}
