@@ -45,9 +45,13 @@ Symbol::Symbol(const std::string& val)
 : value{val}
 {}
 
+Symbol::Symbol(const Symbol& sym) noexcept
+: value{sym.value}
+{}
+
 /*
 struct Symbol final : public Object{
-Symbol::Symbol(const Symbol& sym) noexcept{}
+
 Symbol::Symbol(Symbol&& sym) noexcept{}
 Symbol& Symbol::operator=(const Symbol& sym) noexcept{}
 Symbol& Symbol::operator=(Symbol&& sym) noexcept{}
