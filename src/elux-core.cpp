@@ -2236,9 +2236,25 @@ bool operator<(const Self& lhs, const Self& rhs){
     throw ELuxError(ELuxError::TypeError, ss.str());
 }
 
+// -*-
+bool operator>(const Self& lhs, const Self& rhs){
+    if(ELux::is_number(lhs) && ELux::is_number(rhs)){
+        auto xnum = *dynamic_cast<Number*>(lhs.get());
+        auto ynum = *dynamic_cast<Number*>(rhs.get());
+        return (xnum > ynum);
+    }
+    if(lhs->type()==rhs->type() && ELux::is_string(lhs)){
+        auto xstr = *dynamic_cast<String*>(lhs.get());
+        return (xstr.compare(rhs.get()) > 0);
+    }
+
+    std::stringstream ss;
+    ss << "`>' is not support for type " << std::quoted(lhs->type());
+    throw ELuxError(ELuxError::TypeError, ss.str());
+}
+
 /*
 
-bool operator>(const Self& lhs, const Self& rhs){}
 Self operator+(const Self& lhs, const Self& rhs){}
 Self operator-(const Self& lhs, const Self& rhs){}
 Self operator*(const Self& lhs, const Self& rhs){}
