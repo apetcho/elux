@@ -1410,6 +1410,16 @@ bool String::done(void) const{
 }
 
 // -*-
+usize String::hash(void) const{
+    return std::hash<std::string>{}(this->m_val);
+}
+
+/*
+bool String::equal(Object*) const{}
+int String::compare(Object*) const{}
+*/
+
+// -*-
 std::string String::str(void) const{
     std::stringstream ss;
     ss << std::quoted(this->m_val);
