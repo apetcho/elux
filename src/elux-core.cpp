@@ -738,8 +738,17 @@ ELuxError::ELuxError(const ELuxError& err) noexcept
 , m_msg{err.m_msg}
 {}
 
+// -*-
+ELuxError::ELuxError(ELuxError&& err) noexcept
+: Hashable(this)
+, Equalable(this)
+, m_kind{std::move(err.m_kind)}
+, m_msg{std::move(err.m_msg)}
+{
+    err.m_msg = {};
+}
+
 /*
-ELuxError::ELuxError(ELuxError&& err) noexcept{}
 ELuxError& ELuxError::operator=(const ELuxError& err) noexcept{}
 ELuxError& ELuxError::operator=(ELuxError&& err) noexcept{}
 */
