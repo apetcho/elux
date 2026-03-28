@@ -152,7 +152,8 @@ Iterator Iterable::enumerate(Vec<Iterator> iterators){
 Iterator Iterable::drop_while(Function func, Context env){
     Vec<Self> vec{};
     while(!this->done()){
-        auto ans = func.call(Vec<Self>{this->next()}, env);
+        auto self = this->next();
+        auto ans = func.call(Vec<Self>{self}, env);
         if(!ELux::is_bool(ans)){
             std::stringstream ss;
             ss << "`drop-while: the first argument must be a unary predicate.";
@@ -160,10 +161,29 @@ Iterator Iterable::drop_while(Function func, Context env){
         }
 
         if(!ELux::as_bool(ans)){
-            vec.push_back(std::move(ans));
+            vec.push_back(std::move(self));
         }
     }
 
+    return std::make_shared<Array>(vec);
+}
+
+// -*-
+Iterator Iterable::take_while(Function func, Context env){
+    Vec<Self> vec{};
+    while(!this->done()){
+        auto self = this->next();
+        auto ans = func.call(Vec<Self>{self}, env);
+        if(!ELux::is_bool(ans)){
+            std::stringstream ss;
+            ss << "`take-while: the first argument must be a unary predicate.";
+            throw std::runtime_error(ss.str());
+        }
+
+        if(ELux::as_bool(ans)){
+            vec.push_back(std::move(self));
+        }
+    }
     return std::make_shared<Array>(vec);
 }
 
@@ -174,9 +194,6 @@ struct Iterable : public Object {
     virtual Self next(void) = 0;
     virtual bool done(void) const = 0;
 
-
-
-Iterator Iterable::take_while(Function func, Context env){}
 bool Iterable::any(Function func, Context env) const;
 bool Iterable::all(Function func, Context env) const;
 
