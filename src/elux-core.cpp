@@ -1189,9 +1189,10 @@ Self Set::next(void){
     return ELux::share(self);
 }
 
-/*
-bool Set::done(void) const{}
-*/
+// -*-
+bool Set::done(void) const{
+    return (this->m_ptr==this->m_stop ? true: false);
+}
 
 // ------------
 // -*- Dict -*-
