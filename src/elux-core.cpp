@@ -134,6 +134,20 @@ Iterator Iterable::take(u32 n){
     return std::make_shared<Array>(vec);
 }
 
+// -*-
+Iterator Iterable::enumerate(Vec<Iterator> iterators){
+    Vec<Self> vec{};
+    u32 idx = 0;
+    while(!this->done()){
+        auto key = ELux::share(static_cast<i64>(idx));
+        auto val = this->next();
+        auto self = ELux::share(Pair(key, val));
+        vec.push_back(std::move(self));
+    }
+
+    return std::make_shared<Array>(vec);
+}
+
 /*
 struct Iterable : public Object {
     virtual ~Iterable() = default;
@@ -141,7 +155,7 @@ struct Iterable : public Object {
     virtual Self next(void) = 0;
     virtual bool done(void) const = 0;
 
-Iterator Iterable::enumerate(Vec<Iterator> iterators){}
+
 Iterator Iterable::drop_while(Function func, Context env, Vec<Iterator> iterators){}
 Iterator Iterable::take_while(Function func, Context env, Vec<Iterator> iterators){}
 bool Iterable::any(Function func, Context env) const;
