@@ -43,21 +43,30 @@ namespace ekasoft::klx{
 // ----------------
 Iterable::Iterable(Object* data): m_data{data}{}
 
+Iterator Iterable::map(Function func, Context env){
+    Vec<Self> vec{};
+    while(!this->done()){
+        Vec<Self> args = {this->next()};
+        vec.push_back(std::move(func.call(args, env)));
+    }
+    return std::make_shared<Array>(vec);
+}
+
 /*
 struct Iterable : public Object {
     virtual ~Iterable() = default;
     
     virtual Self next(void) = 0;
     virtual bool done(void) const = 0;
-Iterator Iterable::map(Function func){}
-Iterator Iterable::filter(Function func){}
-Self Iterable::reduce(Function func, const Self& init){}
+
+Iterator Iterable::filter(Function func, Context env){}
+Self Iterable::reduce(Function func, Context env, const Self& init){}
 Iterator Iterable::zip(const Vec<Iterator>& iterators){}
 Iterator Iterable::chain(const Vec<Iterator>& iterators){}
 Iterator Iterable::take(const Vec<Iterator>& iterators){}
 Iterator Iterable::enumerate(const Vec<Iterator>& iterators){}
-Iterator Iterable::drop_while(const Vec<Iterator>& iterators){}
-Iterator Iterable::take_while(const Vec<Iterator>& iterators){}
+Iterator Iterable::drop_while(Function func, Context env, const Vec<Iterator>& iterators){}
+Iterator Iterable::take_while(Function func, Context env, const Vec<Iterator>& iterators){}
 
 std::string Iterable::type(void) const{}
 std::string Iterable::str(void) const{}
@@ -178,35 +187,44 @@ std::string Pair::str(void) const{
 // -*- Tuple -*-
 // -------------
 Tuple::Tuple()
-: items{}{}
+: Iterable(this)
+, items{}{}
 
 Tuple::Tuple(const std::initializer_list<Self>& xs)
-: items{Vec<Self>(xs.begin(), xs.end())}
+: Iterable(this)
+, items{Vec<Self>(xs.begin(), xs.end())}
 {}
 
 Tuple::Tuple(const Vec<Self>& xs)
-: items{xs}
+: Iterable(this)
+, items{xs}
 {}
 
 Tuple::Tuple(const std::list<Self>& xs)
-: items{Vec<Self>(xs.begin(), xs.end())}
+: Iterable(this)
+, items{Vec<Self>(xs.begin(), xs.end())}
 {}
 
 Tuple::Tuple(const Pair& xs)
-: items{Vec<Self>{xs.key, xs.val}}
+: Iterable(this)
+, items{Vec<Self>{xs.key, xs.val}}
 {}
 
 Tuple::Tuple(const List& xs)
+: Iterable(this)
 {
     auto data = xs.value();
     this->items = Vec<Self>(data.begin(), data.end());
 }
 
 Tuple::Tuple(const Array& xs)
-: items{xs.value()}
+: Iterable(this)
+, items{xs.value()}
 {}
 
-Tuple::Tuple(const Set& xs){
+Tuple::Tuple(const Set& xs)
+: Iterable(this)
+{
     auto data = xs.value();
     this->items = {};
     for(auto item: data){
@@ -214,7 +232,8 @@ Tuple::Tuple(const Set& xs){
     }
 }
 
-Tuple::Tuple(const Dict& xs){
+Tuple::Tuple(const Dict& xs)
+: Iterable(this){
     auto data = xs.value();
     this->items = {};
     for(auto [key, val]: data){
@@ -226,12 +245,13 @@ Tuple::Tuple(const Dict& xs){
 }
 
 Tuple::Tuple(const Tuple& tuple) noexcept
-: items{tuple.items}
+: Iterable(this)
+, items{tuple.items}
 {}
 
 Tuple::Tuple(Tuple&& tuple) noexcept
-: items{std::move(tuple.items)}
-{
+: Iterable(this)
+, items{std::move(tuple.items)}{
     tuple.items = {};
 }
 
@@ -773,24 +793,32 @@ const std::string& String::value(void) const{
 // -----------
 // -*- Set -*-
 // -----------
-Set::Set(): m_hset{} {}
+Set::Set()
+: Iterable(this)
+, m_hset{} {}
 
 // -*-
-Set::Set(std::initializer_list<Self> xs) : m_hset{}{
+Set::Set(std::initializer_list<Self> xs)
+: Iterable(this)
+, m_hset{}{
     for(auto x: xs){
         this->m_hset.insert(ELux::str(x));
     }
 }
 
 // -*-
-Set::Set(const Array& xs) : m_hset{}{
+Set::Set(const Array& xs)
+: Iterable(this)
+, m_hset{}{
     for(auto x: xs.value()){
         this->m_hset.insert(ELux::str(x));
     }
 }
 
 // -*-
-Set::Set(const List& xs) : m_hset{}{
+Set::Set(const List& xs)
+: Iterable(this)
+, m_hset{}{
     for(auto x: xs.value()){
         this->m_hset.insert(ELux::str(x));
     }
@@ -798,11 +826,13 @@ Set::Set(const List& xs) : m_hset{}{
 
 // -*-
 Set::Set(const Set& xs) noexcept
-: m_hset{xs.m_hset} {}
+: Iterable(this)
+, m_hset{xs.m_hset} {}
 
 // -*-
 Set::Set(Set&& xs) noexcept
-: m_hset{std::move(xs.m_hset)}{
+: Iterable(this)
+, m_hset{std::move(xs.m_hset)}{
     xs.m_hset = {};
 }
 
@@ -855,9 +885,13 @@ const HSet& Set::value(void) const{ return this->m_hset; }
 // ------------
 // -*- Dict -*-
 // ------------
-Dict::Dict(): m_hmap{}{}
+Dict::Dict()
+: Iterable(this)
+, m_hmap{}{}
 
-Dict::Dict(std::initializer_list<Self> xs): m_hmap{} {
+Dict::Dict(std::initializer_list<Self> xs)
+: Iterable(this)
+, m_hmap{} {
     for(auto self: xs){
         if(auto pair=dynamic_cast<List*>(self.get())){
             if(pair->value().size()==2){
@@ -887,7 +921,9 @@ Dict::Dict(std::initializer_list<Self> xs): m_hmap{} {
 }
 
 // -*-
-Dict::Dict(const Array& xs): m_hmap{} {
+Dict::Dict(const Array& xs)
+: Iterable(this)
+, m_hmap{} {
     for(auto self: xs.value()){
         if(auto pair=dynamic_cast<List*>(self.get())){
             if(pair->value().size()==2){
@@ -917,7 +953,9 @@ Dict::Dict(const Array& xs): m_hmap{} {
 }
 
 // -*-
-Dict::Dict(const List& xs): m_hmap{} {
+Dict::Dict(const List& xs)
+: Iterable(this)
+, m_hmap{} {
     for(auto self: xs.value()){
         if(auto pair=dynamic_cast<List*>(self.get())){
             if(pair->value().size()==2){
@@ -948,11 +986,13 @@ Dict::Dict(const List& xs): m_hmap{} {
 
 // -*-
 Dict::Dict(const Dict& xs) noexcept
-: m_hmap{xs.m_hmap} {}
+: Iterable(this)
+, m_hmap{xs.m_hmap} {}
 
 // -*-
 Dict::Dict(Dict&& xs) noexcept
-: m_hmap{std::move(xs.m_hmap)}{
+: Iterable(this)
+, m_hmap{std::move(xs.m_hmap)}{
     xs.m_hmap = {};
 }
 
@@ -1003,30 +1043,40 @@ const HMap& Dict::value(void) const{ return this->m_hmap; }
 // ------------
 // -*- List -*-
 // ------------
-List::List(): m_xs{}{}
+List::List()
+: Iterable(this)
+, m_xs{}{}
 
-List::List(std::initializer_list<Self> xs): m_xs{}{
+List::List(std::initializer_list<Self> xs)
+: Iterable(this)
+, m_xs{}{
     for(auto self: xs){
         this->m_xs.push_back(std::move(self));
     }
 }
 
 // -*-
-List::List(const Array& xs): m_xs{}{
+List::List(const Array& xs)
+: Iterable(this)
+, m_xs{}{
     for(auto self: xs.value()){
         this->m_xs.push_back(std::move(self));
     }
 }
 
 // -*-
-List::List(const Set& xs): m_xs{}{
+List::List(const Set& xs)
+: Iterable(this)
+, m_xs{}{
     for(auto self: xs.value()){
         this->m_xs.push_back(std::make_shared<String>(self));
     }
 }
 
 // -*-
-List::List(const Dict& xs): m_xs{}{
+List::List(const Dict& xs)
+: Iterable(this)
+, m_xs{}{
     for(const auto& [key, val]: static_cast<HMap>(xs)){
         auto self = std::make_shared<Array>();
         self->value().push_back(ELux::share(key));
@@ -1037,11 +1087,13 @@ List::List(const Dict& xs): m_xs{}{
 
 // -*-
 List::List(const List& xs) noexcept
-: m_xs{xs.m_xs}{}
+: Iterable(this)
+, m_xs{xs.m_xs}{}
 
 // -*-
 List::List(List&& xs) noexcept
-: m_xs{std::move(xs.m_xs)}{
+: Iterable(this)
+, m_xs{std::move(xs.m_xs)}{
     xs.m_xs = {};
 }
 
@@ -1094,17 +1146,23 @@ const std::list<Self>& List::value(void) const{
 // -------------
 // -*- Array -*-
 // -------------
-Array::Array(): m_xs{}{}
+Array::Array()
+: Iterable(this)
+, m_xs{}{}
 
 // -*-
-Array::Array(std::initializer_list<Self> xs): m_xs{}{
+Array::Array(std::initializer_list<Self> xs)
+: Iterable(this)
+, m_xs{}{
     for(auto self: xs){
         this->m_xs.push_back(std::move(self));
     }
 }
 
 // -*-
-Array::Array(const List& xs): m_xs{}{
+Array::Array(const List& xs)
+: Iterable(this)
+, m_xs{}{
     for(auto self: xs.value()){
         this->m_xs.push_back(std::move(self));
     }
@@ -1118,14 +1176,18 @@ Array::Array(const List& xs): m_xs{}{
 // }
 
 // -*-
-Array::Array(const Set& xs): m_xs{}{
+Array::Array(const Set& xs)
+: Iterable(this)
+, m_xs{}{
     for(auto self: xs.value()){
         this->m_xs.push_back(std::make_shared<String>(self));
     }
 }
 
 // -*-
-Array::Array(const Dict& xs): m_xs{}{
+Array::Array(const Dict& xs)
+: Iterable(this)
+, m_xs{}{
     for(auto [key, val]: xs.value()){
         auto data = std::initializer_list<Self>{
             std::make_shared<String>(key),
@@ -1137,11 +1199,13 @@ Array::Array(const Dict& xs): m_xs{}{
 
 // -*-
 Array::Array(const Array& xs) noexcept
-: m_xs{xs.m_xs} {}
+: Iterable(this)
+, m_xs{xs.m_xs} {}
 
 // -*-
 Array::Array(Array&& xs) noexcept
-: m_xs{std::move(xs.m_xs)}{}
+: Iterable(this)
+, m_xs{std::move(xs.m_xs)}{}
 
 // -*-
 Array& Array::operator=(const Array& xs) noexcept{

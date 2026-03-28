@@ -99,24 +99,21 @@ struct Object{
 // ----------------
 // -*- Iterable -*-
 // ----------------
-struct Iterable : public Object {
+struct Iterable{
     explicit Iterable(Object* data);
     virtual ~Iterable() = default;
     
     virtual Self next(void) = 0;
     virtual bool done(void) const = 0;
-    virtual Iterator map(Function func);
-    virtual Iterator filter(Function func);
-    virtual Self reduce(Function func, const Self& init);
+    virtual Iterator map(Function func, Context env);
+    virtual Iterator filter(Function func, Context env);
+    virtual Self reduce(Function func, Context env, const Self& init);
     virtual Iterator zip(const Vec<Iterator>& iterators);
     virtual Iterator chain(const Vec<Iterator>& iterators);
     virtual Iterator take(const Vec<Iterator>& iterators);
     virtual Iterator enumerate(const Vec<Iterator>& iterators);
-    virtual Iterator drop_while(const Vec<Iterator>& iterators);
-    virtual Iterator take_while(const Vec<Iterator>& iterators);
-
-    std::string type(void) const override;
-    std::string str(void) const override;
+    virtual Iterator drop_while(Function func, Context env, const Vec<Iterator>& iterators);
+    virtual Iterator take_while(Function func, Context env, const Vec<Iterator>& iterators);
 
 private:
     Object* m_data;
@@ -163,7 +160,7 @@ struct Pair final : public Object{
     Self val;
 };
 
-struct Tuple final: public Object{
+struct Tuple final: public Object, public Iterable{
     explicit Tuple();
     explicit Tuple(const std::initializer_list<Self>& xs);
     explicit Tuple(const Vec<Self>& xs);
@@ -353,15 +350,13 @@ private:
 };
 
 // -*-
-struct String final: public Object{
-    explicit String() : m_val{std::string()}{}
-    explicit String(const std::string& str): m_val{std::string(str)}{}
-    explicit String(const char* cstr): m_val{std::string(cstr)}{}
-    explicit String(char c): m_val{std::string(1, c)}{}
-    String(const String& xs) : m_val{xs.m_val}{};
-    String(String&& xs): m_val{std::move(xs.m_val)}{
-        xs.m_val = {};
-    }
+struct String final: public Object, public Iterable{
+    explicit String();// : m_val{std::string()}{}
+    explicit String(const std::string& str);//: m_val{std::string(str)}{}
+    explicit String(const char* cstr);//: m_val{std::string(cstr)}{}
+    explicit String(char c); //: m_val{std::string(1, c)}{}
+    String(const String& xs); // : m_val{xs.m_val}{};
+    String(String&& xs);//: m_val{std::move(xs.m_val)}{ xs.m_val = {}; }
     String& operator=(const String& xs){
         if(this != &xs){
             this->m_val = xs.m_val;
@@ -388,11 +383,12 @@ private:
 };
 
 // -*-
-struct Set final: public Object {
+struct Set final: public Object, public Iterable {
     explicit Set();
     explicit Set(std::initializer_list<Self> xs);
     explicit Set(const Array& xs);
     explicit Set(const List& xs);
+    explicit Set(const Vec<Self>& xs);
     Set(const Set& xs) noexcept;
     Set(Set&& xs) noexcept;
     Set& operator=(const Set& xs) noexcept;
@@ -411,11 +407,12 @@ private:
 };
 
 // -*-
-struct Dict final: public Object {
+struct Dict final: public Object, public Iterable{
     explicit Dict();
     explicit Dict(std::initializer_list<Self> xs);
     explicit Dict(const Array& xs);
     explicit Dict(const List& xs);
+    explicit Dict(const Vec<Pair>& pairs);
     Dict(const Dict& xs) noexcept;
     Dict(Dict&& xs) noexcept;
     Dict& operator=(const Dict& xs) noexcept;
@@ -435,12 +432,13 @@ private:
 };
 
 // -*-
-struct List final: public Object {
+struct List final: public Object, public Iterable{
     explicit List();
     explicit List(std::initializer_list<Self> xs);
     explicit List(const Array& xs);
     explicit List(const Set& xs);
     explicit List(const Dict& xs);
+    explicit List(const Vec<Self>& xs);
     List(const List& xs) noexcept;
     List(List&& xs) noexcept;
     List& operator=(const List& xs) noexcept;
@@ -457,12 +455,13 @@ private:
 };
 
 // -*-
-struct Array final: public Object {
+struct Array final: public Object, public Iterable{
     explicit Array();
     explicit Array(std::initializer_list<Self> xs);
     explicit Array(const List& xs);
     explicit Array(const Set& xs);
     explicit Array(const Dict& xs);
+    explicit Array(const Vec<Self>& xs);
     Array(const Array& xs) noexcept;
     Array(Array&& xs) noexcept;
     Array& operator=(const Array& xs) noexcept;
@@ -503,6 +502,9 @@ struct Function final: public Object {
         ss << (isMacro ? "<Macro @ " : "<function @ ") << std::addressof(*this) << ">";
         return ss.str();
     }
+
+    //! @todo
+    Self call(const Vec<Self>& args, Context env);
 };
 
 // =========================
