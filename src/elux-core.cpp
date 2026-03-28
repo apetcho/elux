@@ -101,9 +101,13 @@ Number Number::cos(void) const{
     return Number(std::cos(this->as_float()));
 }
 
+// -*-
+Number Number::tan(void) const{
+    return Number(std::tan(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::tan(void) const{}
 Number Number::asin(void) const{}
 Number Number::acos(void) const{}
 Number Number::atan(void) const{}
