@@ -731,6 +731,20 @@ ELuxError::ELuxError(const Symbol& sym, const std::string& msg)
 {}
 
 // -*-
+ELuxError::ELuxError(const ELuxError& err) noexcept
+: Hashable(this)
+, Equalable(this)
+, m_kind{err.m_kind}
+, m_msg{err.m_msg}
+{}
+
+/*
+ELuxError::ELuxError(ELuxError&& err) noexcept{}
+ELuxError& ELuxError::operator=(const ELuxError& err) noexcept{}
+ELuxError& ELuxError::operator=(ELuxError&& err) noexcept{}
+*/
+
+// -*-
 std::string ELuxError::describe(void) const{
     std::stringstream ss;
     ss << this->m_kind.str() << ": " << this->m_msg;
