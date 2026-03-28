@@ -192,9 +192,13 @@ Number Number::sqrt(void) const{
     return Number(std::sqrt(this->as_float()));
 }
 
+// -*-
+Number Number::cbrt(void) const{
+    return Number(std::cbrt(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::cbrt(void) const{}
 Number Number::log(void) const{}
 Number Number::log2(void) const{}
 Number Number::log10(void) const{}
