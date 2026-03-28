@@ -477,10 +477,11 @@ Self Tuple::next(void){
 
     return std::move(self);
 }
-/*
 
-bool Tuple::done(void) const{}
-*/
+// -*-
+bool Tuple::done(void) const{
+    return (this->m_ptr==this->m_stop ? true: false);
+}
 
 // -----------------
 // -*- ELuxError -*-
