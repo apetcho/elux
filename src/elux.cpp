@@ -332,6 +332,17 @@ bool ELux::is_iterable(const Self& self){
 }
 
 // -*-
+bool ELux::is_hashable(const Self& self){
+    auto ptr = dynamic_cast<Hashable*>(self.get());
+    return (ptr==nullptr ? false : true);
+}
+
+/*
+bool ELux::is_equalable(const Self& self){}
+bool ELux::is_comparable(const Self& self){}
+*/
+
+// -*-
 std::string ELux::str(const Self& self){
     return self->str();
 }
@@ -1056,6 +1067,7 @@ Self ELux::handle_lambda(const Vec<Expr>& elems, Context env){
     fn->body = body;
     fn->closure = env;
     fn->isMacro = false;
+    fn->elux = *this;
     return std::move(fn);
 }
 
@@ -1096,6 +1108,7 @@ Self ELux::handle_fun(const Vec<Expr>& elems, Context env){
     fn->body = body;
     fn->closure = env;
     fn->isMacro = false;
+    fn->elux = *this;
     env->define(nameSym->name, fn);
     return fn;
 }
