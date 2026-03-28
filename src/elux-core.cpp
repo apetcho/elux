@@ -251,9 +251,16 @@ bool Number::isfinite(void) const{
     return std::isfinite(this->as_float());
 }
 
+// -*-
+Number& Number::operator!(){
+    auto flag = static_cast<bool>(*this);
+    i64 num = (flag ? 0 : 1);
+    this->m_val = num;
+    return *this;
+}
+
 /*
 // -*-
-Number& Number::operator!(){}
 Number& Number::operator-(){}
 Number& Number::operator~(){}
 
