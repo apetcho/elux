@@ -76,9 +76,13 @@ Number Number::ceil(void) const{
     return Number(std::ceil(this->as_float()));
 }
 
+// -*-
+Number Number::floor(void) const{
+    return Number(std::floor(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::floor(void) const{}
 Number Number::round(void) const{}
 Number Number::truncate(void) const{}
 Number Number::sin(void) const{}
