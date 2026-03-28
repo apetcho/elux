@@ -193,8 +193,11 @@ Self ELux::share(const Pair& val){
     return std::make_shared<Pair>(val);
 }
 
+Self ELux::share(const Tuple& val){
+    return std::make_shared<Tuple>(val);
+}
+
 /*
-Self ELux::share(const Tuple& val){}
 Self ELux::share(const ELuxError& val){}
 Expr ELux::share(const LiteralExpr& expr){}
 Expr ELux::share(const SymbolExpr& expr){}
