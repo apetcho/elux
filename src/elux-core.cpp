@@ -59,9 +59,20 @@ f64 Number::as_float(void) const{
     return std::get<f64>(this->m_val);
 }
 
+// -*-
+Number Number::abs(void) const{
+    if(this->is_integer()){
+        auto num = this->as_integer();
+        num = (num < 0 ? -num : num);
+        return Number(num);
+    }
+
+    auto num = this->as_float();
+    return Number(std::fabs(num));
+}
+
 /*
 // -*-
-Number Number::abs(void) const{}
 Number Number::ceil(void) const{}
 Number Number::floor(void) const{}
 Number Number::round(void) const{}
