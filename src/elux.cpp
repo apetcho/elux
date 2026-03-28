@@ -845,6 +845,36 @@ Self ELux::expand(const Vec<Expr>& elems, Context env){
 }
 
 // -*-
+Vec<Self> ELux::eval_args(const Vec<Expr>& elems, Context env){
+    struct Handler{
+        Self handle(Expr expr){
+            if(auto self = dynamic_cast<LiteralExpr*>(expr.get())){
+                return self->value;
+            }
+            if(auto self = dynamic_cast<SymbolExpr*>(expr.get())){
+                return ELux::share(self->name);
+            }
+            if(auto le = dynamic_cast<ListExpr*>(expr.get())){
+                Array array{};
+                for(auto& elem : le->elements){
+                    array.push(this->handle(elem));
+                }
+
+                return ELux::share(List(array));
+            }
+            return ELux::share();
+        }
+    };
+    Vec<Self> argv;
+    Handler handler;
+    for(size_t i = 1; i < elems.size(); ++i){
+        argv.push_back(handler.handle(elems[i]));
+    }
+
+    return argv;
+}
+
+// -*-
 Self ELux::handle_quote(const Vec<Expr>& elems, Context env){
     if (elems.size() != 2){
         throw std::runtime_error("quote expects 1 arg");

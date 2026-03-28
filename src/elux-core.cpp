@@ -1763,11 +1763,19 @@ Self Function::call(const Vec<Self>& args, Context env){
     return this->elux.eval(expr, env);
 }
 
-/*
+// -*-
+Expr Function::expand(const Vec<Self>& args, Context env){
+    if(args.size() != this->params.size()){
+        throw std::runtime_error("macro arg count mismatch");
+    }
+    auto callEnv = std::make_shared<Env>(this->closure);
+    for(size_t i = 0; i < this->params.size(); ++i){
+        callEnv->define(this->params[i], args[i]);
+    }
+    // macro body returns Value representing code
+    return this->elux.to_expr(this->body->eval(this->elux, callEnv));
+}
 
-Self Function::expand(const Vec<Self>& args, Context env){}
-
-*/
 
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::ekasoft::klx                                 -*-

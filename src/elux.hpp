@@ -572,6 +572,7 @@ struct Function final: public Object {
     bool isMacro = false;
     bool isNative = false;
     NativeFunc native;
+    ELux& elux;
 
     std::string type(void) const override{
         if(this->isMacro){ return "Macro"; }
@@ -587,6 +588,7 @@ struct Function final: public Object {
 
     //! @todo
     Self call(const Vec<Self>& args, Context env);
+    Expr expand(const Vec<Self>& args, Context env);
 };
 
 // =========================
@@ -803,6 +805,11 @@ public:
     Expr valueToExpr(const Self& v);
     Expr valueListToExpr(const List& lst);
     Self expand(const Vec<Expr>& elems, Context env);
+
+    Vec<Self> eval_args(const Vec<Expr>& elems, Context env);
+    Expr to_expr(const Self& self);
+    Expr to_expr(const List& xs);
+    Self eval_as_expr(const Self& self, Context env);
 
 private:
     //Self handle_expand(const Vec<Expr>& elems, Context env);
