@@ -1414,8 +1414,18 @@ usize String::hash(void) const{
     return std::hash<std::string>{}(this->m_val);
 }
 
+// -*-
+bool String::equal(Object* other) const{
+    auto self = dynamic_cast<String*>(other);
+    if(self==nullptr){
+        return false;
+    }
+    auto rhs = self->m_val;
+    return (this->m_val==rhs);
+}
+
+
 /*
-bool String::equal(Object*) const{}
 int String::compare(Object*) const{}
 */
 
