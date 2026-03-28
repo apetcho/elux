@@ -220,10 +220,13 @@ Tuple& Tuple::operator=(Tuple&& tuple) noexcept{
     return *this;
 }
 
+std::string Tuple::type(void) const{
+    return "Tuple";
+}
+
 /*
 struct Tuple final: public Object{
 
-std::string Tuple::type(void) const{}
 std::string Tuple::str(void) const{}
 };
 // -*-
