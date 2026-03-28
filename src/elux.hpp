@@ -86,7 +86,7 @@ template<typename T>
 using Vec = std::vector<T>;
 using Expr = std::shared_ptr<ExprBase>;
 using NativeFunc = std::function<Self(const Vec<Self>&, Context)>;
-using Iterator = std::shared_ptr<Iterator>;
+using Iterator = std::shared_ptr<Iterable>;
 
 // -*-
 struct Object{
@@ -108,12 +108,14 @@ struct Iterable{
     virtual Iterator map(Function func, Context env);
     virtual Iterator filter(Function func, Context env);
     virtual Self reduce(Function func, Context env, const Self& init);
-    virtual Iterator zip(const Vec<Iterator>& iterators);
-    virtual Iterator chain(const Vec<Iterator>& iterators);
-    virtual Iterator take(const Vec<Iterator>& iterators);
-    virtual Iterator enumerate(const Vec<Iterator>& iterators);
-    virtual Iterator drop_while(Function func, Context env, const Vec<Iterator>& iterators);
-    virtual Iterator take_while(Function func, Context env, const Vec<Iterator>& iterators);
+    virtual Iterator zip(Vec<Iterator> iterators, Context env);
+    virtual Iterator chain(Vec<Iterator> iterators);
+    virtual Iterator take(Vec<Iterator> iterators);
+    virtual Iterator enumerate(Vec<Iterator> iterators);
+    virtual Iterator drop_while(Function func, Context env, Vec<Iterator> iterators);
+    virtual Iterator take_while(Function func, Context env, Vec<Iterator> iterators);
+    virtual bool any(Function func, Context env);
+    virtual bool all(Function func, Context env);
 
 private:
     Object* m_data;
@@ -177,6 +179,10 @@ struct Tuple final: public Object, public Iterable{
     std::string type(void) const override;
     std::string str(void) const override;
     Vec<Self> items;
+
+    //! @todo
+    Self next(void) override;
+    bool done(void) const override;
 };
 
 // -*-
@@ -357,6 +363,11 @@ struct String final: public Object, public Iterable{
     explicit String(char c); //: m_val{std::string(1, c)}{}
     String(const String& xs); // : m_val{xs.m_val}{};
     String(String&& xs);//: m_val{std::move(xs.m_val)}{ xs.m_val = {}; }
+
+    //! @todo
+    Self next(void) override;
+    bool done(void) const override;
+
     String& operator=(const String& xs){
         if(this != &xs){
             this->m_val = xs.m_val;
@@ -401,6 +412,10 @@ struct Set final: public Object, public Iterable {
 
     HSet& value(void);
     const HSet& value(void) const;
+
+    //! @todo
+    Self next(void) override;
+    bool done(void) const override;
     
 private:
     HSet m_hset;
@@ -426,6 +441,10 @@ struct Dict final: public Object, public Iterable{
     HMap& value(void);
     const HMap& value(void) const;
 
+    //! @todo
+    Self next(void) override;
+    bool done(void) const override;
+
 private:
     HMap m_hmap;
     friend class ELux;
@@ -449,6 +468,10 @@ struct List final: public Object, public Iterable{
 
     std::list<Self>& value(void);
     const std::list<Self>& value(void) const;
+
+    //! @todo
+    Self next(void) override;
+    bool done(void) const override;
 
 private:
     std::list<Self> m_xs;
@@ -477,6 +500,10 @@ struct Array final: public Object, public Iterable{
         this->m_xs.push_back(self);
         return *this;
     }
+
+    //! @todo
+    Self next(void) override;
+    bool done(void) const override;
 
 private:
     Vec<Self> m_xs;

@@ -83,6 +83,28 @@ Self Iterable::reduce(Function func, Context env, const Self& init){
     return std::move(acc);
 }
 
+// -*-
+Iterator Iterable::zip(Vec<Iterator> iterators, Context env){
+    Vec<Self> vec{};
+    
+    while(true){
+        auto stop = std::any_of(
+            iterators.begin(), iterators.end(),
+            [this](Iterator iter){ return iter->done(); }
+        );
+        if(stop){ break; }
+        Vec<Self> record{};
+        std::for_each(
+            iterators.begin(), iterators.end(),
+            [this, &record](const Iterator& iter){
+                record.push_back(iter->next());
+            }
+        );
+        Tuple tuple(record);
+        vec.push_back(ELux::share(tuple));
+    }
+}
+
 /*
 struct Iterable : public Object {
     virtual ~Iterable() = default;
@@ -90,14 +112,13 @@ struct Iterable : public Object {
     virtual Self next(void) = 0;
     virtual bool done(void) const = 0;
 
-
-
-Iterator Iterable::zip(const Vec<Iterator>& iterators){}
 Iterator Iterable::chain(const Vec<Iterator>& iterators){}
 Iterator Iterable::take(const Vec<Iterator>& iterators){}
 Iterator Iterable::enumerate(const Vec<Iterator>& iterators){}
 Iterator Iterable::drop_while(Function func, Context env, const Vec<Iterator>& iterators){}
 Iterator Iterable::take_while(Function func, Context env, const Vec<Iterator>& iterators){}
+bool Iterable::any(Function func, Context env) const;
+bool Iterable::all(Function func, Context env) const;
 
 std::string Iterable::type(void) const{}
 std::string Iterable::str(void) const{}
