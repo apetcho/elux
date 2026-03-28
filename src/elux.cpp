@@ -205,8 +205,11 @@ Expr ELux::share(const LiteralExpr& expr){
     return std::make_shared<LiteralExpr>(expr);
 }
 
+Expr ELux::share(const SymbolExpr& expr){
+    return std::make_shared<SymbolExpr>(expr);
+}
+
 /*
-Expr ELux::share(const SymbolExpr& expr){}
 Expr ELux::share(const ListExpr& expr){}
 
 */
