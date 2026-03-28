@@ -139,9 +139,13 @@ Number Number::sinh(void) const{
     return Number(std::sinh(this->as_float()));
 }
 
+// -*-
+Number Number::cosh(void) const{
+    return Number(std::cosh(this->as_float()));
+}
+
 /*
 // -*-
-Number Number::cosh(void) const{}
 Number Number::tanh(void) const{}
 Number Number::asinh(void) const{}
 Number Number::acosh(void) const{}
