@@ -75,6 +75,8 @@ struct Symbol;
 struct Pair;
 
 using i64 = std::int64_t;
+using u64 = std::uint64_t;
+using u32 = std::uint32_t;
 using f64 = double;
 // using List  = std::list<Value>;
 // using Array = std::vector<Value>;
@@ -110,7 +112,7 @@ struct Iterable{
     virtual Self reduce(Function func, Context env, const Self& init);
     virtual Iterator zip(Vec<Iterator> iterators, Context env);
     virtual Iterator chain(Vec<Iterator> iterators);
-    virtual Iterator take(Vec<Iterator> iterators);
+    virtual Iterator take(u32 n);
     virtual Iterator enumerate(Vec<Iterator> iterators);
     virtual Iterator drop_while(Function func, Context env, Vec<Iterator> iterators);
     virtual Iterator take_while(Function func, Context env, Vec<Iterator> iterators);

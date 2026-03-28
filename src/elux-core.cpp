@@ -123,6 +123,17 @@ Iterator Iterable::chain(Vec<Iterator> iterators){
     return std::make_shared<Array>(vec);
 }
 
+// -*-
+Iterator Iterable::take(u32 n){
+    Vec<Self> vec{};
+    for(u32 i=0; i < n; i++){
+        if(this->done()){ break; }
+        vec.push_back(std::move(this->next()));
+    }
+
+    return std::make_shared<Array>(vec);
+}
+
 /*
 struct Iterable : public Object {
     virtual ~Iterable() = default;
@@ -130,7 +141,6 @@ struct Iterable : public Object {
     virtual Self next(void) = 0;
     virtual bool done(void) const = 0;
 
-Iterator Iterable::take(Vec<Iterator> iterators){}
 Iterator Iterable::enumerate(Vec<Iterator> iterators){}
 Iterator Iterable::drop_while(Function func, Context env, Vec<Iterator> iterators){}
 Iterator Iterable::take_while(Function func, Context env, Vec<Iterator> iterators){}
