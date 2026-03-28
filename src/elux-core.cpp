@@ -258,12 +258,17 @@ ELuxError::ELuxError(const Symbol& sym)
 , m_kind{sym}
 {}
 
+ELuxError::ELuxError(const Symbol& sym, const std::string& msg)
+: std::runtime_error(msg)
+, m_kind{sym}
+{}
+
 /*
 // -*-
 class ELuxError final: public Object, public std::runtime_error {
 public:
 
-ELuxError::ELuxError(const Symbol& sym, const std::string& msg){}
+
 ELuxError::ELuxError(const ELuxError& err) noexcept{}
 ELuxError::ELuxError(ELuxError&& err) noexcept{}
 ELuxError& ELuxError::operator=(const ELuxError& err) noexcept{}
