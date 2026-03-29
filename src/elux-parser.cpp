@@ -668,8 +668,9 @@ Expr Parser::make_symbol_expr(const std::string& text){
 
 // -*-
 Expr Parser::make_literal_expr(void){
-    //! @todo
-    return nullptr;
+    auto expr = std::make_shared<LiteralExpr>();
+    expr->value = std::make_shared<Nil>();
+    return std::move(expr);
 }
  
 // -*-
