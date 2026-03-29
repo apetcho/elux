@@ -660,6 +660,19 @@ std::string Tuple::str(void) const{
 }
 
 // -*-
+std::string Tuple::repr(void) const{
+    std::stringstream ss;
+    ss << "#[";
+    for(size_t i=0; i < this->m_items.size(); i++){
+        if(i > 0){ ss << " "; }
+        ss << this->m_items[i]->repr();
+    }
+    ss << "]";
+
+    return ss.str();
+}
+
+// -*-
 Self Tuple::next(void){
     auto self = *this->m_ptr;
     this->m_ptr = std::next(this->m_ptr);
