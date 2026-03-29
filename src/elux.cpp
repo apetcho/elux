@@ -1598,12 +1598,20 @@ Module& Module::operator=(Module&& other) noexcept{
     return *this;
 }
 
+// -*-
+const std::string& Module::key(void) const{
+    std::stringstream ss;
+    ss << this->m_fullpath.string() << "::";
+    ss << this->m_filename << "::";
+    ss << this->m_name.str();
+    return ss.str();
+}
+
 /*
 // -*-
 class Module final{
 public:
 
-const std::string& Module::key(void) const{}
 std::string Module::name_from_key(const std::string& text){}
 void Module::setup(const Symbol& sym){}
 void Module::setup(const fs::path& path){}
