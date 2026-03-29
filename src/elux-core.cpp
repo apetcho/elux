@@ -41,6 +41,11 @@ namespace ekasoft::klx{
 // -----------
 // -*- Nil -*-
 // -----------
+// -*-
+Symbol Nil::type(void) const{
+    return Symbol("Nil");
+}
+
 usize Nil::hash(void) const{
     return std::hash<std::string>{}("nil");
 }
@@ -308,15 +313,16 @@ void Iterable::collect(Dict& result){
         if(!ELux::is_pair(item)){
             std::stringstream ss;
             ss << "`collect(Dict&)': expect each item in the iterator to be a pair but got ";
-            ss << std::quoted(item->type());
+            ss << std::quoted(item->type().str());
             throw std::runtime_error(ss.str());
         }
         auto pair = ELux::as_pair(item);
         if(!ELux::is_string(pair.key)){
             std::stringstream ss;
             ss << "`collect(Dict&)': expect each item in the iterator to be a pair but got ";
-            ss << std::quoted(item->type()) << "\nwhere the `.key' component of each pair ";
-            ss << "is a string. The type of the `.key' here is " << std::quoted(pair.key->type());
+            ss << std::quoted(item->type().str()) << "\nwhere the `.key' component of each pair ";
+            ss << "is a string. The type of the `.key' here is ";
+            ss << std::quoted(pair.key->type().str());
             throw std::runtime_error(ss.str());
         }
         vec.push_back(std::move(pair));
@@ -362,8 +368,8 @@ Symbol& Symbol::operator=(Symbol&& sym) noexcept{
     return *this;
 }
 
-std::string Symbol::type(void) const{
-    return "Symbol";
+Symbol Symbol::type(void) const{
+    return Symbol("Symbol");
 }
 
 std::string Symbol::str(void) const{
@@ -382,6 +388,16 @@ bool Symbol::equal(Object* other) const{
     }
 
     return false;
+}
+
+// -*-
+bool operator==(const Symbol& lhs, const Symbol& rhs){
+    return (lhs.value==rhs.value);
+}
+
+// -*-
+bool operator!=(const Symbol& lhs, const Symbol& rhs){
+    return !(lhs==rhs);
 }
 
 // ------------
@@ -435,8 +451,8 @@ Pair& Pair::operator=(Pair&& pair) noexcept{
 }
 
 // -*-
-std::string Pair::type(void) const{
-    return "Pair";
+Symbol Pair::type(void) const{
+    return Symbol("Pair");
 }
 
 std::string Pair::str(void) const{
@@ -620,8 +636,8 @@ Tuple& Tuple::operator=(Tuple&& tuple) noexcept{
     return *this;
 }
 
-std::string Tuple::type(void) const{
-    return "Tuple";
+Symbol Tuple::type(void) const{
+    return Symbol("Tuple");
 }
 
 std::string Tuple::str(void) const{
@@ -793,8 +809,8 @@ Symbol& ELuxError::kind(void){
     return this->m_kind;
 }
 
-std::string ELuxError::type(void) const{
-    return this->kind().str();
+Symbol ELuxError::type(void) const{
+    return this->kind();
 }
 
 std::string ELuxError::str(void) const{
@@ -836,6 +852,11 @@ Bool& Bool::operator=(Bool&& other) noexcept{
         this->m_val = std::move(other.m_val);
     }
     return *this;
+}
+
+// -*-
+Symbol Bool::type(void) const{
+    return Symbol("Bool");
 }
 
 // --------------
@@ -891,7 +912,7 @@ int Number::compare(Object* obj) const{
     auto self = dynamic_cast<Number*>(obj);
     if(self==nullptr){
         std::stringstream ss;
-        ss << "cannot compare " << std::quoted(obj->type()) << " to numbers.";
+        ss << "cannot compare " << std::quoted(obj->type().str()) << " to numbers.";
         throw std::runtime_error(ss.str());
     }
     auto rhs = *self;
@@ -900,6 +921,11 @@ int Number::compare(Object* obj) const{
     return 0;
 }
 
+// -*-
+Symbol Number::type(void) const{
+    if(this->is_integer()){ return Symbol("Integer"); }
+    return Symbol("Float");
+}
 
 // -*-
 bool Number::as_bool(void) const{
@@ -1445,6 +1471,10 @@ int String::compare(Object* other) const{
     return this->m_val.compare(self->m_val);
 }
 
+// -*-
+Symbol String::type(void) const{
+    return Symbol("String");
+}
 
 // -*-
 std::string String::str(void) const{
@@ -1560,8 +1590,8 @@ Set& Set::operator=(Set&& xs) noexcept{
 // -*-
 Set::operator HSet() const{ return this->m_hset; }
 
-std::string Set::type(void) const{
-    return "Set";
+Symbol Set::type(void) const{
+    return Symbol("Set");
 }
 
 // -*-
@@ -1770,8 +1800,8 @@ Dict& Dict::operator=(Dict&& xs) noexcept{
 Dict::operator HMap() const{ return this->m_hmap; }
 
 // -*-
-std::string Dict::type(void) const{
-    return "Dict";
+Symbol Dict::type(void) const{
+    return Symbol("Dict");
 }
 
 // -*-
@@ -1916,8 +1946,8 @@ List& List::operator=(List&& xs) noexcept{
 }
 
 // -*-
-std::string List::type(void) const{
-    return "List";
+Symbol List::type(void) const{
+    return Symbol("List");
 }
 
 // -*-
@@ -2051,8 +2081,8 @@ Array& Array::operator=(Array&& xs) noexcept{
 }
 
 // -*-
-std::string Array::type(void) const{
-    return "Array";
+Symbol Array::type(void) const{
+    return Symbol("Array");
 }
 
 // -*-
@@ -2114,18 +2144,25 @@ Self Function::call(const Vec<Self>& args, Context env){
     // (2) macro
     if(this->isMacro){
         auto expr = this->expand(args, callEnv);
-        return this->elux.eval(expr, callEnv);
+        return this->elux->eval(expr, callEnv);
     }
     
     // (3) user-defined function
-    return this->body->eval(this->elux, callEnv);
+    return this->body->eval(*this->elux, callEnv);
 }
 
 // -*-
 Expr Function::expand(const Vec<Self>& args, Context env){
-    auto self = this->body->eval(this->elux, env);
+    auto self = this->body->eval(*this->elux, env);
     // macro body returns Value representing code
-    return this->elux.to_expr(self);
+    return this->elux->to_expr(self);
+}
+
+// -*-
+Symbol Function::type(void) const{
+    if(this->isMacro){ return Symbol("Macro"); }
+    if(this->isNative){ return Symbol("Builtin-Function"); }
+    return Symbol("Function");
 }
 
 // -------------------
@@ -2134,7 +2171,7 @@ Expr Function::expand(const Vec<Self>& args, Context env){
 usize HashHandler::operator()(const Self& self) const{
     if(!ELux::is_hashable(self)){
         std::stringstream ss;
-        ss << "hash function is not supported for " << std::quoted(self->type());
+        ss << "hash function is not supported for " << std::quoted(self->type().str());
         ss << " objects.";
         throw ELuxError(ELuxError::RuntimeError, ss.str());
     }
@@ -2150,106 +2187,107 @@ bool EqualHandler::operator()(const Self& lhs, const Self& rhs) const{
     }
 
     std::stringstream ss;
-    ss << "" << std::quoted(lhs->type()) << " and " << std::quoted(rhs->type());
+    ss << "" << std::quoted(lhs->type().str());
+    ss << " and " << std::quoted(rhs->type().str());
     ss << " must support equality (i.e `=') operations.";
     throw ELuxError(ELuxError::RuntimeError, ss.str());
 }
 
 // -*-
-bool operator==(const Self& lhs, const Self& rhs){
+Self operator==(const Self& lhs, const Self& rhs){
     if(ELux::is_number(lhs) && ELux::is_number(rhs)){
         auto xnum = *dynamic_cast<Number*>(lhs.get());
         auto ynum = *dynamic_cast<Number*>(rhs.get());
-        return (xnum==ynum);
+        return ELux::share(xnum==ynum);
     }
 
-    if(lhs->type() != rhs->type()){ return false; }
-    if(ELux::is_nil(lhs)){ return true; }
+    if(lhs->type() != rhs->type()){ return ELux::share(false); }
+    if(ELux::is_nil(lhs)){ return ELux::share(true); }
     if(ELux::is_string(lhs)){
         auto xstr = *dynamic_cast<String*>(lhs.get());
         auto ystr = *dynamic_cast<String*>(rhs.get());
-        return (xstr.value()==ystr.value());
+        return ELux::share(xstr.value()==ystr.value());
     }
     if(auto self=dynamic_cast<Symbol*>(lhs.get())){
         auto xsym = *self;
         auto ysym = *dynamic_cast<Symbol*>(rhs.get());
-        return (xsym.str()==ysym.str());
+        return ELux::share(xsym.str()==ysym.str());
     }
     std::stringstream ss;
-    ss << "`=' is not support for type " << std::quoted(lhs->type());
+    ss << "`=' is not support for type " << std::quoted(lhs->type().str());
     throw ELuxError(ELuxError::TypeError, ss.str());
 }
 
 // -*-
-bool operator!=(const Self& lhs, const Self& rhs){
-    return !(lhs==rhs);
+Self operator!=(const Self& lhs, const Self& rhs){
+    return ELux::share(!(lhs==rhs));
 }
 
 // -*-
-bool operator<=(const Self& lhs, const Self& rhs){
+Self operator<=(const Self& lhs, const Self& rhs){
     if(ELux::is_number(lhs) && ELux::is_number(rhs)){
         auto xnum = *dynamic_cast<Number*>(lhs.get());
         auto ynum = *dynamic_cast<Number*>(rhs.get());
-        return (xnum<=ynum);
+        return ELux::share(xnum<=ynum);
     }
     if(lhs->type()==rhs->type() && ELux::is_string(lhs)){
         auto xstr = *dynamic_cast<String*>(lhs.get());
-        return (xstr.compare(rhs.get()) < 0 || xstr.equal(rhs.get()));
+        return ELux::share(xstr.compare(rhs.get()) < 0 || xstr.equal(rhs.get()));
     }
 
     std::stringstream ss;
-    ss << "`<=' is not support for type " << std::quoted(lhs->type());
+    ss << "`<=' is not support for type " << std::quoted(lhs->type().str());
     throw ELuxError(ELuxError::TypeError, ss.str());
 }
 
 // -*-
-bool operator>=(const Self& lhs, const Self& rhs){
+Self operator>=(const Self& lhs, const Self& rhs){
     if(ELux::is_number(lhs) && ELux::is_number(rhs)){
         auto xnum = *dynamic_cast<Number*>(lhs.get());
         auto ynum = *dynamic_cast<Number*>(rhs.get());
-        return (xnum>=ynum);
+        return ELux::share(xnum>=ynum);
     }
     if(lhs->type()==rhs->type() && ELux::is_string(lhs)){
         auto xstr = *dynamic_cast<String*>(lhs.get());
-        return (xstr.compare(rhs.get()) > 0 || xstr.equal(rhs.get()));
+        return ELux::share(xstr.compare(rhs.get()) > 0 || xstr.equal(rhs.get()));
     }
 
     std::stringstream ss;
-    ss << "`>=' is not support for type " << std::quoted(lhs->type());
+    ss << "`>=' is not support for type " << std::quoted(lhs->type().str());
     throw ELuxError(ELuxError::TypeError, ss.str());
 }
 
 // -*-
-bool operator<(const Self& lhs, const Self& rhs){
+Self operator<(const Self& lhs, const Self& rhs){
     if(ELux::is_number(lhs) && ELux::is_number(rhs)){
         auto xnum = *dynamic_cast<Number*>(lhs.get());
         auto ynum = *dynamic_cast<Number*>(rhs.get());
-        return (xnum < ynum);
+        return ELux::share(xnum < ynum);
     }
     if(lhs->type()==rhs->type() && ELux::is_string(lhs)){
         auto xstr = *dynamic_cast<String*>(lhs.get());
-        return (xstr.compare(rhs.get()) < 0);
+        return ELux::share(xstr.compare(rhs.get()) < 0);
     }
 
     std::stringstream ss;
-    ss << "`<' is not support for type " << std::quoted(lhs->type());
+    ss << "`<' is not support for type " << std::quoted(lhs->type().str());
     throw ELuxError(ELuxError::TypeError, ss.str());
 }
 
 // -*-
-bool operator>(const Self& lhs, const Self& rhs){
+Self operator>(const Self& lhs, const Self& rhs){
     if(ELux::is_number(lhs) && ELux::is_number(rhs)){
         auto xnum = *dynamic_cast<Number*>(lhs.get());
         auto ynum = *dynamic_cast<Number*>(rhs.get());
-        return (xnum > ynum);
+        return ELux::share(xnum > ynum);
     }
     if(lhs->type()==rhs->type() && ELux::is_string(lhs)){
         auto xstr = *dynamic_cast<String*>(lhs.get());
-        return (xstr.compare(rhs.get()) > 0);
+        return ELux::share(xstr.compare(rhs.get()) > 0);
     }
 
     std::stringstream ss;
-    ss << "`>' is not support for type " << std::quoted(lhs->type());
+    ss << "`>' is not support for type " << std::quoted(lhs->type().str());
     throw ELuxError(ELuxError::TypeError, ss.str());
 }
 

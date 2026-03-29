@@ -148,7 +148,7 @@ Self modfn(const Vec<Self>& args){
 Self eq(const Vec<Self>& args){
     if(args.size() < 2){ return std::make_shared<Bool>(true); }
     for(size_t i = 1; i < args.size(); ++i){
-        if(args[0]->type()=="Function" || args[i]->type()=="Function"){
+        if(args[0]->type().str()=="Function" || args[i]->type().str()=="Function"){
             return std::make_shared<Bool>(false);
         }
         if(args[i]->str() != args[0]->str()){
@@ -743,16 +743,16 @@ Self builtin_enumerate(const Vec<Self>& args, Context env){
 }
 
 // -*-
-Self builtin_repr(const Vec<Self>& args, Context env){
-    std::stringstream ss;
-    auto idx = 0;
-    for(auto self: args){
-        if(idx > 0){ ss << " "; }
-        ss << ELux::repr(self);
-    }
+// Self builtin_repr(const Vec<Self>& args, Context env){
+//     std::stringstream ss;
+//     auto idx = 0;
+//     for(auto self: args){
+//         if(idx > 0){ ss << " "; }
+//         ss << ELux::repr(self);
+//     }
 
-    return ELux::share(ss.str());
-}
+//     return ELux::share(ss.str());
+// }
 
 
 // =========================
@@ -995,7 +995,7 @@ Context makeGlobalEnv() {
             if(!ELux::is_string(args[0])){
                 std::stringstream ss;
                 ss << "`bye': expected a string as argument but got ";
-                ss << std::quoted(args[0]->type()) << ".";
+                ss << std::quoted(args[0]->type().str()) << ".";
                 throw std::runtime_error(ss.str());
             }
             std::cout << ELux::str(args[0]) << std::endl;
@@ -1011,7 +1011,7 @@ Context makeGlobalEnv() {
         if(!ELux::is_integer(args[0])){
             std::stringstream ss;
             ss << "`exit': invalid argument type. Expect an Integer but got ";
-            ss << args[0]->type() << ".";
+            ss << args[0]->type().str() << ".";
             throw std::runtime_error(ss.str());
         }
         

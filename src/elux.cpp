@@ -507,7 +507,7 @@ Pair ELux::as_pair(const Self& self){
         pair.val = std::move(vec[1]);
     }else{
         std::stringstream ss;
-        ss << "cannot convert " << std::quoted(self->type()) << " to a pair.";
+        ss << "cannot convert " << std::quoted(self->type().str()) << " to a pair.";
         throw std::runtime_error(ss.str());
     }
 
@@ -525,7 +525,7 @@ Tuple ELux::as_tuple(const Self& self){
         }
     }else{
         std::stringstream ss;
-        ss << "cannot convert " << std::quoted(self->type()) << " to a tuple.";
+        ss << "cannot convert " << std::quoted(self->type().str()) << " to a tuple.";
         throw std::runtime_error(ss.str());
     }
 
@@ -542,7 +542,7 @@ Iterator ELux::as_iterator(const Self& self){
         }
     }else{
         std::stringstream ss;
-        ss << "type " << std::quoted(self->type()) << " objects are not iterable.";
+        ss << "type " << std::quoted(self->type().str()) << " objects are not iterable.";
     }
 
     return std::make_shared<Array>(vec);
@@ -1130,7 +1130,8 @@ Self ELux::handle_lambda(const Vec<Expr>& elems, Context env){
     fn->body = body;
     fn->closure = env;
     fn->isMacro = false;
-    fn->elux = *this;
+    fn->elux = this;
+    fn->name = std::nullopt;
     return std::move(fn);
 }
 
@@ -1171,7 +1172,8 @@ Self ELux::handle_fun(const Vec<Expr>& elems, Context env){
     fn->body = body;
     fn->closure = env;
     fn->isMacro = false;
-    fn->elux = *this;
+    fn->elux = this;
+    fn->name = Symbol(nameSym->name);
     env->define(nameSym->name, fn);
     return fn;
 }
@@ -1213,6 +1215,8 @@ Self ELux::handle_macro(const Vec<Expr>& elems, Context env){
     fn->body = body;
     fn->closure = env;
     fn->isMacro = true;
+    fn->elux = this;
+    fn->name = Symbol(nameSym->name);
     env->define(nameSym->name, fn);
     return fn;
 }
