@@ -1581,12 +1581,28 @@ Module::Module(Module&& other) noexcept
     other.m_name = Symbol("");
 }
 
+// -*-
+Module& Module::operator=(Module&& other) noexcept{
+    if(this != &other){
+        this->m_elux = std::move(other.m_elux);
+        this->m_name = std::move(other.m_name);
+        this->m_fullpath = std::move(other.m_fullpath);
+        this->m_filename = std::move(other.m_filename);
+        this->m_env = std::move(other.m_env);
+        other.m_elux = nullptr;
+        other.m_env = nullptr;
+        other.m_filename = "";
+        other.m_fullpath = "";
+        other.m_name = Symbol("");
+    }
+    return *this;
+}
+
 /*
 // -*-
 class Module final{
 public:
 
-Module& Module::operator=(Module&& other) noexcept{}
 const std::string& Module::key(void) const{}
 std::string Module::name_from_key(const std::string& text){}
 void Module::setup(const Symbol& sym){}
