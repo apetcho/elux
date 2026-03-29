@@ -457,7 +457,10 @@ Symbol Pair::type(void) const{
 
 std::string Pair::str(void) const{
     std::stringstream ss;
-    ss << "#(" << key->str() << " " << val->str() << ")";
+    ss << "#(" << key->str() << " ";
+    if(ELux::is_string(val)){ ss << val->repr(); }
+    else{ ss << val->str() << ")"; }
+
     return ss.str();
 }
 
@@ -652,7 +655,11 @@ std::string Tuple::str(void) const{
     ss << "#[";
     for(size_t i=0; i < this->m_items.size(); i++){
         if(i > 0){ ss << " "; }
-        ss << this->m_items[i]->str();
+        if(ELux::is_list(this->m_items[i])){
+            ss << this->m_items[i]->repr();
+        }else{
+            ss << this->m_items[i]->str();
+        }
     }
     ss << "]";
 
@@ -834,7 +841,7 @@ Symbol ELuxError::type(void) const{
 }
 
 std::string ELuxError::str(void) const{
-    return std::string(this->m_msg);
+    return this->m_msg;
 }
 
 // -*-
@@ -883,6 +890,35 @@ Bool& Bool::operator=(Bool&& other) noexcept{
 // -*-
 Symbol Bool::type(void) const{
     return Symbol("Bool");
+}
+
+// -*-
+usize Bool::hash(void) const{
+    auto sym = Symbol(this->m_val ? "true" : "false");
+    return sym.hash();
+}
+
+// -*-
+bool Bool::equal(Object* obj) const{
+    if(this->type()!=obj->type()){ return false; }
+    auto rhs = dynamic_cast<Bool*>(obj);
+
+    return (this->m_val==rhs->m_val);
+}
+
+// -*-
+int Bool::compare(Object* obj) const{
+    if(this->type()!=obj->type()){
+        std::stringstream ss;
+        ss << "Cannot compare " << std::quoted(obj->type().str()) << " objects to ";
+        ss << "Bool objects.";
+        throw std::runtime_error(ss.str());
+    }
+    auto rhs = dynamic_cast<Bool*>(obj);
+    auto x = this->m_val ? 1 : 0;
+    auto y = rhs->m_val ? 1 : 0;
+
+    return (x - y);
 }
 
 // --------------
@@ -1507,6 +1543,11 @@ std::string String::str(void) const{
     std::stringstream ss;
     ss << std::quoted(this->m_val);
     return ss.str();
+}
+
+// -*-
+std::string String::repr(void) const{
+    return this->str();
 }
 
 std::string& String::value(void){
