@@ -675,8 +675,9 @@ Expr Parser::make_literal_expr(void){
  
 // -*-
 Expr Parser::make_literal_expr(bool val){
-    //! @todo
-    return nullptr;
+    auto expr = std::make_shared<LiteralExpr>();
+    expr->value = std::make_shared<Bool>(val);
+    return std::move(expr);
 }
 
 // -*-
