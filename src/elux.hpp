@@ -949,7 +949,7 @@ public:
     std::string& filename(void){ return this->m_filename; }
 
     const std::string& key(void) const;
-    static std::string name_from_key(const std::string& text);
+    static std::string name_from_key(const std::string& modKey);
 
 private:
     ELux* m_elux;               // the interpreter
@@ -960,6 +960,7 @@ private:
 
     void setup(const Symbol& sym);
     void setup(const fs::path& path);
+    static bool is_module_key(const std::string& token);
 };
 
 // ==============================

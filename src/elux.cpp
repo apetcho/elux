@@ -1607,14 +1607,30 @@ const std::string& Module::key(void) const{
     return ss.str();
 }
 
+// -*-
+std::string Module::name_from_key(const std::string& modKey){
+    auto token{modKey};
+    if(!Module::is_module_key(token)){
+        std::stringstream ss;
+        ss << token << " is not a module key.";
+        throw ELuxError(ELuxError::RuntimeError, ss.str());
+    }
+    auto pos = token.find("::");
+    token = token.substr(pos+2);
+    pos = token.find("::");
+    token = token.substr(pos+2);
+    
+    return token;
+}
+
 /*
 // -*-
 class Module final{
 public:
 
-std::string Module::name_from_key(const std::string& text){}
 void Module::setup(const Symbol& sym){}
 void Module::setup(const fs::path& path){}
+bool Module::is_module_key(const std::string& token){}
 
 private:
     Symbol m_name;              // module nmae
