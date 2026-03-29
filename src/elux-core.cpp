@@ -2284,6 +2284,24 @@ Symbol Function::type(void) const{
     return Symbol("Function");
 }
 
+// -*-
+std::string Function::str(void) const{
+    std::stringstream ss;
+    if(this->name==std::nullopt){ ss << "<lambda @ "; }
+    else if(this->isMacro){
+        ss << "<macro " << std::quoted(this->name.value().str()) << " @ ";
+    }else if(this->isNative){
+        ss << "<builtin-function " << std::quoted(this->name.value().str()) << " @ ";
+    } else{
+        ss << "<function " << std::quoted(this->name.value().str()) << " @ ";
+    }
+    ss << std::addressof(*this) << ">";
+    return ss.str();
+}
+/*
+std::string Function::repr(void) const{}
+*/
+
 // -------------------
 // -*- HashHandler -*-
 // -------------------
