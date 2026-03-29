@@ -702,9 +702,12 @@ Expr Parser::make_literal_expr(const std::string& text){
 }
 
 // -*-
-Expr Parser::make_list_expr(Vec<Expr>&& expr){
-    //! @todo
-    return nullptr;
+Expr Parser::make_list_expr(Vec<Expr>&& exprs){
+    auto self = std::make_shared<ListExpr>();
+    for(auto&& expr: exprs){
+        self->elements.push_back(std::move(expr));
+    }
+    return std::move(self);
 }
 
 // -*----------------------------------------------------------------*-
