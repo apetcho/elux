@@ -2205,6 +2205,20 @@ std::string Array::str(void) const{
 }
 
 // -*-
+std::string Array::repr(void) const{
+    std::stringstream ss;
+    ss << "[";
+    size_t idx = 0;
+    for(const auto& self: this->m_xs){
+        if(idx > 0){ ss << " "; }
+        ss << self->repr();
+        ++idx;
+    }
+    ss << "]";
+    return ss.str();
+}
+
+// -*-
 Vec<Self>& Array::value(void){
     return this->m_xs;
 }
