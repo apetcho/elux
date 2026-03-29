@@ -838,6 +838,12 @@ std::string ELuxError::str(void) const{
 }
 
 // -*-
+std::string ELuxError::repr(void) const{
+    Pair self(ELux::share(this->m_kind), ELux::share(this->m_msg));
+    return self.repr();
+}
+
+// -*-
 usize ELuxError::hash(void) const{
     auto x = this->m_kind.hash();
     auto y = std::hash<std::string>{}(this->m_msg);
