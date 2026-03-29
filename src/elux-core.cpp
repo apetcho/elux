@@ -1668,7 +1668,7 @@ std::string Set::str(void) const{
     size_t idx = 0;
     for(auto self: this->m_hset){
         if(idx > 0){ ss << " "; }
-        ss << self;
+        ss << std::quoted(self);
         ++idx;
     }
     ss << "}";
@@ -1892,7 +1892,24 @@ std::string Dict::str(void) const {
     size_t idx = 0;
     for(auto& [key, val]: this->m_hmap){
         if(idx > 0){ ss << " "; }
-        ss << "[" << key << " " << val->str() << "]";
+        ss << "[" << std::quoted(key) << " ";
+        if(ELux::is_string(val)){ ss << val->repr(); }
+        else{ ss << val->str();}
+        ss  << "]";
+        ++idx;
+    }
+    ss << "}";
+    return ss.str();
+}
+
+// -*-
+std::string Dict::repr(void) const{
+    std::stringstream ss;
+    ss << "{";
+    size_t idx = 0;
+    for(auto& [key, val]: this->m_hmap){
+        if(idx > 0){ ss << " "; }
+        ss << "[" << std::quoted(key) << " " << val->repr() << "]";
         ++idx;
     }
     ss << "}";
