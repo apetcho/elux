@@ -696,8 +696,9 @@ Expr Parser::make_literal_expr(f64 val){
 
 // -*-
 Expr Parser::make_literal_expr(const std::string& text){
-    //! @todo
-    return nullptr;
+    auto expr = std::make_shared<LiteralExpr>();
+    expr->value = std::make_shared<String>(text);
+    return std::move(expr);
 }
 
 // -*-
