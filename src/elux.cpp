@@ -1546,15 +1546,12 @@ size_t ModuleHash::operator()(const Module& self) const{
     return std::hash<std::string>{}(key);
 }
 
+// -*-
+bool ModuleEqual::operator()(const Module& lhs, const Module& rhs) const{
+    return (lhs.key()==rhs.key());
+}
+
 /*
-struct ModuleHash final{};
-
-struct ModuleEqual final{
-
-bool ModuleEqual::operator()(const Module& lhs, const Module& rhs) const{}
-
-};
-
 // -*-
 class Module final{
 public:
