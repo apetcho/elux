@@ -462,6 +462,13 @@ std::string Pair::str(void) const{
 }
 
 // -*-
+std::string Pair::repr(void) const{
+    std::stringstream ss;
+    ss << "#(" << key->repr() << " " << val->repr() << ")";
+    return ss.str();
+}
+
+// -*-
 usize Pair::hash(void) const{
     if(ELux::is_hashable(this->key) && ELux::is_hashable(this->val)){
         auto lhs = dynamic_cast<Hashable*>(this->key.get());
