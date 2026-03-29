@@ -1637,10 +1637,18 @@ bool Module::is_module_key(const std::string& token){
     return true;
 }
 
+// -*-
+bool Module::is_builtin_module(void) const{
+    auto myKey = this->key();
+    auto path = myKey.substr(0, myKey.find("::"));
+    return (path=="@elux");
+}
+
 /*
 // -*-
 class Module final{
 public:
+
 
 void Module::setup(const Symbol& sym){}
 void Module::setup(const fs::path& path){}

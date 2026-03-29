@@ -961,6 +961,7 @@ private:
     void setup(const Symbol& sym);
     void setup(const fs::path& path);
     static bool is_module_key(const std::string& token);
+    bool is_builtin_module(void) const;
 };
 
 // ==============================
