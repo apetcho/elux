@@ -848,12 +848,14 @@ struct ExprVisitor {
 
 enum class TokenKind {
     LPAREN, RPAREN, QUOTE, BACKQUOTE, COMMA, COMMA_AT,
-    SYMBOL, STRING, INT, FLOAT, END
+    SYMBOL, STRING, INT, FLOAT, END, INVALID,
 };
 
 struct Token {
-    TokenKind kind;
-    std::string text;
+    TokenKind kind = TokenKind::END;
+    std::string text = "";
+    u32 row;
+    u32 col;
 };
 
 struct Lexer {
@@ -863,6 +865,8 @@ struct Lexer {
 private:
     std::string m_src;
     size_t m_pos = 0;
+    u32 m_row = 1;
+    u32 m_col = 1;
 
     void skip(void);
     bool startsWith(const std::string& s);
@@ -871,7 +875,7 @@ private:
     char peek_next(void) const;
     void advance(void);
     std::string read_token(void);
-    //void skip_comment(void);
+    bool is_numeric(const std::string& str, TokenKind& kind);
 };
 
 struct Parser {

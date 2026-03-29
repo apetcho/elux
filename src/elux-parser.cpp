@@ -72,37 +72,358 @@ std::string Lexer::read_token(void){
 }
 
 // -*-
+bool Lexer::is_numeric(const std::string& str, TokenKind& kind){
+    struct Checker{
+        bool check(const std::string& src){
+            return (
+                this->is_decimal(src) ||
+                this->is_hex(src) ||
+                this->is_oct(src) ||
+                this->is_bin(src)
+            );
+        }
+
+    private:
+        bool is_decimal(const std::string& src){
+            std::string data{"0123456789"};
+            // 0x...
+            if(src.length()>=2 && src[0]=='+' && std::isdigit(src[1])){
+                return true;
+            }
+            if(src.length()>=2 && src[0]=='-' && std::isdigit(src[1])){
+                return true;
+            }
+            return std::isdigit(src[0]);
+        }
+
+        bool is_hex(const std::string& src){
+            std::string data{"0123456789ABCDEFabcdef"};
+            // 0x...
+            if(src.length()>=3 && src[0]=='0' && src[1]=='x' && data.find(src[2])!=std::string::npos){
+                return true;
+            }
+            return false;
+        }
+
+        bool is_oct(const std::string& src){
+            std::string data{"01234567"};
+            // 0x...
+            if(src.length()>=3 && src[0]=='0' && src[1]=='o' && data.find(src[2])!=std::string::npos){
+                return true;
+            }
+            return false;
+        }
+
+        bool is_bin(const std::string& src){
+            std::string data{"01"};
+            // 0x...
+            if(src.length()>=3 && src[0]=='0' && src[1]=='b' && data.find(src[2])!=std::string::npos){
+                return true;
+            }
+            return false;
+        }
+    };
+    
+
+    if(Checker{}.check(str)){
+        if(str[0]=='0' && str[1]=='x'){
+            bool failed{false};
+            int i=2;
+            for(auto c: str.substr(2)){
+                if(std::string{"0123456789ABCDEFabcdef"}.find(c)==std::string::npos){
+                    failed = true;
+                    break;
+                }
+            }
+            if(failed){
+                kind = TokenKind::INVALID;
+                return false;
+            }
+            kind = TokenKind::INT;
+            return true;
+        }
+        // -
+        if(str[0]=='0' && str[1]=='o'){
+            bool failed{false};
+            int i=2;
+            for(auto c: str.substr(2)){
+                if(std::string{"01234567"}.find(c)==std::string::npos){
+                    failed = true;
+                    break;
+                }
+            }
+            if(failed){
+                kind = TokenKind::INVALID;
+                return false;
+            }
+            kind = TokenKind::INT;
+            return true;
+        }
+        // -
+        if(str[0]=='0' && str[1]=='b'){
+            bool failed{false};
+            int i=2;
+            for(auto c: str.substr(2)){
+                if(std::string{"01"}.find(c)==std::string::npos){
+                    failed = true;
+                    break;
+                }
+            }
+            if(failed){
+                kind = TokenKind::INVALID;
+                return false;
+            }
+            kind = TokenKind::INT;
+            return true;
+        }
+        // -
+        if((str[0]=='+' || str[0]=='-') && std::isdigit(str[1])){
+            bool failed{false};
+            bool fixed = (
+                str.find('.')!=std::string::npos ||
+                str.find('e')!=std::string::npos ||
+                str.find('E')!=std::string::npos
+            );
+            
+            std::string rest = str.substr(1);
+            if(!fixed){//Float
+                for(auto& c: rest){ c = std::tolower(c); }
+                bool ok{true};
+                auto pos = rest.find('.');
+                if(pos!=std::string::npos){// mantissa
+                    auto chunk = rest.substr(0, pos);
+                    for(auto c: chunk){
+                        if(!std::isdigit(c)){
+                            ok = false;
+                            break;
+                        }
+                    }
+                    if(!ok){
+                        kind = TokenKind::INVALID;
+                        return false;
+                    }
+                    rest = rest.substr(pos+1);
+                }
+                if(rest.empty()){
+                    kind = TokenKind::FLOAT;
+                    return true;
+                }
+
+                // fractional & exponential part
+                pos = rest.find('e');
+                bool hasE{false};
+                if(pos!=std::string::npos){ // fractional
+                    hasE = true;
+                    auto chunk = rest.substr(0, pos);
+                    ok = true;
+                    for(auto c: chunk){
+                        if(!std::isdigit(c)){
+                            ok = false;
+                            break;
+                        }
+                    }
+                    if(!ok){
+                        kind = TokenKind::INVALID;
+                        return false;
+                    }
+                    rest = rest.substr(pos+1);
+                }
+                if(hasE){
+                    if(rest[0]=='-' || rest[0]=='+'){
+                        rest = rest.substr(1);
+                        ok = true;
+                        for(auto c: rest){
+                            if(!std::isdigit(c)){
+                                ok = false;
+                                break;
+                            }
+                        }
+                        if(!ok){
+                            kind = TokenKind::INVALID;
+                            return false;
+                        }
+                    }else{
+                        ok = true;
+                        for(auto c: rest){
+                            if(!std::isdigit(c)){
+                                ok = false;
+                                break;
+                            }
+                        }
+                        if(!ok){
+                            kind = TokenKind::INVALID;
+                            return false;
+                        }
+                    }
+                }
+                kind = TokenKind::FLOAT;
+                return true;
+            }
+            kind = TokenKind::INT;
+            auto ok = true;
+            for(auto c: rest){
+                if(!std::isspace(c)){
+                    ok = false;
+                    break;
+                }
+            }
+            if(!ok){
+                kind = TokenKind::INVALID;
+                return false;
+            }
+            return true;
+        }else if(std::isdigit(str[0])){
+            bool failed{false};
+            bool fixed = (
+                str.find('.')!=std::string::npos ||
+                str.find('e')!=std::string::npos ||
+                str.find('E')!=std::string::npos
+            );
+            
+            std::string rest{str};
+            if(!fixed){//Float
+                for(auto& c: rest){ c = std::tolower(c); }
+                bool ok{true};
+                auto pos = rest.find('.');
+                if(pos!=std::string::npos){// mantissa
+                    auto chunk = rest.substr(0, pos);
+                    for(auto c: chunk){
+                        if(!std::isdigit(c)){
+                            ok = false;
+                            break;
+                        }
+                    }
+                    if(!ok){
+                        kind = TokenKind::INVALID;
+                        return false;
+                    }
+                    rest = rest.substr(pos+1);
+                }
+                if(rest.empty()){
+                    kind = TokenKind::FLOAT;
+                    return true;
+                }
+
+                // fractional & exponential part
+                pos = rest.find('e');
+                bool hasE{false};
+                if(pos!=std::string::npos){ // fractional
+                    hasE = true;
+                    auto chunk = rest.substr(0, pos);
+                    ok = true;
+                    for(auto c: chunk){
+                        if(!std::isdigit(c)){
+                            ok = false;
+                            break;
+                        }
+                    }
+                    if(!ok){
+                        kind = TokenKind::INVALID;
+                        return false;
+                    }
+                    rest = rest.substr(pos+1);
+                }
+                if(hasE){
+                    if(rest[0]=='-' || rest[0]=='+'){
+                        rest = rest.substr(1);
+                        ok = true;
+                        for(auto c: rest){
+                            if(!std::isdigit(c)){
+                                ok = false;
+                                break;
+                            }
+                        }
+                        if(!ok){
+                            kind = TokenKind::INVALID;
+                            return false;
+                        }
+                    }else{
+                        ok = true;
+                        for(auto c: rest){
+                            if(!std::isdigit(c)){
+                                ok = false;
+                                break;
+                            }
+                        }
+                        if(!ok){
+                            kind = TokenKind::INVALID;
+                            return false;
+                        }
+                    }
+                }
+                kind = TokenKind::FLOAT;
+                return true;
+            }
+            kind = TokenKind::INT;
+            auto ok = true;
+            for(auto c: rest){
+                if(!std::isspace(c)){
+                    ok = false;
+                    break;
+                }
+            }
+            if(!ok){
+                kind = TokenKind::INVALID;
+                return false;
+            }
+            return true;
+        }
+        kind = TokenKind::SYMBOL;
+        return true;
+    }
+}
+
+// -*-
 Token Lexer::next(){
+    Token result;
     skip();
     
-    if(this->eof()){ return {TokenKind::END, ""}; }
+    if(this->eof()){
+        result.row = this->m_row;
+        result.col = this->m_col;
+        return result;
+    }
     char c = this->peek();
-
+    result.row = this->m_row;
+    result.col = this->m_col;
+    
     if(c=='('){
+        result.kind = TokenKind::LPAREN;
+        result.text = "(";
         this->advance();
-        return {TokenKind::LPAREN, "("};
+        return result;
     }
     if(c==')'){
+        result.kind = TokenKind::RPAREN;
+        result.text = ")";
         this->advance();
-        return {TokenKind::RPAREN, ")"};
+        return result;
     }
     if(c=='\''){
+        result.kind = TokenKind::QUOTE;
+        result.text = "'";
         this->advance();
-        return {TokenKind::QUOTE, "'"};
+        return result;
     }
     if(c=='`'){
+        result.kind = TokenKind::BACKQUOTE;
+        result.text = "`";
         this->advance();
-        return {TokenKind::BACKQUOTE, "`"};
+        return result;
     }
     if(c==','){
         if (m_pos + 1 < m_src.size() && this->peek_next()=='@') {
             // m_pos += 2;
+            result.kind = TokenKind::COMMA_AT;
+            result.text = ",@";
             this->advance();
             this->advance();
-            return {TokenKind::COMMA_AT, ",@"};
+            return result;
         }
+        result.kind = TokenKind::COMMA;
+        result.text = ",";
         this->advance();
-        return {TokenKind::COMMA, ","};
+        return result;
     }
     if(c=='"'){
         this->advance();
@@ -128,8 +449,11 @@ Token Lexer::next(){
             this->advance();
             //pos++;
         }
-        return {TokenKind::STRING, oss.str()};
+        result.kind = TokenKind::STRING;
+        result.text = oss.str();
+        return result;
     }
+    //! @todo
     if(isdigit((unsigned char)c) || (c == '-' && m_pos+1 < m_src.size() && isdigit(this->peek_next()))){
         size_t start = m_pos;
         bool hasDot = false;
@@ -179,6 +503,13 @@ char Lexer::peek_next(void) const{
 // -*-
 void Lexer::advance(void){
     this->m_pos++;
+    auto c = this->peek();
+    if(c=='\n'){
+        this->m_row += 1;
+        this->m_col = 1;
+    }else{
+        this->m_col += 1;
+    }
 }
 
 // -*-
