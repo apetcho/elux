@@ -1540,14 +1540,14 @@ Symbol String::type(void) const{
 
 // -*-
 std::string String::str(void) const{
-    std::stringstream ss;
-    ss << std::quoted(this->m_val);
-    return ss.str();
+    return this->m_val;
 }
 
 // -*-
 std::string String::repr(void) const{
-    return this->str();
+    std::stringstream ss;
+    ss << std::quoted(this->m_val);
+    return ss.str();
 }
 
 std::string& String::value(void){
