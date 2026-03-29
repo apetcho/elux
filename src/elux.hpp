@@ -790,10 +790,11 @@ Self operator&&(const Self& lhs, const Self& rhs);
 struct Env : std::enable_shared_from_this<Env> {
     std::map<std::string, Self> vars;
     std::set<std::string> immutables;
-    //! @todo: std::map<std::string, std::string> docstrs;
+    //! @todo: std::map<std::string, std::string> docstrings;
     //! @todo std::set<std::string> exceptions;
     std::shared_ptr<Env> parent;
 
+    Env() = default;
     Env(std::shared_ptr<Env> p = nullptr);
     bool hasLocal(const std::string& name) const;
     void define(const std::string& name, const Self& v);
@@ -920,14 +921,45 @@ private:
 // =====================
 // -*- Module System -*-
 // =====================
-// class Module final{
-// public:
-// //! @todo
+struct ModuleHash final{
+    size_t operator()(const Module& self) const;
+};
 
-// private:
-//     Symbol m_name;
+struct ModuleEqual final{
+    bool operator()(const Module& lhs, const Module& rhs) const;
+};
 
-// };
+// -*-
+class Module final{
+public:
+    explicit Module(ELux* elux, const Symbol name);
+    explicit Module(ELux* elux, const fs::path& modulePath);
+    Module(const Module&) noexcept = delete;
+    Module& operator=(const Module&) noexcept = delete;
+    Module(Module&& other) noexcept;
+    Module& operator=(Module&& other) noexcept;
+
+    // -*-
+    const Context& load(void) const{ return this->m_env; }
+    const Symbol& name(void) const{ return this->m_name; }
+    Symbol& name(void){ return this->m_name; }
+    const fs::path& fullpath() const{ return this->m_fullpath; }
+    fs::path& fullpath(){ return this->m_fullpath; }
+    const std::string& filename(void) const{ return this->m_filename; }
+    std::string& filename(void){ return this->m_filename; }
+
+    const std::string& key(void) const;
+    static std::string name_from_key(const std::string& text);
+
+private:
+    ELux* m_elux;               // the interpreter
+    Symbol m_name;              // module nmae
+    fs::path m_fullpath;        // module fullpath
+    std::string m_filename;     // module filename
+    Context m_env;              // module environment
+
+    void setup(void);
+};
 
 // ==============================
 // ELux (Visitor) : the evaluator

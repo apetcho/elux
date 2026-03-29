@@ -1534,9 +1534,48 @@ void ELux::run(const std::string& code, Context env, const std::string& label) {
     }
 }
 
+//! @todo
 /*
 void ELux::repl(const Vec<std::string>& args){}
 void ELux::setup(void){}
+*/
+
+// -*-
+size_t ModuleHash::operator()(const Module& self) const{
+    auto key = self.key();
+    return std::hash<std::string>{}(key);
+}
+
+/*
+struct ModuleHash final{};
+
+struct ModuleEqual final{
+
+bool ModuleEqual::operator()(const Module& lhs, const Module& rhs) const{}
+
+};
+
+// -*-
+class Module final{
+public:
+
+Module::Module(ELux* elux, const Symbol name){}
+Module::Module(ELux* elux, const fs::path& modulePath){}
+Module::Module(Module&& other) noexcept{}
+Module& Module::operator=(Module&& other) noexcept{}
+const std::string& Module::key(void) const{}
+std::string Module::name_from_key(const std::string& text){}
+void Module::setup(void){}
+
+private:
+    Symbol m_name;              // module nmae
+    fs::path m_fullpath;        // module fullpath
+    std::string m_filename;     // module filename
+    Context m_env;              // module environment
+    ELux* m_elux;               // the interpreter
+
+
+};
 */
 
 // -*----------------------------------------------------------------*-
