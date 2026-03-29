@@ -823,7 +823,7 @@ struct LiteralExpr : ExprBase {
 };
 
 struct SymbolExpr : ExprBase {
-    std::string name;
+    Symbol name;
     explicit SymbolExpr(std::string n) : name(std::move(n)) {}
     Self eval(ExprVisitor& v, Context env) override;
     std::string repr(void) const override;
@@ -854,6 +854,7 @@ enum class TokenKind {
 struct Token {
     TokenKind kind = TokenKind::END;
     std::string text = "";
+    u32 offset;
     u32 row;
     u32 col;
 };
@@ -862,9 +863,24 @@ struct Lexer {
     explicit Lexer(std::string s);
     Token next_token();
 
+    std::string get_line(u32 start){
+        size_t len = 0;
+        auto c = this->m_src[(start + len)];
+        while(c!='\n'){
+            auto n = (start + len);
+            if((n >= this->m_src.length())){
+                break;
+            }
+            len++;
+            c = this->m_src[(start + len)];
+        }
+        return this->m_src.substr(start, len);
+    }
+
 private:
     std::string m_src;
     size_t m_pos = 0;
+    u32 m_offset = 0;
     u32 m_row = 1;
     u32 m_col = 1;
 
@@ -890,6 +906,14 @@ private:
     bool match(TokenKind kind);
     Expr parse_expr();
     Expr parse_list();
+
+    Expr make_symbol_expr(const std::string& text);
+    Expr make_literal_expr(void);
+    Expr make_literal_expr(bool val);
+    Expr make_literal_expr(i64 val);
+    Expr make_literal_expr(f64 val);
+    Expr make_literal_expr(const std::string& text);
+    Expr make_list_expr(Vec<Expr>&& expr);
 };
 
 //! @todo

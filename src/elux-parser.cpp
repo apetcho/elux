@@ -379,11 +379,13 @@ Token Lexer::next_token(void){
     skip();
     
     if(this->eof()){
+        result.offset = this->m_offset;
         result.row = this->m_row;
         result.col = this->m_col;
         return result;
     }
     char c = this->peek();
+    result.offset = this->m_offset;
     result.row = this->m_row;
     result.col = this->m_col;
     
@@ -522,6 +524,7 @@ void Lexer::advance(void){
     if(c=='\n'){
         this->m_row += 1;
         this->m_col = 1;
+        ++this->m_offset;
     }else{
         this->m_col += 1;
     }
@@ -533,7 +536,7 @@ Parser::Parser(const std::string& s) : m_lexer(s) {
 }
 
 // -*-
-void Parser::advance() { m_token = m_lexer.next_token(); }
+void Parser::advance(void){ m_token = m_lexer.next_token(); }
 
 // -*-
 bool Parser::match(TokenKind kind){
@@ -545,81 +548,106 @@ bool Parser::match(TokenKind kind){
 }
 
 // -*-
-Expr Parser::parse_expr() {
-    switch (m_token.kind) {
-    case TokenKind::LPAREN: return parse_list();
+Expr Parser::parse_expr(){
+    switch (m_token.kind){
+    case TokenKind::INVALID:{
+            std::stringstream ss;
+            ss << "invalid token" << std::quoted(m_token.text) << " found at ";
+            ss << "row " << m_token.row << " and column " << m_token.col << ".\n";
+            auto start = this->m_token.offset;
+            auto len = this->m_token.col;
+            auto text = this->m_lexer.get_line(start);
+            auto line = std::string((len-1), ' ');
+            line += "^\n";
+            ss << text << "\n";
+            ss << line;
+            throw ELuxError(ELuxError::SyntaxError, ss.str());
+        }
+        break;
+    case TokenKind::LPAREN:
+        return parse_list();
     case TokenKind::QUOTE: {
         advance();
-        auto e = parse_expr();
-        auto list = std::make_shared<ListExpr>();
-        list->elements.push_back(std::make_shared<SymbolExpr>("quote"));
-        list->elements.push_back(e);
-        return list;
+        return this->make_list_expr({
+            this->make_symbol_expr("quote"),
+            this->parse_expr(),
+        });
     }
     case TokenKind::BACKQUOTE: {
         advance();
-        auto e = parse_expr();
-        auto list = std::make_shared<ListExpr>();
-        list->elements.push_back(std::make_shared<SymbolExpr>("quasiquote"));
-        list->elements.push_back(e);
-        return list;
+        return this->make_list_expr({
+            this->make_symbol_expr("quasiquote"),
+            this->parse_expr(),
+        });
     }
     case TokenKind::COMMA: {
         advance();
-        auto e = parse_expr();
-        auto list = std::make_shared<ListExpr>();
-        list->elements.push_back(std::make_shared<SymbolExpr>("unquote"));
-        list->elements.push_back(e);
-        return list;
+        return this->make_list_expr({
+            this->make_symbol_expr("unquote"),
+            this->parse_expr(),
+        });
     }
     case TokenKind::COMMA_AT: {
         advance();
-        auto e = parse_expr();
-        auto list = std::make_shared<ListExpr>();
-        list->elements.push_back(std::make_shared<SymbolExpr>("unquote-splicing"));
-        list->elements.push_back(e);
-        return list;
+        return this->make_list_expr({
+            this->make_symbol_expr("unquote-splicing"),
+            this->parse_expr(),
+        });
     }
-    case TokenKind::STRING: {
-        auto v = ELux::share(m_token.text);
+    case TokenKind::STRING:{
+        auto text = this->m_token.text;
         advance();
-        return std::make_shared<LiteralExpr>(v);
+        return this->make_literal_expr(text);
     }
     case TokenKind::INT: {
-        i64 i = std::stoll(m_token.text);
-        auto v = ELux::share(i);
+        auto text = this->m_token.text;
+        i64 num{};
+        size_t pos{};
+        if(text.length() > 2 && text[0]=='0' && text[0]=='x'){
+            num = std::stoll(text, &pos, 16);
+        }else if(text.length() > 2 && text[0]=='0' && text[0]=='o'){
+            num = std::stoll(text, &pos, 8);
+        }else if(text.length() > 2 && text[0]=='0' && text[0]=='b'){
+            num = std::stoll(text, &pos, 2);
+        }else{
+            num = std::stoll(text, &pos);
+        }
         advance();
-        return std::make_shared<LiteralExpr>(v);
+
+        return this->make_literal_expr(num);
     }
-    case TokenKind::FLOAT: {
-        double d = std::stod(m_token.text);
-        auto v = ELux::share(d);
+    case TokenKind::FLOAT:{
+        auto text = this->m_token.text;
+        auto num = std::stod(text);
         advance();
-        return std::make_shared<LiteralExpr>(v);
+        return this->make_literal_expr(num);
     }
-    case TokenKind::SYMBOL: {
-        std::string s = m_token.text;
+    case TokenKind::SYMBOL:{
+        std::string text = m_token.text;
         advance();
-        if(s=="nil"){ return std::make_shared<LiteralExpr>(ELux::share()); }
-        if(s=="t"){ return std::make_shared<LiteralExpr>(ELux::share(true)); }
-        return std::make_shared<SymbolExpr>(s);
+        if(text=="nil"){ return this->make_literal_expr(); }
+        if(text=="true"){ return this->make_literal_expr(true); }
+        if(text=="false"){ return this->make_literal_expr(false); }
+        return this->make_symbol_expr(text);
     }
     default:
-        throw std::runtime_error("Unexpected token in parseExpr");
+        throw ELuxError(ELuxError::SyntaxError, "Unexpected token in parseExpr");
     }
 }
 
 // -*-
 Expr Parser::parse_list() {
-    if(!match(TokenKind::LPAREN)){ throw std::runtime_error("Expected '('"); }
-    auto list = std::make_shared<ListExpr>();
-    while(m_token.kind != TokenKind::RPAREN && m_token.kind != TokenKind::END) {
-        list->elements.push_back(parse_expr());
+    if(!match(TokenKind::LPAREN)){
+        throw ELuxError(ELuxError::SyntaxError, "Expected '('");
+    }
+    Vec<Expr> exprs{};
+    while(m_token.kind != TokenKind::RPAREN && m_token.kind != TokenKind::END){
+        exprs.push_back(this->parse_expr());
     }
     if(!match(TokenKind::RPAREN)){
-        throw std::runtime_error("Expected ')'");
+        throw ELuxError(ELuxError::SyntaxError, "Expected ')'");
     }
-    return list;
+    return this->make_list_expr(std::move(exprs));
 }
 
 // -*-
@@ -629,6 +657,48 @@ Vec<Expr> Parser::parse(){
         exprs.push_back(parse_expr());
     }
     return exprs;
+}
+
+// -*-
+Expr Parser::make_symbol_expr(const std::string& text){
+    //! @todo
+    return nullptr;
+}
+
+// -*-
+Expr Parser::make_literal_expr(void){
+    //! @todo
+    return nullptr;
+}
+ 
+// -*-
+Expr Parser::make_literal_expr(bool val){
+    //! @todo
+    return nullptr;
+}
+
+// -*-
+Expr Parser::make_literal_expr(i64 val){
+    //! @todo
+    return nullptr;
+}
+
+// -*-
+Expr Parser::make_literal_expr(f64 val){
+    //! @todo
+    return nullptr;
+}
+
+// -*-
+Expr Parser::make_literal_expr(const std::string& text){
+    //! @todo
+    return nullptr;
+}
+
+// -*-
+Expr Parser::make_list_expr(Vec<Expr>&& expr){
+    //! @todo
+    return nullptr;
 }
 
 // -*----------------------------------------------------------------*-
