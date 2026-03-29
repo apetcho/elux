@@ -1558,12 +1558,19 @@ Module::Module(ELux* elux, const Symbol name)
     this->setup(name);
 }
 
+// -*-
+Module::Module(ELux* elux, const fs::path& modulePath)
+: m_elux{elux}
+, m_name{Symbol("")}
+{
+    this->setup(modulePath);
+}
+
 /*
 // -*-
 class Module final{
 public:
 
-Module::Module(ELux* elux, const fs::path& modulePath){}
 Module::Module(Module&& other) noexcept{}
 Module& Module::operator=(Module&& other) noexcept{}
 const std::string& Module::key(void) const{}
