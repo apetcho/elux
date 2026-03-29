@@ -33,6 +33,79 @@ SOFTWARE.
 // -*----------------------------------------------------------------*-
 namespace ekasoft::klx{
 // -
+/*
+Self fn_add(const Vec<Self>& args, Context ctx);
+Self fn_sub(const Vec<Self>& args, Context ctx);
+Self fn_mul(const Vec<Self>& args, Context ctx);
+Self fn_div(const Vec<Self>& args, Context ctx);
+Self fn_mod(const Vec<Self>& args, Context ctx);
+Self fn_logical_and(const Vec<Self>& args, Context ctx);
+Self fn_logical_or(const Vec<Self>& args, Context ctx);
+Self fn_logical_not(const Vec<Self>& args, Context ctx);
+Self fn_bit_and(const Vec<Self>& args, Context ctx);
+Self fn_bit_or(const Vec<Self>& args, Context ctx);
+Self fn_bit_not(const Vec<Self>& args, Context ctx);
+Self fn_bit_xor(const Vec<Self>& args, Context ctx);
+Self fn_bit_lshift(const Vec<Self>& args, Context ctx);
+Self fn_bit_rshift(const Vec<Self>& args, Context ctx);
+Self fn_println(const Vec<Self>& args, Context ctx);
+Self fn_print(const Vec<Self>& args, Context ctx);
+Self fn_eprintln(const Vec<Self>& args, Context ctx);
+Self fn_eprint(const Vec<Self>& args, Context ctx);
+Self fn_panic(const Vec<Self>& args, Context ctx);
+Self fn_input(const Vec<Self>& args, Context ctx);
+Self fn_bool(const Vec<Self>& args, Context ctx);
+Self fn_integer(const Vec<Self>& args, Context ctx);
+Self fn_float(const Vec<Self>& args, Context ctx);
+Self fn_string(const Vec<Self>& args, Context ctx);
+Self fn_pair(const Vec<Self>& args, Context ctx);
+Self fn_tuple(const Vec<Self>& args, Context ctx);
+Self fn_array(const Vec<Self>& args, Context ctx);
+Self fn_list(const Vec<Self>& args, Context ctx);
+Self fn_hashset(const Vec<Self>& args, Context ctx);
+Self fn_hashmap(const Vec<Self>& args, Context ctx);
+Self fn_define_error(const Vec<Self>& args, Context ctx);
+Self fn_len(const Vec<Self>& args, Context ctx);
+Self fn_map(const Vec<Self>& args, Context ctx);
+Self fn_filter(const Vec<Self>& args, Context ctx);
+Self fn_reduce(const Vec<Self>& args, Context ctx);
+Self fn_zip(const Vec<Self>& args, Context ctx);
+Self fn_chain(const Vec<Self>& args, Context ctx);
+Self fn_take(const Vec<Self>& args, Context ctx);
+Self fn_drop(const Vec<Self>& args, Context ctx);
+Self fn_enumerate(const Vec<Self>& args, Context ctx);
+Self fn_drop_while(const Vec<Self>& args, Context ctx);
+Self fn_take_while(const Vec<Self>& args, Context ctx);
+Self fn_any(const Vec<Self>& args, Context ctx);
+Self fn_all(const Vec<Self>& args, Context ctx);
+Self fn_reverse(const Vec<Self>& args, Context ctx);
+Self fn_collect(const Vec<Self>& args, Context ctx);
+Self fn_sort(const Vec<Self>& args, Context ctx);
+Self fn_range(const Vec<Self>& args, Context ctx);
+Self fn_linspace(const Vec<Self>& args, Context ctx);
+Self fn_seed(const Vec<Self>& args, Context ctx);
+Self fn_random(const Vec<Self>& args, Context ctx);
+Self fn_nextInteger(const Vec<Self>& args, Context ctx);
+Self fn_nextFloat(const Vec<Self>& args, Context ctx);
+Self fn_push(const Vec<Self>& args, Context ctx);
+Self fn_pop(const Vec<Self>& args, Context ctx);
+Self fn_get(const Vec<Self>& args, Context ctx);
+Self fn_insert(const Vec<Self>& args, Context ctx);
+Self fn_find(const Vec<Self>& args, Context ctx);
+Self fn_find_all(const Vec<Self>& args, Context ctx);
+Self fn_contains(const Vec<Self>& args, Context ctx);
+Self fn_typeof(const Vec<Self>& args, Context ctx);
+Self fn_replace(const Vec<Self>& args, Context ctx);
+Self fn_replace_all(const Vec<Self>& args, Context ctx);
+Self fn_format(const Vec<Self>& args, Context ctx);
+Self fn_docstr(const Vec<Self>& args, Context ctx);
+Self fn_help(const Vec<Self>& args, Context ctx);
+Self fn_lookfor(const Vec<Self>& args, Context ctx);
+
+void ELux::initialize_prelude(void){}
+
+
+*/
 
 Self add(const Vec<Self>& args) {
     if(args.empty()){ return std::make_shared<Number>();}
@@ -290,8 +363,8 @@ Self builtin_map(const Vec<Self>& args, Context env){
         !ELux::is_list(listVal) &&
         !ELux::is_array(listVal) &&
         !ELux::is_string(listVal) &&
-        !ELux::is_set(listVal) &&
-        !ELux::is_dict(listVal)
+        !ELux::is_hashset(listVal) &&
+        !ELux::is_hashmap(listVal)
     );
     if(notOk){
         throw std::runtime_error("map expects list/array/string/set/dict");
@@ -361,41 +434,41 @@ Self builtin_map(const Vec<Self>& args, Context env){
             }
         }
         result = ELux::share(ans);
-    }else if(ELux::is_set(listVal)){
-        Set ans{};
-        const auto& xset = dynamic_cast<Set*>(listVal.get())->value();
+    }else if(ELux::is_hashset(listVal)){
+        HashSet ans{};
+        const auto& xset = dynamic_cast<HashSet*>(listVal.get())->value();
         for (auto& item : xset) {
-            Vec<Self> callArgs = { ELux::share(item) };
+            Vec<Self> callArgs = { item };
             if (fn->isNative){
                 auto rv = fn->native(callArgs, env);
-                if(!ELux::is_string(rv)){
-                    throw std::runtime_error(
-                        "`map' applied to set. The callable argument must return a string."
-                    );
-                }
-                ans.value().insert(rv->str());
+                // if(!ELux::is_string(rv)){
+                //     throw std::runtime_error(
+                //         "`map' applied to set. The callable argument must return a string."
+                //     );
+                // }
+                ans.value().insert(rv);
             } else{
                 auto callEnv = std::make_shared<Env>(fn->closure);
                 if (fn->params.size() != 1){
                     throw std::runtime_error("map function must take 1 arg");
                 }
-                callEnv->define(fn->params[0], ELux::share(item));
+                callEnv->define(fn->params[0], item);
                 auto rv = fn->body->eval(elux, callEnv);
                 if(!ELux::is_string(rv)){
                     throw std::runtime_error(
                         "`map' applied to set. The callable argument must return a string."
                     );
                 }
-                ans.value().insert(rv->str());
+                ans.value().insert(rv);
             }
         }
         result = ELux::share(ans);
     }else{
-        Dict ans{};
-        const auto& xdict = ELux::as_dict(listVal);
+        HashMap ans{};
+        const auto& xdict = ELux::as_hashmap(listVal);
         for (auto& item : xdict.value()){
             Array entry{};
-            entry.value().push_back(ELux::share(item.first));
+            entry.value().push_back(item.first);
             entry.value().push_back(item.second);
             Vec<Self> callArgs = { ELux::share(entry) };
             if (fn->isNative){
@@ -413,8 +486,9 @@ Self builtin_map(const Vec<Self>& args, Context env){
                     ss << "an array with two elements.";
                     throw std::runtime_error(ss.str());
                 }
-                auto key = ELux::str(rv.value()[0]);
-                ans.value()[key] = rv.value()[1];
+                auto key = rv.value()[0];
+                auto val = rv.value()[1];
+                ans.value()[std::move(key)] = std::move(val);
             } else {
                 auto callEnv = std::make_shared<Env>(fn->closure);
                 if(fn->params.size() != 1){
@@ -436,7 +510,7 @@ Self builtin_map(const Vec<Self>& args, Context env){
                     throw std::runtime_error(ss.str());
                 }
                 auto key = ELux::str(rv.value()[0]);
-                ans.value()[key] = rv.value()[1];
+                ans.value()[std::move(rv.value()[0])] = std::move(rv.value()[1]);
             }
         }
         result = ELux::share(ans);
@@ -458,8 +532,8 @@ Self builtin_filter(const Vec<Self>& args, Context env){
         !ELux::is_list(listVal) &&
         !ELux::is_array(listVal) &&
         !ELux::is_string(listVal) &&
-        !ELux::is_set(listVal) &&
-        !ELux::is_dict(listVal)
+        !ELux::is_hashset(listVal) &&
+        !ELux::is_hashmap(listVal)
     );
     if(notOk){
         throw std::runtime_error("filter expects list/array/string/set/dict");
@@ -527,11 +601,11 @@ Self builtin_filter(const Vec<Self>& args, Context env){
         }
         ans += xs.substr(idx);
         result = ELux::share(ans);
-    }else if(ELux::is_set(listVal)){ //!
-        Set ans{};
-        const auto& xs = ELux::as_set(listVal);
+    }else if(ELux::is_hashset(listVal)){ //!
+        HashSet ans{};
+        const auto& xs = ELux::as_hashset(listVal);
         for(auto& item : xs.value()){
-            auto self = processItem(ELux::share(item));
+            auto self = processItem(item);
             if(ELux::is_nil(self)){ continue; }
             if(!ELux::is_string(self)){
                 std::stringstream ss;
@@ -539,15 +613,15 @@ Self builtin_filter(const Vec<Self>& args, Context env){
                 ss << "return a string.";
                 throw std::runtime_error(ss.str());
             }
-            ans.value().insert(ELux::str(self));
+            ans.value().insert(self);
         }
         result = ELux::share(ans);
-    }else{ // Dict
-        Dict ans{};
-        const auto& xdict = ELux::as_dict(listVal);
+    }else{ // HashMap
+        HashMap ans{};
+        const auto& xdict = ELux::as_hashmap(listVal);
         for(auto& item : xdict.value()){
             Array xs{};
-            xs.value().push_back(ELux::share(item.first));
+            xs.value().push_back(item.first);
             xs.value().push_back(item.second);
             auto self = processItem(ELux::share(xs));
             if(ELux::is_nil(self)){ continue; }
@@ -567,7 +641,7 @@ Self builtin_filter(const Vec<Self>& args, Context env){
                 throw std::runtime_error(ss.str());
             }
             auto key = ELux::str(vec.value()[0]);
-            ans.value()[key] = vec.value()[1];
+            ans.value()[vec.value()[0]] = vec.value()[1];
         }
         result = ELux::share(ans);
     }
@@ -589,8 +663,8 @@ Self builtin_reduce(const Vec<Self>& args, Context env){
     auto notOk = (
         !ELux::is_list(listVal) &&
         !ELux::is_array(listVal) &&
-        !ELux::is_set(listVal) &&
-        !ELux::is_dict(listVal)
+        !ELux::is_hashset(listVal) &&
+        !ELux::is_hashmap(listVal)
     );
     if(notOk){
         throw std::runtime_error("reduce expects list/array/set/dict");
@@ -616,16 +690,16 @@ Self builtin_reduce(const Vec<Self>& args, Context env){
     }else if(ELux::is_array(listVal)){
         const auto& xs = ELux::as_array(listVal);
         for (auto& item : xs.value()){ processItem(item); }
-    }else if(ELux::is_set(listVal)){
-        const auto& xs = ELux::as_set(listVal);
+    }else if(ELux::is_hashset(listVal)){
+        const auto& xs = ELux::as_hashset(listVal);
         for (auto& item : xs.value()){
-            processItem(ELux::share(item));
+            processItem(item);
         }
     }else{
-        const auto& xs = ELux::as_dict(listVal);
+        const auto& xs = ELux::as_hashmap(listVal);
         for(auto& item : xs.value()){
             Array vec{};
-            vec.value().push_back(ELux::share(item.first));
+            vec.value().push_back(item.first);
             vec.value().push_back(item.second);
             processItem(ELux::share(vec));
         }
@@ -687,8 +761,8 @@ Self builtin_enumerate(const Vec<Self>& args, Context env){
         !ELux::is_list(listVal) &&
         !ELux::is_array(listVal) &&
         !ELux::is_string(listVal) &&
-        !ELux::is_set(listVal) &&
-        !ELux::is_dict(listVal)
+        !ELux::is_hashset(listVal) &&
+        !ELux::is_hashmap(listVal)
     );
     if(failed){
         throw std::runtime_error("enumerate expects list/array/string/set/dict");
@@ -719,20 +793,20 @@ Self builtin_enumerate(const Vec<Self>& args, Context env){
             pair.value().push_back(ELux::share(item));
             result.value().push_back(ELux::share(pair));
         }
-    }else if(ELux::is_set(listVal)){
-        const auto& xs = ELux::as_set(listVal);
+    }else if(ELux::is_hashset(listVal)){
+        const auto& xs = ELux::as_hashset(listVal);
         for (auto& item : xs.value()) {
             Array pair;
             pair.value().push_back(ELux::share(static_cast<i64>(idx++)));
-            pair.value().push_back(ELux::share(item));
+            pair.value().push_back(item);
             result.value().push_back(ELux::share(pair));
         }
-    }else{ // Dict
-        const auto& xs = ELux::as_dict(listVal);
+    }else{ // HashMap
+        const auto& xs = ELux::as_hashmap(listVal);
         for (auto& item : xs.value()){
             Array pair;
             Array self{};
-            self.value().push_back(ELux::share(item.first));
+            self.value().push_back(item.first);
             self.value().push_back(item.second);
             pair.value().push_back(ELux::share(static_cast<i64>(idx++)));
             pair.value().push_back(ELux::share(self));
@@ -843,7 +917,7 @@ Context makeGlobalEnv() {
     addNative(env, "Set.new", [](const Vec<Self>& a, Context){
         Array arr{};
         arr.value().insert(arr.value().begin(), a.begin(), a.end());
-        Set xset(arr);
+        HashSet xset(arr);
         return ELux::share(xset);
     });
 
@@ -851,11 +925,11 @@ Context makeGlobalEnv() {
         if(args.size() % 2 != 0){
             throw std::runtime_error("dict expects even number of args");
         }
-        Dict dict;
+        HashMap dict;
         for (size_t i = 0; i < args.size(); i += 2) {
             if(!ELux::is_string(args[i]))
                 throw std::runtime_error("dict keys must be strings");
-            dict.value()[ELux::str(args[i])] = args[i+1];
+            dict.value()[args[i]] = args[i+1];
         }
         return ELux::share(dict);
     });
@@ -865,7 +939,7 @@ Context makeGlobalEnv() {
             throw std::runtime_error("get expects dict and key");
         }
         auto failed = (
-            !ELux::is_dict(args[0]) &&
+            !ELux::is_hashmap(args[0]) &&
             !ELux::is_array(args[0]) &&
             !ELux::is_list(args[0]) &&
             !ELux::is_string(args[0])
@@ -874,13 +948,13 @@ Context makeGlobalEnv() {
             throw std::runtime_error("get expects dict/array/list/string");
         }
         auto result = ELux::share();
-        if(ELux::is_dict(args[0])){
+        if(ELux::is_hashmap(args[0])){
             if(!ELux::is_string(args[1])){
                 throw std::runtime_error("get key must be string when applied to dict.");
             }
-            const Dict& dict = ELux::as_dict(args[0]);
+            const HashMap& dict = ELux::as_hashmap(args[0]);
             auto key = ELux::str(args[1]);
-            auto it = dict.value().find(key);
+            auto it = dict.value().find(args[1]);
             if(it != dict.value().end()){
                 result = it->second;
             }else{

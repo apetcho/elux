@@ -159,6 +159,44 @@ Iterator Iterable::take(u32 n){
 }
 
 // -*-
+Iterator Iterable::drop(u32 n){
+    for(u32 i=0; i < n; i++){
+        if(this->done()){ break; }
+        this->next();
+    }
+    Vec<Self> argv{};
+    while(!this->done()){
+        argv.push_back(std::move(this->next()));
+    }
+    if(this->m_data->type().str()=="String"){
+        std::stringstream ss;
+        for(auto arg: argv){
+            ss << arg->str();
+        }
+        return std::make_shared<String>(ss.str());
+    }
+    if(this->m_data->type().str()=="Tuple"){
+        return std::make_shared<Tuple>(argv);
+    }
+    if(this->m_data->type().str()=="Array"){
+        return std::make_shared<Array>(argv);
+    }
+    if(this->m_data->type().str()=="List"){
+        return std::make_shared<List>(argv);
+    }
+    if(this->m_data->type().str()=="HashSet"){
+        return std::make_shared<HashSet>(argv);
+    }
+    if(this->m_data->type().str()=="HashMap"){
+        return std::make_shared<HashMap>(argv);
+    }
+    //if(this->m_data->type().str()==""){}
+    //! @note: fallback for uses-defined iterables;
+    //! @todo: refactor this if the user can defined his own iterable;
+    return std::make_shared<Array>(argv);
+}
+
+// -*-
 Iterator Iterable::enumerate(void){
     Vec<Self> vec{};
     u32 idx = 0;
@@ -297,16 +335,16 @@ void Iterable::collect(Tuple& result){
 }
 
 // -*-
-void Iterable::collect(Set& result){
+void Iterable::collect(HashSet& result){
     Vec<Self> vec{};
     while(!this->done()){
         vec.push_back(std::move(this->next()));
     }
-    result = Set(vec);
+    result = HashSet(vec);
 }
 
 // -*-
-void Iterable::collect(Dict& result){
+void Iterable::collect(HashMap& result){
     Vec<Pair> vec{};
     while(!this->done()){
         auto item = this->next();
@@ -328,7 +366,7 @@ void Iterable::collect(Dict& result){
         vec.push_back(std::move(pair));
     }
 
-    result = Dict(vec);
+    result = HashMap(vec);
 }
 
 // --------------
@@ -570,7 +608,7 @@ Tuple::Tuple(const Array& xs)
     this->m_stop = this->m_items.end();
 }
 
-Tuple::Tuple(const Set& xs)
+Tuple::Tuple(const HashSet& xs)
 : Iterable(this)
 , Hashable(this)
 , Equalable(this)
@@ -578,13 +616,13 @@ Tuple::Tuple(const Set& xs)
     auto data = xs.value();
     this->m_items = {};
     for(auto item: data){
-        this->m_items.push_back(ELux::share(item));
+        this->m_items.push_back(item);
     }
     this->m_ptr = this->m_items.begin();
     this->m_stop = this->m_items.end();
 }
 
-Tuple::Tuple(const Dict& xs)
+Tuple::Tuple(const HashMap& xs)
 : Iterable(this)
 , Hashable(this)
 , Equalable(this)
@@ -592,9 +630,9 @@ Tuple::Tuple(const Dict& xs)
     auto data = xs.value();
     this->m_items = {};
     for(auto [key, val]: data){
-        auto xkey = ELux::share(key);
-        auto xval = val;
-        Pair pair(xkey, xval);
+        // auto xkey = ELux::share(key);
+        // auto xval = val;
+        Pair pair(key, val);
         this->m_items.push_back(ELux::share(pair));
     }
     this->m_ptr = this->m_items.begin();
@@ -1553,10 +1591,10 @@ const std::string& String::value(void) const{
     return this->m_val;
 }
 
-// -----------
-// -*- Set -*-
-// -----------
-Set::Set()
+// ---------------
+// -*- HashSet -*-
+// ---------------
+HashSet::HashSet()
 : Iterable(this)
 , m_hset{} {
     this->m_ptr = this->m_hset.begin();
@@ -1564,49 +1602,49 @@ Set::Set()
 }
 
 // -*-
-Set::Set(std::initializer_list<Self> xs)
+HashSet::HashSet(std::initializer_list<Self> xs)
 : Iterable(this)
 , m_hset{}{
     for(auto x: xs){
-        this->m_hset.insert(ELux::str(x));
+        this->m_hset.insert(x);
     }
 }
 
 // -*-
-Set::Set(const Array& xs)
+HashSet::HashSet(const Array& xs)
 : Iterable(this)
 , m_hset{}{
     for(auto x: xs.value()){
-        this->m_hset.insert(ELux::str(x));
+        this->m_hset.insert(x);
     }
     this->m_ptr = this->m_hset.begin();
     this->m_stop = this->m_hset.end();
 }
 
 // -*-
-Set::Set(const List& xs)
+HashSet::HashSet(const List& xs)
 : Iterable(this)
 , m_hset{}{
     for(auto x: xs.value()){
-        this->m_hset.insert(ELux::str(x));
+        this->m_hset.insert(x);
     }
     this->m_ptr = this->m_hset.begin();
     this->m_stop = this->m_hset.end();
 }
 
 // -*-
-Set::Set(const Vec<Self>& xs)
+HashSet::HashSet(const Vec<Self>& xs)
 : Iterable(this)
 , m_hset{}{
     for(auto x: xs){
-        this->m_hset.insert(ELux::str(x));
+        this->m_hset.insert(x);
     }
     this->m_ptr = this->m_hset.begin();
     this->m_stop = this->m_hset.end();
 }
 
 // -*-
-Set::Set(const Set& xs) noexcept
+HashSet::HashSet(const HashSet& xs) noexcept
 : Iterable(this)
 , m_hset{xs.m_hset} {
     this->m_ptr = this->m_hset.begin();
@@ -1614,7 +1652,7 @@ Set::Set(const Set& xs) noexcept
 }
 
 // -*-
-Set::Set(Set&& xs) noexcept
+HashSet::HashSet(HashSet&& xs) noexcept
 : Iterable(this)
 , m_hset{std::move(xs.m_hset)}{
     this->m_ptr = this->m_hset.begin();
@@ -1625,7 +1663,7 @@ Set::Set(Set&& xs) noexcept
 }
 
 // -*-
-Set& Set::operator=(const Set& xs) noexcept{
+HashSet& HashSet::operator=(const HashSet& xs) noexcept{
     if(this != &xs){
         this->m_hset = xs.m_hset;
         this->m_ptr = this->m_hset.begin();
@@ -1636,7 +1674,7 @@ Set& Set::operator=(const Set& xs) noexcept{
 }
 
 // -*-
-Set& Set::operator=(Set&& xs) noexcept{
+HashSet& HashSet::operator=(HashSet&& xs) noexcept{
     if(this != &xs){
         this->m_hset = std::move(xs.m_hset);
         this->m_ptr = this->m_hset.begin();
@@ -1650,20 +1688,20 @@ Set& Set::operator=(Set&& xs) noexcept{
 }
 
 // -*-
-Set::operator HSet() const{ return this->m_hset; }
+HashSet::operator HSet() const{ return this->m_hset; }
 
-Symbol Set::type(void) const{
+Symbol HashSet::type(void) const{
     return Symbol("HashSet");
 }
 
 // -*-
-std::string Set::str(void) const{
+std::string HashSet::str(void) const{
     std::stringstream ss;
     ss << "#{";
     size_t idx = 0;
     for(auto self: this->m_hset){
         if(idx > 0){ ss << " "; }
-        ss << String(self).str();
+        ss << self->str();
         ++idx;
     }
     ss << "}";
@@ -1671,13 +1709,13 @@ std::string Set::str(void) const{
 }
 
 // -*-
-std::string Set::repr(void) const{
+std::string HashSet::repr(void) const{
     std::stringstream ss;
     ss << "(HashSet ";
     size_t idx = 0;
     for(auto self: this->m_hset){
         if(idx > 0){ ss << " "; }
-        ss << String(self).repr();
+        ss << self->repr();
         ++idx;
     }
     ss << ")";
@@ -1685,58 +1723,58 @@ std::string Set::repr(void) const{
 }
 
 // -*-
-HSet& Set::value(void){ return this->m_hset; }
+HSet& HashSet::value(void){ return this->m_hset; }
 
 // -*-
-const HSet& Set::value(void) const{ return this->m_hset; }
+const HSet& HashSet::value(void) const{ return this->m_hset; }
 
 // -*-
-Self Set::next(void){
+Self HashSet::next(void){
     auto self = *this->m_ptr;
     this->m_ptr = std::next(this->m_ptr);
-    return ELux::share(self);
+    return self;
 }
 
 // -*-
-bool Set::done(void) const{
+bool HashSet::done(void) const{
     return (this->m_ptr==this->m_stop ? true: false);
 }
 
-// ------------
-// -*- Dict -*-
-// ------------
-Dict::Dict()
+// ---------------
+// -*- HashMap -*-
+// ---------------
+HashMap::HashMap()
 : Iterable(this)
 , m_hmap{}{
     this->m_ptr = this->m_hmap.begin();
     this->m_stop = this->m_hmap.end();
 }
 
-Dict::Dict(std::initializer_list<Self> xs)
+HashMap::HashMap(std::initializer_list<Self> xs)
 : Iterable(this)
 , m_hmap{} {
     for(auto self: xs){
         if(auto pair=dynamic_cast<List*>(self.get())){
             if(pair->value().size()==2){
-                auto ptr = (pair->value().begin());
-                auto key = ELux::str(*ptr);
-                auto val = *(std::next(ptr));
-                this->m_hmap[key] = std::move(val);
+                auto items = pair->value();
+                auto key = items.front();
+                auto val = items.back();
+                this->m_hmap[std::move(key)] = std::move(val);
             }else{
                 throw std::runtime_error("Dict: expect a key/value pair in the initializer_list");
             }
         }else if(auto pair=dynamic_cast<Array*>(self.get())){
             if(pair->value().size()==2){
-                auto key = ELux::str(pair->value()[0]);
+                auto key = pair->value()[0];
                 auto val = pair->value()[1];
-                this->m_hmap[key] = std::move(val);
+                this->m_hmap[std::move(key)] = std::move(val);
             }else{
                 throw std::runtime_error("Dict: expect a key/value pair in the initializer_list");
             }
         }else if(auto pair=dynamic_cast<std::pair<Self, Self>*>(self.get())){
-            auto key = ELux::str(pair->first);
+            auto key = pair->first;
             auto val = pair->second;
-            this->m_hmap[key] = std::move(val);
+            this->m_hmap[std::move(key)] = std::move(val);
         }else{
             throw std::runtime_error("Dict: expect a key/value pair in the initializer_list");
         }
@@ -1747,31 +1785,31 @@ Dict::Dict(std::initializer_list<Self> xs)
 }
 
 // -*-
-Dict::Dict(const Array& xs)
+HashMap::HashMap(const Array& xs)
 : Iterable(this)
 , m_hmap{} {
     for(auto self: xs.value()){
         if(auto pair=dynamic_cast<List*>(self.get())){
             if(pair->value().size()==2){
-                auto ptr = (pair->value().begin());
-                auto key = ELux::str(*ptr);
-                auto val = *(std::next(ptr));
-                this->m_hmap[key] = std::move(val);
+                auto items = pair->value();
+                auto key = items.front();
+                auto val = items.back();
+                this->m_hmap[std::move(key)] = std::move(val);
             }else{
                 throw std::runtime_error("Dict: expect a key/value pair in the initializer_list");
             }
         }else if(auto pair=dynamic_cast<Array*>(self.get())){
             if(pair->value().size()==2){
-                auto key = ELux::str(pair->value()[0]);
+                auto key = pair->value()[0];
                 auto val = pair->value()[1];
-                this->m_hmap[key] = std::move(val);
+                this->m_hmap[std::move(key)] = std::move(val);
             }else{
                 throw std::runtime_error("Dict: expect a key/value pair in the initializer_list");
             }
         }else if(auto pair=dynamic_cast<std::pair<Self, Self>*>(self.get())){
-            auto key = ELux::str(pair->first);
+            auto key = pair->first;
             auto val = pair->second;
-            this->m_hmap[key] = std::move(val);
+            this->m_hmap[std::move(key)] = std::move(val);
         }else{
             throw std::runtime_error("Dict: expect a key/value pair in the initializer_list");
         }
@@ -1782,31 +1820,31 @@ Dict::Dict(const Array& xs)
 }
 
 // -*-
-Dict::Dict(const List& xs)
+HashMap::HashMap(const List& xs)
 : Iterable(this)
 , m_hmap{} {
     for(auto self: xs.value()){
         if(auto pair=dynamic_cast<List*>(self.get())){
             if(pair->value().size()==2){
-                auto ptr = (pair->value().begin());
-                auto key = ELux::str(*ptr);// ELux::as_string(*ptr);
-                auto val = *(std::next(ptr));
-                this->m_hmap[key] = std::move(val);
+                auto items = pair->value();
+                auto key = items.front();
+                auto val = items.back();
+                this->m_hmap[std::move(key)] = std::move(val);
             }else{
                 throw std::runtime_error("Dict: expect a key/value pair in the initializer_list");
             }
         }else if(auto pair=dynamic_cast<Array*>(self.get())){
             if(pair->value().size()==2){
-                auto key = ELux::str(pair->value()[0]);
+                auto key = pair->value()[0];
                 auto val = pair->value()[1];
-                this->m_hmap[key] = std::move(val);
+                this->m_hmap[std::move(key)] = std::move(val);
             }else{
                 throw std::runtime_error("Dict: expect a key/value pair in the initializer_list");
             }
         }else if(auto pair=dynamic_cast<std::pair<Self, Self>*>(self.get())){
-            auto key = ELux::str(pair->first);
+            auto key = pair->first;
             auto val = pair->second;
-            this->m_hmap[key] = std::move(val);
+            this->m_hmap[std::move(key)] = std::move(val);
         }else{
             throw std::runtime_error("Dict: expect a key/value pair in the initializer_list");
         }
@@ -1817,21 +1855,21 @@ Dict::Dict(const List& xs)
 }
 
 // -*-
-Dict::Dict(const Vec<Pair>& pairs)
+HashMap::HashMap(const Vec<Pair>& pairs)
 : Iterable(this)
 {
     this->m_hmap = {};
     for(const auto& pair: pairs){
-        auto key = ELux::str(pair.key);
+        auto key = pair.key;
         auto val = pair.val;
-        this->m_hmap[key] = std::move(val);
+        this->m_hmap[std::move(key)] = std::move(val);
     }
     this->m_ptr = this->m_hmap.begin();
     this->m_stop = this->m_hmap.end();
 }
 
 // -*-
-Dict::Dict(const Dict& xs) noexcept
+HashMap::HashMap(const HashMap& xs) noexcept
 : Iterable(this)
 , m_hmap{xs.m_hmap} {
     this->m_ptr = this->m_hmap.begin();
@@ -1839,7 +1877,7 @@ Dict::Dict(const Dict& xs) noexcept
 }
 
 // -*-
-Dict::Dict(Dict&& xs) noexcept
+HashMap::HashMap(HashMap&& xs) noexcept
 : Iterable(this)
 , m_hmap{std::move(xs.m_hmap)}{
     this->m_ptr = this->m_hmap.begin();
@@ -1850,7 +1888,7 @@ Dict::Dict(Dict&& xs) noexcept
 }
 
 // -*-
-Dict& Dict::operator=(const Dict& xs) noexcept{
+HashMap& HashMap::operator=(const HashMap& xs) noexcept{
     if(this != &xs){
         this->m_hmap = xs.m_hmap;
         this->m_ptr = this->m_hmap.begin();
@@ -1860,7 +1898,7 @@ Dict& Dict::operator=(const Dict& xs) noexcept{
 }
 
 // -*-
-Dict& Dict::operator=(Dict&& xs) noexcept{
+HashMap& HashMap::operator=(HashMap&& xs) noexcept{
     if(this != &xs){
         this->m_hmap = std::move(xs.m_hmap);
         this->m_ptr = this->m_hmap.begin();
@@ -1873,21 +1911,21 @@ Dict& Dict::operator=(Dict&& xs) noexcept{
 }
 
 // -*-
-Dict::operator HMap() const{ return this->m_hmap; }
+HashMap::operator HMap() const{ return this->m_hmap; }
 
 // -*-
-Symbol Dict::type(void) const{
+Symbol HashMap::type(void) const{
     return Symbol("HashMap");
 }
 
 // -*-
-std::string Dict::str(void) const {
+std::string HashMap::str(void) const {
     std::stringstream ss;
     ss << "{";
     size_t idx = 0;
     for(auto& [key, val]: this->m_hmap){
         if(idx > 0){ ss << " "; }
-        Pair entry(ELux::share(key), val);
+        Pair entry(key, val);
         ss << entry.str();
         ++idx;
     }
@@ -1896,13 +1934,13 @@ std::string Dict::str(void) const {
 }
 
 // -*-
-std::string Dict::repr(void) const{
+std::string HashMap::repr(void) const{
     std::stringstream ss;
     ss << "(HashMap ";
     size_t idx = 0;
     for(auto& [key, val]: this->m_hmap){
         if(idx > 0){ ss << " "; }
-        Pair entry(ELux::share(key), val);
+        Pair entry(key, val);
         ss << entry.repr();
         ++idx;
     }
@@ -1911,22 +1949,22 @@ std::string Dict::repr(void) const{
 }
 
 // -*-
-HMap& Dict::value(void){ return this->m_hmap; }
+HMap& HashMap::value(void){ return this->m_hmap; }
 
-const HMap& Dict::value(void) const{ return this->m_hmap; }
+const HMap& HashMap::value(void) const{ return this->m_hmap; }
 
 // -*-
-Self Dict::next(void){
+Self HashMap::next(void){
     auto self = *this->m_ptr;
     this->m_ptr = std::next(this->m_ptr);
-    auto key = ELux::share(self.first);
+    auto key = std::move(self.first);
     auto val = std::move(self.second);
 
     return ELux::share(Pair(key, val));
 }
 
 // -*-
-bool Dict::done(void) const{
+bool HashMap::done(void) const{
     return (this->m_ptr==this->m_stop ? true : false);
 }
 
@@ -1962,7 +2000,7 @@ List::List(const Array& xs)
 }
 
 // -*-
-List::List(const Set& xs)
+List::List(const HashSet& xs)
 : Iterable(this)
 , m_xs{}{
     for(auto self: xs.value()){
@@ -1973,14 +2011,12 @@ List::List(const Set& xs)
 }
 
 // -*-
-List::List(const Dict& xs)
+List::List(const HashMap& xs)
 : Iterable(this)
 , m_xs{}{
     for(const auto& [key, val]: static_cast<HMap>(xs)){
-        auto self = std::make_shared<Array>();
-        self->value().push_back(ELux::share(key));
-        self->value().push_back(std::move(val));
-        this->m_xs.push_back(std::move(self));
+        Pair pair(key, val);
+        this->m_xs.push_back(ELux::share(pair));
     }
     this->m_ptr = this->m_xs.begin();
     this->m_stop = this->m_xs.end();
@@ -2125,7 +2161,7 @@ Array::Array(const List& xs)
 }
 
 // -*-
-Array::Array(const Set& xs)
+Array::Array(const HashSet& xs)
 : Iterable(this)
 , m_xs{}{
     for(auto self: xs.value()){
@@ -2136,15 +2172,12 @@ Array::Array(const Set& xs)
 }
 
 // -*-
-Array::Array(const Dict& xs)
+Array::Array(const HashMap& xs)
 : Iterable(this)
 , m_xs{}{
     for(auto [key, val]: xs.value()){
-        auto data = std::initializer_list<Self>{
-            std::make_shared<String>(key),
-            std::move(val)
-        };
-        this->m_xs.push_back(std::make_shared<Array>(data));
+        Pair pair(key, val);
+        this->m_xs.push_back(ELux::share(pair));
     }
     this->m_ptr = this->m_xs.begin();
     this->m_stop = this->m_xs.end();
@@ -2641,4 +2674,3 @@ Self operator&&(const Self& lhs, const Self& rhs){
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::ekasoft::klx                                 -*-
 // -*----------------------------------------------------------------*-
-

@@ -73,8 +73,8 @@ struct Object;
 struct Number;
 struct Array;
 struct List;
-struct Set;
-struct Dict;
+struct HashSet;
+struct HashMap;
 struct String;
 struct Function;
 struct Symbol;
@@ -89,8 +89,8 @@ using usize = std::size_t;
 // using List  = std::list<Value>;
 // using Array = std::vector<Value>;
 using Self = std::shared_ptr<Object>;
-using HSet = std::set<std::string>; // store as stringified values for simplicity
-using HMap = std::map<std::string, Self>;
+// using HSet = std::set<std::string>; // store as stringified values for simplicity
+// using HMap = std::map<std::string, Self>;
 using Context = std::shared_ptr<Env>;
 template<typename T>
 using Vec = std::vector<T>;
@@ -108,8 +108,8 @@ struct EqualHandler{
     bool operator()(const Self& lhs, const Self& rhs) const;
 };
 
-using HashMap = std::unordered_map<Self, Self, HashHandler, EqualHandler>;
-using HashSet = std::unordered_set<Self, HashHandler, EqualHandler>;
+using HMap = std::unordered_map<Self, Self, HashHandler, EqualHandler>;
+using HSet = std::unordered_set<Self, HashHandler, EqualHandler>;
 
 // -*-
 struct Object{
@@ -145,6 +145,7 @@ struct Iterable{
     virtual Iterator zip(Vec<Iterator> iterators);
     virtual Iterator chain(Vec<Iterator> iterators);
     virtual Iterator take(u32 n);
+    virtual Iterator drop(u32 n);
     virtual Iterator enumerate(void);
     virtual Iterator drop_while(Function func, Context env);
     virtual Iterator take_while(Function func, Context env);
@@ -155,8 +156,8 @@ struct Iterable{
     virtual void collect(Array& result);
     virtual void collect(List& result);
     virtual void collect(Tuple& result);
-    virtual void collect(Set& result);
-    virtual void collect(Dict& result);
+    virtual void collect(HashSet& result);
+    virtual void collect(HashMap& result);
 
 private:
     Object* m_data;
@@ -283,8 +284,8 @@ struct Tuple final: public Object, public Iterable, public Hashable, public Equa
     explicit Tuple(const Pair& xs);
     explicit Tuple(const List& xs);
     explicit Tuple(const Array& xs);
-    explicit Tuple(const Set& xs);
-    explicit Tuple(const Dict& xs);
+    explicit Tuple(const HashSet& xs);
+    explicit Tuple(const HashMap& xs);
     Tuple(const Tuple& tuple) noexcept;
     Tuple(Tuple&& tuple) noexcept;
     Tuple& operator=(const Tuple& tuple) noexcept;
@@ -588,16 +589,16 @@ private:
 // -----------
 // -*- Set -*-
 // -----------
-struct Set final: public Object, public Iterable {
-    explicit Set();
-    explicit Set(std::initializer_list<Self> xs);
-    explicit Set(const Array& xs);
-    explicit Set(const List& xs);
-    explicit Set(const Vec<Self>& xs);
-    Set(const Set& xs) noexcept;
-    Set(Set&& xs) noexcept;
-    Set& operator=(const Set& xs) noexcept;
-    Set& operator=(Set&& xs) noexcept;
+struct HashSet final: public Object, public Iterable {
+    explicit HashSet();
+    explicit HashSet(std::initializer_list<Self> xs);
+    explicit HashSet(const Array& xs);
+    explicit HashSet(const List& xs);
+    explicit HashSet(const Vec<Self>& xs);
+    HashSet(const HashSet& xs) noexcept;
+    HashSet(HashSet&& xs) noexcept;
+    HashSet& operator=(const HashSet& xs) noexcept;
+    HashSet& operator=(HashSet&& xs) noexcept;
 
     operator HSet() const;
 
@@ -623,16 +624,16 @@ private:
 // ------------
 // -*- Dict -*-
 // ------------
-struct Dict final: public Object, public Iterable{
-    explicit Dict();
-    explicit Dict(std::initializer_list<Self> xs);
-    explicit Dict(const Array& xs);
-    explicit Dict(const List& xs);
-    explicit Dict(const Vec<Pair>& pairs);
-    Dict(const Dict& xs) noexcept;
-    Dict(Dict&& xs) noexcept;
-    Dict& operator=(const Dict& xs) noexcept;
-    Dict& operator=(Dict&& xs) noexcept;
+struct HashMap final: public Object, public Iterable{
+    explicit HashMap();
+    explicit HashMap(std::initializer_list<Self> xs);
+    explicit HashMap(const Array& xs);
+    explicit HashMap(const List& xs);
+    explicit HashMap(const Vec<Pair>& pairs);
+    HashMap(const HashMap& xs) noexcept;
+    HashMap(HashMap&& xs) noexcept;
+    HashMap& operator=(const HashMap& xs) noexcept;
+    HashMap& operator=(HashMap&& xs) noexcept;
 
     operator HMap() const;
 
@@ -663,8 +664,8 @@ struct List final: public Object, public Iterable{
     explicit List();
     explicit List(std::initializer_list<Self> xs);
     explicit List(const Array& xs);
-    explicit List(const Set& xs);
-    explicit List(const Dict& xs);
+    explicit List(const HashSet& xs);
+    explicit List(const HashMap& xs);
     explicit List(const Vec<Self>& xs);
     List(const List& xs) noexcept;
     List(List&& xs) noexcept;
@@ -697,8 +698,8 @@ struct Array final: public Object, public Iterable{
     explicit Array();
     explicit Array(std::initializer_list<Self> xs);
     explicit Array(const List& xs);
-    explicit Array(const Set& xs);
-    explicit Array(const Dict& xs);
+    explicit Array(const HashSet& xs);
+    explicit Array(const HashMap& xs);
     explicit Array(const Vec<Self>& xs);
     Array(const Array& xs) noexcept;
     Array(Array&& xs) noexcept;
@@ -789,6 +790,8 @@ Self operator&&(const Self& lhs, const Self& rhs);
 struct Env : std::enable_shared_from_this<Env> {
     std::map<std::string, Self> vars;
     std::set<std::string> immutables;
+    //! @todo: std::map<std::string, std::string> docstrs;
+    //! @todo std::set<std::string> exceptions;
     std::shared_ptr<Env> parent;
 
     Env(std::shared_ptr<Env> p = nullptr);
@@ -798,6 +801,8 @@ struct Env : std::enable_shared_from_this<Env> {
     bool contains(const std::string& name) const;
     bool is_immutable(const std::string& name) const;
     Self get(const std::string& name);
+    //! @todo: std::string get_doc(const std::string&) const;
+    //! @todo: void add_doc(const std::string&, const std::string& doc);
 };
 
 // =========================
@@ -900,18 +905,24 @@ private:
 // ==============================
 class ELux : public ExprVisitor {
 public:
+    //! @todo: refactor & reimplement this method
     static void run(const std::string& code, Context env, const std::string& label);
-    //! @todo add `repl()'
-    //! @todo add `eluxLicense'
-    //! @todo add `eluxVersion'
-    //! @todo add `eluxAuthors'
-    //! @todo add `eluxNoBanner'
-    //! @todo add `eluxFloatPrecision'
-    //! @todo add `eluxFloatMode'
-    //! @todo add `eluxIntegerMode'
-    //! @todo add `eluxFormatWidth'
-    //! @todo add `eluxModules'
-    //! @todo add `eluxPrelude'
+    
+    //! @todo add `myLicense'
+    //! @todo add `myVersion'
+    //! @todo add `myAuthors'
+    //! @todo add `myNoBanner'
+    //! @todo add `myFloatPrecision'
+    //! @todo add `myFloatMode'
+    //! @todo add `myIntegerMode'
+    //! @todo add `myFormatWidth'
+    //! @todo add `myModules'
+    //! @todo add `myPrelude'
+    
+    //! @todo: implement the following two methods
+    static void repl(const Vec<std::string>& args);
+    static void setup(void);
+
     // --- {File, Path, System, Regex, ...}
     
     static Self share(void);
@@ -926,8 +937,8 @@ public:
     static Self share(const Bool& val);
     static Self share(const List& val);
     static Self share(const Array& val);
-    static Self share(const Set& val);
-    static Self share(const Dict& val);
+    static Self share(const HashSet& val);
+    static Self share(const HashMap& val);
     static Self share(const Symbol& val);
     static Self share(const Pair& val);
     static Self share(const Tuple& val);
@@ -944,8 +955,8 @@ public:
     static bool is_string(const Self& self);
     static bool is_list(const Self& self);
     static bool is_array(const Self& self);
-    static bool is_set(const Self& self);
-    static bool is_dict(const Self& self);
+    static bool is_hashset(const Self& self);
+    static bool is_hashmap(const Self& self);
     static bool is_function(const Self& self);
     static bool is_macro(const Self& self);
     static bool is_native(const Self& self);
@@ -969,8 +980,8 @@ public:
     static String as_string(const Self& self);
     static Array as_array(const Self& self);
     static List as_list(const Self& self);
-    static Set as_set(const Self& self);
-    static Dict as_dict(const Self& self);
+    static HashSet as_hashset(const Self& self);
+    static HashMap as_hashmap(const Self& self);
     static Function as_function(const Self& self);
 
     static Pair as_pair(const Self& self);
@@ -980,13 +991,11 @@ public:
     static void collect(Iterator iter, Tuple& result);
     static void collect(Iterator iter, Array& result);
     static void collect(Iterator iter, List& result);
-    static void collect(Iterator iter, Set& result);
-    static void collect(Iterator iter, Dict& result);
+    static void collect(Iterator iter, HashSet& result);
+    static void collect(Iterator iter, HashMap& result);
 
     static bool is_collection(const Self& self);
     static i64 len(const Self& self);
-
-    //static std::string repr(const Self& self);
 
     static void check_type(bool pred, const std::string& message);
     static void check_value(bool pred, const std::string& message);
@@ -1033,11 +1042,35 @@ private:
     Self handle_cond(const Vec<Expr>& elems, Context env);
     Self handle_match(const Vec<Expr>& elems, Context env);
     Self handle_try(const Vec<Expr>& elems, Context env);
-    //!@todo add `handle_throw' method to handle throw-expressions
     Self handle_import(const Vec<Expr>& elems, Context env);
+
+    //!@todo add `handle_throw' method to handle throw-expressions
+    Self handle_throw(const Vec<Expr>& elems, Context env);
     //! @todo add `handle_export' method to handle export-expressions
+    Self handle_export(const Vec<Expr>& elems, Context env);
+    //! @todo : implement the followings.
+    static void initialize_prelude(void);
+    static void add_builtin(const std::string& name, NativeFunc func);
+    static void add_builtin(const std::string& name, Self self);
+
+    //-------------------------------------------------------------
+    //! @note: the following should add builtin data structure APIs
+    //-------------------------------------------------------------
+    /*
+    void initialize_math(void);
+    void initialize_string(void);
+    void initialize_pair(void);
+    void initialize_tuple(void);
+    void initialize_array(void);
+    void initialize_list(void);
+    void initialize_hashset(void);
+    void initialize_hashmap(void);
+    */
+
+    // ------------------------
+    // -*- FUTURE EXTENSION -*-
+    // ------------------------
     //! @todo add `handle_use' method to handle use-expressions
-    //! @todo add `handle_at_doc' method to handle @doc-expressions
     //! @todo add `handle_type' method to handle type-expressions
     //! @todo add `handle_method' method to handle method-expressions
     //! @todo add `handle_trait' method to handle trait-expressions

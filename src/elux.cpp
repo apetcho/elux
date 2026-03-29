@@ -176,13 +176,13 @@ Self ELux::share(const Array& val){
 }
 
 // -*-
-Self ELux::share(const Set& val){
-    return std::make_shared<Set>(val);
+Self ELux::share(const HashSet& val){
+    return std::make_shared<HashSet>(val);
 }
 
 // -*-
-Self ELux::share(const Dict& val){
-    return std::make_shared<Dict>(val);
+Self ELux::share(const HashMap& val){
+    return std::make_shared<HashMap>(val);
 }
 
 Self ELux::share(const Symbol& val){
@@ -270,15 +270,15 @@ bool ELux::is_array(const Self& self){
 }
 
 // -*-
-bool ELux::is_set(const Self& self){
-    auto ptr = dynamic_cast<Set*>(self.get());
+bool ELux::is_hashset(const Self& self){
+    auto ptr = dynamic_cast<HashSet*>(self.get());
     if(ptr==nullptr){ return false; }
     return true;
 }
 
 // -*-
-bool ELux::is_dict(const Self& self){
-    auto ptr = dynamic_cast<Dict*>(self.get());
+bool ELux::is_hashmap(const Self& self){
+    auto ptr = dynamic_cast<HashMap*>(self.get());
     if(ptr==nullptr){ return false; }
     return true;
 }
@@ -418,18 +418,18 @@ List ELux::as_list(const Self& self){
 }
 
 // -*-
-Set ELux::as_set(const Self& self){
-    if(ELux::is_set(self)){
-        auto ans = *dynamic_cast<Set*>(self.get());
+HashSet ELux::as_hashset(const Self& self){
+    if(ELux::is_hashset(self)){
+        auto ans = *dynamic_cast<HashSet*>(self.get());
         return ans;
     }
     throw std::runtime_error("invalid type. Expected a Set");
 }
 
 // -*-
-Dict ELux::as_dict(const Self& self){
-    if(ELux::is_dict(self)){
-        auto ans = *dynamic_cast<Dict*>(self.get());
+HashMap ELux::as_hashmap(const Self& self){
+    if(ELux::is_hashmap(self)){
+        auto ans = *dynamic_cast<HashMap*>(self.get());
         return ans;
     }
     throw std::runtime_error("invalid type. Expected a Dict");
@@ -479,32 +479,34 @@ Pair ELux::as_pair(const Self& self){
         auto xs = ELux::as_list(self).value();
         pair.key = std::move(xs.front());
         pair.val = std::move(xs.back());
-    }else if(ELux::is_set(self)){
+    }else if(ELux::is_hashset(self)){
         if(self->len() != 2){
             std::stringstream ss;
             ss << "converting a set to a pair. Expect a set containing 2 elements but\n";
             ss << "got a set containing " << self->len() << " elements.";
             throw std::runtime_error(ss.str());
         }
-        auto xset = ELux::as_set(self).value();
-        auto vec = Vec<std::string>(xset.begin(), xset.end());
-        pair.key = std::move(ELux::share(vec[0]));
-        pair.val = std::move(ELux::share(vec[1]));
-    }else if(ELux::is_dict(self)){
+        auto xset = ELux::as_hashset(self).value();
+        auto vec = Vec<Self>(xset.begin(), xset.end());
+        pair.key = std::move(vec[0]);
+        pair.val = std::move(vec[1]);
+    }else if(ELux::is_hashmap(self)){
         if(self->len() != 1){
             std::stringstream ss;
             ss << "converting a dict to a pair. Expect a dict containing 1 elements but\n";
             ss << "got a dict containing " << self->len() << " elements.";
             throw std::runtime_error(ss.str());
         }
-        auto xdict = ELux::as_dict(self).value();
+        auto xdict = ELux::as_hashmap(self).value();
         Vec<Self> vec{};
-        for(auto [key, val]: xdict){
-            vec[0] = ELux::share(key);
-            vec[1] = val;
+        Self key = nullptr;
+        Self val = nullptr;
+        for(auto [key_, val_]: xdict){
+            key = key_;
+            val = val_;
         }
-        pair.key = std::move(vec[0]);
-        pair.val = std::move(vec[1]);
+        pair.key = std::move(key);
+        pair.val = std::move(val);
     }else{
         std::stringstream ss;
         ss << "cannot convert " << std::quoted(self->type().str()) << " to a pair.";
@@ -569,12 +571,12 @@ void ELux::collect(Iterator iter, List& result){
 }
 
 // -*-
-void ELux::collect(Iterator iter, Set& result){
+void ELux::collect(Iterator iter, HashSet& result){
     iter->collect(result);
 }
 
 // -*-
-void ELux::collect(Iterator iter, Dict& result){
+void ELux::collect(Iterator iter, HashMap& result){
     iter->collect(result);
 }
 
@@ -583,8 +585,8 @@ bool ELux::is_collection(const Self& self){
     return (
         ELux::is_list(self) ||
         ELux::is_array(self) ||
-        ELux::is_set(self) ||
-        ELux::is_dict(self)
+        ELux::is_hashset(self) ||
+        ELux::is_hashmap(self)
     );
 }
 
@@ -593,8 +595,8 @@ i64 ELux::len(const Self& self){
     if(ELux::is_string(self)){ return ELux::as_string(self).value().length(); }
     if(ELux::is_array(self)){ return ELux::as_array(self).value().size(); }
     if(ELux::is_list(self)){ return ELux::as_list(self).value().size(); }
-    if(ELux::is_set(self)){ return ELux::as_set(self).value().size(); }
-    if(ELux::is_dict(self)){ return ELux::as_array(self).value().size(); }
+    if(ELux::is_hashset(self)){ return ELux::as_hashset(self).value().size(); }
+    if(ELux::is_hashmap(self)){ return ELux::as_array(self).value().size(); }
     throw std::runtime_error("invalid type. Expected an dict/set/list/array/string");
 }
 
@@ -842,7 +844,9 @@ Self ELux::eval(const Vec<Expr>& elems, Context env) {
         if(op == "cond"){ return handle_cond(elems, env); }
         if(op == "match"){ return handle_match(elems, env); }
         if(op == "try"){ return handle_try(elems, env); }
+        if(op == "throw"){ return handle_throw(elems, env); }
         if(op == "import"){ return handle_import(elems, env); }
+        if(op == "export"){ return handle_export(elems, env); }
         // --------- End special forms ---------
     }
 
@@ -990,23 +994,6 @@ Self ELux::handle_quasiquote(const Vec<Expr>& elems, Context env){
     if(elems.size() != 2){
         throw std::runtime_error("quasiquote expects 1 arg");
     }
-    // convert AST to Value, then process quasiquote
-    // std::function<Self(Expr)> conv = [&](Expr expr) -> Self {
-    //     if(auto lit = dynamic_cast<LiteralExpr*>(expr.get())){
-    //         return lit->value;
-    //     }
-    //     if(auto sy = dynamic_cast<SymbolExpr*>(expr.get())){
-    //         return ELux::share(sy->name);
-    //     }
-    //     if(auto le = dynamic_cast<ListExpr*>(expr.get())){
-    //         List xs;
-    //         for(auto& sub : le->elements){
-    //             xs.value().push_back(conv(sub));
-    //         }
-    //         return ELux::share(xs);
-    //     }
-    //     return ELux::share(); // Value();
-    // };
     
     struct Handler{
         Self handle(Expr expr){
@@ -1297,8 +1284,8 @@ Self ELux::handle_for(const Vec<Expr>& elems, Context env){
     auto failed = (
         !ELux::is_list(listVal) &&
         !ELux::is_array(listVal) &&
-        !ELux::is_set(listVal) &&
-        !ELux::is_dict(listVal) &&
+        !ELux::is_hashset(listVal) &&
+        !ELux::is_hashmap(listVal) &&
         !ELux::is_string(listVal)
     );
     if(failed){
@@ -1324,8 +1311,8 @@ Self ELux::handle_for(const Vec<Expr>& elems, Context env){
                 [[maybe_unused]] auto _ = elems[i]->eval(*this, newEnv);
             }
         }
-    }else if(ELux::is_set(listVal)){
-        const Set& xset = *dynamic_cast<Set*>(listVal.get());
+    }else if(ELux::is_hashset(listVal)){
+        const HashSet& xset = *dynamic_cast<HashSet*>(listVal.get());
         for(auto& item : xset.value()) {
             newEnv->define(varSym->name, std::make_shared<String>(item));
             for(size_t i = 2; i < elems.size(); ++i){
@@ -1333,11 +1320,11 @@ Self ELux::handle_for(const Vec<Expr>& elems, Context env){
                 [[maybe_unused]] auto _ = elems[i]->eval(*this, newEnv);
             }
         }
-    }else if(ELux::is_dict(listVal)){
-        const Dict& dict = *dynamic_cast<Dict*>(listVal.get());
+    }else if(ELux::is_hashmap(listVal)){
+        const HashMap& dict = *dynamic_cast<HashMap*>(listVal.get());
         for(auto& item : dict.value()) {
             std::vector<Self> kv{};
-            kv.push_back(std::make_shared<String>(item.first));
+            kv.push_back(item.first);
             kv.push_back(item.second);
             auto data = std::make_shared<Array>();
             data->value().insert(data->value().begin(), kv.begin(), kv.end());
@@ -1457,6 +1444,13 @@ Self ELux::handle_try(const Vec<Expr>& elems, Context env){
 }
 
 // -*-
+Self ELux::handle_throw(const Vec<Expr>& elems, Context env){
+    //! @todo: implement this
+    throw ELuxError(ELuxError::RuntimeError, "`throw' is not implemented yet.");
+}
+
+// -*-
+//! @todo: refactor this functions
 Self ELux::handle_import(const Vec<Expr>& elems, Context env){
     // (import "file.elux")
     if(elems.size() != 2){
@@ -1493,19 +1487,26 @@ Self ELux::handle_import(const Vec<Expr>& elems, Context env){
     if( !ELux::is_list(exportsVal)){
         throw std::runtime_error("exports must be list of symbols (strings)");
     }
-    Dict dict;
+    HashMap dict;
     const List& exList = *dynamic_cast<List*>(exportsVal.get());
     for(auto& symVal : exList.value()){
         if(!ELux::is_string(symVal)){
             throw std::runtime_error("exports entries must be strings");
         }
         std::string name = dynamic_cast<String*>(symVal.get())->str();
-        dict.m_hmap[name] = moduleEnv->get(name);
+        dict.m_hmap[ELux::share(name)] = moduleEnv->get(name);
     }
-    return std::make_shared<Dict>(dict);
+    return std::make_shared<HashMap>(dict);
 }
 
 // -*-
+Self ELux::handle_export(const Vec<Expr>& elems, Context env){
+    //! @todo: implement this
+    throw ELuxError(ELuxError::RuntimeError, "`export' is not implemented yet.");
+}
+
+// -*-
+//! @todo: refactor & reimplement this method
 void ELux::run(const std::string& code, Context env, const std::string& label) {
     auto len = 4 + label.length() + 4;
     std::string line(len, '=');
@@ -1529,6 +1530,10 @@ void ELux::run(const std::string& code, Context env, const std::string& label) {
     }
 }
 
+/*
+void ELux::repl(const Vec<std::string>& args){}
+void ELux::setup(void){}
+*/
 
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::klx                                          -*-
