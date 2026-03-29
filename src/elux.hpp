@@ -34,6 +34,7 @@ SOFTWARE.
 #include<sstream>
 #include<fstream>
 #include<variant>
+#include<optional>
 #include<memory>
 #include<vector>
 #include<string>
@@ -50,7 +51,6 @@ namespace fs = std::filesystem;
 // -*----------------------------------------------------------------*-
 namespace ekasoft::klx{
 // -
-
 
 // =========================
 // Value representation
@@ -114,11 +114,18 @@ using HashSet = std::unordered_set<Self, HashHandler, EqualHandler>;
 // -*-
 struct Object{
     virtual ~Object() = default;
-    virtual std::string type(void) const = 0;
+    virtual Symbol type(void) const = 0;
     virtual std::string str(void) const = 0;
     virtual i64 len(void) const{
         std::stringstream ss;
-        ss << "`.len' is not implemented on type " << std::quoted(this->type()) << ".";
+        ss << "`.len' is not implemented for " << std::quoted(this->type().str());
+        ss << " type.";
+        throw std::runtime_error(ss.str());
+    }
+    virtual std::string repr(void) const{
+        std::stringstream ss;
+        ss << "`.repr' is not implemented for " << std::quoted(this->type().str());
+        ss << " type.";
         throw std::runtime_error(ss.str());
     }
 };
@@ -204,12 +211,14 @@ struct Nil final : public Object, public Hashable, public Equalable{
     Nil& operator=(const Nil&) noexcept = default;
     Nil& operator=(Nil&&) noexcept = default;
 
-    std::string type(void) const override{
-        return "Nil";
-    }
+    Symbol type(void) const override;
 
     std::string str(void) const override{
         return "nil";
+    }
+
+    std::string repr(void) const override{
+        return this->str();
     }
 
     usize hash(void) const override;
@@ -217,32 +226,45 @@ struct Nil final : public Object, public Hashable, public Equalable{
 
 };
 
-// -*-
+// --------------
+// -*- Symbol -*-
+// --------------
 struct Symbol final : public Object, public Hashable, public Equalable{
+    // -*-
+    std::string value;
+
+    // -*-
     explicit Symbol(const std::string& val);
     Symbol(const Symbol& sym) noexcept;
     Symbol(Symbol&& sym) noexcept;
     Symbol& operator=(const Symbol& sym) noexcept;
     Symbol& operator=(Symbol&& sym) noexcept;
 
-    std::string type(void) const override;
+    Symbol type(void) const override;
     std::string str(void) const override;
-    std::string value;
+    std::string repr(void) const override{
+        return this->str();
+    }
 
     usize hash(void) const override;
     bool equal(Object* other) const override;
+
+    friend bool operator==(const Symbol& lhs, const Symbol& rhs);
+    friend bool operator!=(const Symbol& lhs, const Symbol& rhs);
 };
 
-// -*-
+// ------------
+// -*- Pair -*-
+// ------------
 struct Pair final : public Object, public Hashable, public Equalable{
     explicit Pair(Self key, Self val);
     Pair(const Pair& pair) noexcept;
     Pair(Pair&& pair) noexcept;
     Pair& operator=(const Pair& pair) noexcept;
     Pair& operator=(Pair&& pair) noexcept;
-    std::string type(void) const override;
+    Symbol type(void) const override;
     std::string str(void) const override;
-
+    std::string repr(void) const override;
     usize hash(void) const override;
     bool equal(Object* other) const override;
 
@@ -250,6 +272,9 @@ struct Pair final : public Object, public Hashable, public Equalable{
     Self val;
 };
 
+// -------------
+// -*- Tuple -*-
+// -------------
 struct Tuple final: public Object, public Iterable, public Hashable, public Equalable{
     explicit Tuple();
     explicit Tuple(const std::initializer_list<Self>& xs);
@@ -264,8 +289,9 @@ struct Tuple final: public Object, public Iterable, public Hashable, public Equa
     Tuple(Tuple&& tuple) noexcept;
     Tuple& operator=(const Tuple& tuple) noexcept;
     Tuple& operator=(Tuple&& tuple) noexcept;
-    std::string type(void) const override;
+    Symbol type(void) const override;
     std::string str(void) const override;
+    std::string repr(void) const override;
 
     i64 len(void) const override{
         return static_cast<i64>(this->m_items.size());
@@ -286,7 +312,9 @@ private:
     Vec<Self>::iterator m_stop;
 };
 
-// -*-
+// -----------------
+// -*- ELuxError -*-
+// -----------------
 class ELuxError final: public Object, public Hashable, public Equalable{
 public:
     explicit ELuxError();
@@ -301,8 +329,9 @@ public:
     std::string describe(void) const;
     const Symbol& kind(void) const;
     Symbol& kind(void);
-    std::string type(void) const override;
+    Symbol type(void) const override;
     std::string str(void) const override;
+    std::string repr(void) const override;
 
     usize hash(void) const override;
     bool equal(Object* other) const override;
@@ -319,7 +348,9 @@ private:
     std::string m_msg;
 };
 
-// -*-
+// ------------
+// -*- Bool -*-
+// ------------
 struct Bool final: public Object, public Hashable, public TotalOrdering {
     explicit Bool()
     : Hashable(this)
@@ -343,12 +374,14 @@ struct Bool final: public Object, public Hashable, public TotalOrdering {
     Bool& operator=(Bool&&) noexcept;
     operator bool() const{ return this->m_val; }
 
-    std::string type(void) const override{
-        return "Bool";
-    }
+    Symbol type(void) const override;
 
     std::string str(void) const override{
         return (this->m_val ? "true" : "false");
+    }
+
+    std::string repr(void) const override{
+        return this->str();
     }
 
     usize hash(void) const override;
@@ -359,7 +392,9 @@ private:
     bool m_val;
 };
 
-// -*-
+// --------------
+// -*- Number -*-
+// --------------
 struct Number final: public Object, public Hashable, public TotalOrdering {
     explicit Number()
     : Hashable(this)
@@ -404,14 +439,16 @@ struct Number final: public Object, public Hashable, public TotalOrdering {
         );
     }
 
-    std::string type(void) const override{
-        return (this->is_integer() ? "Integer" : "Float");
-    }
+    Symbol type(void) const override;
 
     std::string str(void) const override{
         std::stringstream ss;
         ss << (this->is_integer() ? std::get<i64>(m_val) : std::get<f64>(m_val));
         return ss.str();
+    }
+
+    std::string repr(void) const override{
+        this->str();
     }
 
     bool is_integer(void) const{
@@ -492,7 +529,9 @@ private:
     Data m_val;
 };
 
-// -*-
+// --------------
+// -*- String -*-
+// --------------
 struct String final: public Object, public Iterable, public Hashable, public TotalOrdering {
     explicit String();
     explicit String(const std::string& str);
@@ -528,11 +567,11 @@ struct String final: public Object, public Iterable, public Hashable, public Tot
         return *this;
     }
     
-    std::string type(void) const override{
-        return "String";
-    }
+    Symbol type(void) const override;
 
     std::string str(void) const override;
+    std::string repr(void) const override;
+
     i64 len(void) const override{
         return static_cast<i64>(this->m_val.length());
     }
@@ -562,8 +601,9 @@ struct Set final: public Object, public Iterable {
 
     operator HSet() const;
 
-    std::string type(void) const override;
+    Symbol type(void) const override;
     std::string str(void) const override;
+    std::string repr(void) const override;
     i64 len(void) const override{
         return static_cast<i64>(this->m_hset.size());
     }
@@ -596,8 +636,9 @@ struct Dict final: public Object, public Iterable{
 
     operator HMap() const;
 
-    std::string type(void) const override;
+    Symbol type(void) const override;
     std::string str(void) const override;
+    std::string repr(void) const override;
     i64 len(void) const override{
         return static_cast<i64>(this->m_hmap.size());
     }
@@ -615,7 +656,9 @@ private:
     friend class ELux;
 };
 
-// -*-
+// ------------
+// -*- List -*-
+// ------------
 struct List final: public Object, public Iterable{
     explicit List();
     explicit List(std::initializer_list<Self> xs);
@@ -628,8 +671,9 @@ struct List final: public Object, public Iterable{
     List& operator=(const List& xs) noexcept;
     List& operator=(List&& xs) noexcept;
 
-    std::string type(void) const override;
+    Symbol type(void) const override;
     std::string str(void) const override;
+    std::string repr(void) const override;
     i64 len(void) const override{
         return static_cast<i64>(this->m_xs.size());
     }
@@ -646,7 +690,9 @@ private:
     std::list<Self>::iterator m_stop;
 };
 
-// -*-
+// -------------
+// -*- Array -*-
+// -------------
 struct Array final: public Object, public Iterable{
     explicit Array();
     explicit Array(std::initializer_list<Self> xs);
@@ -659,8 +705,9 @@ struct Array final: public Object, public Iterable{
     Array& operator=(const Array& xs) noexcept;
     Array& operator=(Array&& xs) noexcept;
 
-    std::string type(void) const override;
+    Symbol type(void) const override;
     std::string str(void) const override;
+    std::string repr(void) const override;
     i64 len(void) const override{
         return static_cast<i64>(this->m_xs.size());
     }
@@ -682,28 +729,28 @@ private:
     Vec<Self>::iterator m_stop;
 };
 
-// -*-
+// -------------------------------------------
+// -*- Function : For <macro, lambda, fun> -*-
+// -------------------------------------------
 struct Function final: public Object {
+    std::optional<std::string> name;
     Vec<std::string> params;
-    Expr body;
+    Expr body = nullptr;
     Context closure;
     bool isMacro = false;
     bool isNative = false;
-    NativeFunc native;
-    ELux& elux;
+    NativeFunc native = nullptr;
+    ELux* elux;
+    //! @todo: add `docstr` field to store optional doc-string
 
-    std::string type(void) const override{
-        if(this->isMacro){ return "Macro"; }
-        if(this->isNative){ return "NativeFn"; }
-        return "Function";
+    Symbol type(void) const override;
+
+    std::string str(void) const override;
+    std::string repr(void) const override;
+
+    bool is_lambda(void) const{
+        return (this->name==std::nullopt);
     }
-
-    std::string str(void) const override{
-        std::stringstream ss;
-        ss << (isMacro ? "<Macro @ " : "<function @ ") << std::addressof(*this) << ">";
-        return ss.str();
-    }
-
     //! -*-
     Self call(const Vec<Self>& args, Context env);
     Expr expand(const Vec<Self>& args, Context env);
@@ -712,12 +759,12 @@ struct Function final: public Object {
 // -----------------
 // -*- Operators -*-
 // -----------------
-bool operator==(const Self& lhs, const Self& rhs);
-bool operator!=(const Self& lhs, const Self& rhs);
-bool operator<=(const Self& lhs, const Self& rhs);
-bool operator>=(const Self& lhs, const Self& rhs);
-bool operator<(const Self& lhs, const Self& rhs);
-bool operator>(const Self& lhs, const Self& rhs);
+Self operator==(const Self& lhs, const Self& rhs);
+Self operator!=(const Self& lhs, const Self& rhs);
+Self operator<=(const Self& lhs, const Self& rhs);
+Self operator>=(const Self& lhs, const Self& rhs);
+Self operator<(const Self& lhs, const Self& rhs);
+Self operator>(const Self& lhs, const Self& rhs);
 Self operator+(const Self& lhs, const Self& rhs);
 Self operator-(const Self& lhs, const Self& rhs);
 Self operator*(const Self& lhs, const Self& rhs);
@@ -734,6 +781,11 @@ Self operator&&(const Self& lhs, const Self& rhs);
 // =========================
 // Environment
 // =========================
+//! @todo add `exceptions' field for storing exceptions 
+//! @todo add `docstrings' field to handle doctstring define in `var', `define', `fun'
+// and `macro' special forms
+//! @todo add `types' to store type names defined in the current environment
+//! @todo add `modules` to store modules imported in the current environment
 struct Env : std::enable_shared_from_this<Env> {
     std::map<std::string, Self> vars;
     std::set<std::string> immutables;
@@ -755,23 +807,27 @@ struct Env : std::enable_shared_from_this<Env> {
 struct ExprBase {
     virtual ~ExprBase() = default;
     virtual Self eval(ExprVisitor& v, Context env) = 0;
+    virtual std::string repr(void) const = 0;
 };
 
 struct LiteralExpr : ExprBase {
     Self value;
     explicit LiteralExpr(const Self& v) : value(v) {}
     Self eval(ExprVisitor& v, Context env) override;
+    std::string repr(void) const override;
 };
 
 struct SymbolExpr : ExprBase {
     std::string name;
     explicit SymbolExpr(std::string n) : name(std::move(n)) {}
     Self eval(ExprVisitor& v, Context env) override;
+    std::string repr(void) const override;
 };
 
 struct ListExpr : ExprBase {
     Vec<Expr> elements;
     Self eval(ExprVisitor& v, Context env) override;
+    std::string repr(void) const override;
 };
 
 struct ExprVisitor {
@@ -845,6 +901,18 @@ private:
 class ELux : public ExprVisitor {
 public:
     static void run(const std::string& code, Context env, const std::string& label);
+    //! @todo add `repl()'
+    //! @todo add `eluxLicense'
+    //! @todo add `eluxVersion'
+    //! @todo add `eluxAuthors'
+    //! @todo add `eluxNoBanner'
+    //! @todo add `eluxFloatPrecision'
+    //! @todo add `eluxFloatMode'
+    //! @todo add `eluxIntegerMode'
+    //! @todo add `eluxFormatWidth'
+    //! @todo add `eluxModules'
+    //! @todo add `eluxPrelude'
+    // --- {File, Path, System, Regex, ...}
     
     static Self share(void);
     static Self share(i64 val);
@@ -965,9 +1033,60 @@ private:
     Self handle_cond(const Vec<Expr>& elems, Context env);
     Self handle_match(const Vec<Expr>& elems, Context env);
     Self handle_try(const Vec<Expr>& elems, Context env);
+    //!@todo add `handle_throw' method to handle throw-expressions
     Self handle_import(const Vec<Expr>& elems, Context env);
+    //! @todo add `handle_export' method to handle export-expressions
+    //! @todo add `handle_use' method to handle use-expressions
+    //! @todo add `handle_at_doc' method to handle @doc-expressions
+    //! @todo add `handle_type' method to handle type-expressions
+    //! @todo add `handle_method' method to handle method-expressions
+    //! @todo add `handle_trait' method to handle trait-expressions
+    //! @todo add `handle_implement' method to handle implement-expressions
+    //! @todo add `handle_overload' method to handle overload-expressions
 };
 
+/*
+struct Type final{
+    std::string name;
+    std::map<std::string, Self> fields;
+    std::map<std::string, Function> methods
+    explicit Type(const std::string name);
+    void add_field(const std::string&, Self);
+    void add_method(const std::string&, Function);
+    Self get_field(const std::string&) const;
+    Function get_method(const std::string&) const;
+    Self call(const std::string&, const Vec<Self>& args);
+    Instance operator()(const Vec<Pair>&);
+};
+
+struct Instance final: public Object {
+    std::shared_ptr<Type> self;
+
+    Self get(const std::string&) const;
+    void set(const std::string&, Self);
+    void set(const std::string&, Function);
+};
+
+struct Trait {
+    std::string name;
+    std::map<std::string, Pair> func
+};
+(trait name funcname params [doc])
+(implement typename (trait-name funcname params) [doc] body)
+
+eluxNil = ELux::create_type("Nil", ctx);
+eluxBool = ELux::create_type("Bool", ctx);
+eluxInteger = ELux::create_type("Integer", ctx);
+eluxFloat = ELux::create_type("Float", ctx);
+eluxSymbol = ELux::create_type("Symbol", ctx);
+eluxString = ELux::create_type("String", ctx);
+eluxPair = ELux::create_type("Pair", ctx);
+eluxTuple = ELux::create_type("Tuple", ctx);
+eluxArray = ELux::create_type("Array", ctx);
+eluxList = ELux::create_type("List", ctx);
+eluxHashMap = ELux::create_type("HashMap", ctx);
+eluxHashSet = ELux::create_type("HashSet", ctx);
+*/
 
 // =========================
 // Global environment setup

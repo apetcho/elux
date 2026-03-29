@@ -855,6 +855,7 @@ Self ELux::eval(const Vec<Expr>& elems, Context env) {
     }
 
     auto fn = dynamic_cast<Function*>(headVal.get());
+    fn->elux = this;
     auto argv = this->eval_args(Vec<Expr>(elems.begin()+1, elems.end()), env);
     
     // // macro: receive unevaluated args as Values (AST->Value), expand, then eval
@@ -1173,7 +1174,7 @@ Self ELux::handle_fun(const Vec<Expr>& elems, Context env){
     fn->closure = env;
     fn->isMacro = false;
     fn->elux = this;
-    fn->name = Symbol(nameSym->name);
+    fn->name = nameSym->name;
     env->define(nameSym->name, fn);
     return fn;
 }
@@ -1216,7 +1217,7 @@ Self ELux::handle_macro(const Vec<Expr>& elems, Context env){
     fn->closure = env;
     fn->isMacro = true;
     fn->elux = this;
-    fn->name = Symbol(nameSym->name);
+    fn->name = nameSym->name;
     env->define(nameSym->name, fn);
     return fn;
 }

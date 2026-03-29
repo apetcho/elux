@@ -465,7 +465,7 @@ std::string Pair::str(void) const{
 // -*-
 std::string Pair::repr(void) const{
     std::stringstream ss;
-    ss << "#(" << key->repr() << " " << val->repr() << ")";
+    ss << "(Pair " << key->repr() << " " << val->repr() << ")";
     return ss.str();
 }
 
@@ -663,12 +663,12 @@ std::string Tuple::str(void) const{
 // -*-
 std::string Tuple::repr(void) const{
     std::stringstream ss;
-    ss << "#[";
+    ss << "(Tuple ";
     for(size_t i=0; i < this->m_items.size(); i++){
         if(i > 0){ ss << " "; }
         ss << this->m_items[i]->repr();
     }
-    ss << "]";
+    ss << ")";
 
     return ss.str();
 }
@@ -840,8 +840,9 @@ std::string ELuxError::str(void) const{
 
 // -*-
 std::string ELuxError::repr(void) const{
-    Pair self(ELux::share(this->m_kind), ELux::share(this->m_msg));
-    return self.repr();
+    std::stringstream ss;
+    ss << "(" << this->m_kind.str() << " " << String(this->m_msg).str() << ")";
+    return ss.str();
 }
 
 // -*-
@@ -1652,7 +1653,7 @@ Set& Set::operator=(Set&& xs) noexcept{
 Set::operator HSet() const{ return this->m_hset; }
 
 Symbol Set::type(void) const{
-    return Symbol("Set");
+    return Symbol("HashSet");
 }
 
 // -*-
@@ -1672,14 +1673,14 @@ std::string Set::str(void) const{
 // -*-
 std::string Set::repr(void) const{
     std::stringstream ss;
-    ss << "#{";
+    ss << "(HashSet ";
     size_t idx = 0;
     for(auto self: this->m_hset){
         if(idx > 0){ ss << " "; }
         ss << String(self).repr();
         ++idx;
     }
-    ss << "}";
+    ss << ")";
     return ss.str();
 }
 
@@ -1876,7 +1877,7 @@ Dict::operator HMap() const{ return this->m_hmap; }
 
 // -*-
 Symbol Dict::type(void) const{
-    return Symbol("Dict");
+    return Symbol("HashMap");
 }
 
 // -*-
@@ -1897,7 +1898,7 @@ std::string Dict::str(void) const {
 // -*-
 std::string Dict::repr(void) const{
     std::stringstream ss;
-    ss << "{";
+    ss << "(HashMap ";
     size_t idx = 0;
     for(auto& [key, val]: this->m_hmap){
         if(idx > 0){ ss << " "; }
@@ -1905,7 +1906,7 @@ std::string Dict::repr(void) const{
         ss << entry.repr();
         ++idx;
     }
-    ss << "}";
+    ss << ")";
     return ss.str();
 }
 
@@ -2058,7 +2059,7 @@ std::string List::str(void) const{
 // -*-
 std::string List::repr(void) const{
     std::stringstream ss;
-    ss << "(";
+    ss << "(List ";
     size_t idx = 0;
     for(auto self: this->m_xs){
         if(idx > 0){ ss << " "; }
@@ -2207,14 +2208,14 @@ std::string Array::str(void) const{
 // -*-
 std::string Array::repr(void) const{
     std::stringstream ss;
-    ss << "[";
+    ss << "(Array ";
     size_t idx = 0;
     for(const auto& self: this->m_xs){
         if(idx > 0){ ss << " "; }
         ss << self->repr();
         ++idx;
     }
-    ss << "]";
+    ss << ")";
     return ss.str();
 }
 
@@ -2289,18 +2290,73 @@ std::string Function::str(void) const{
     std::stringstream ss;
     if(this->name==std::nullopt){ ss << "<lambda @ "; }
     else if(this->isMacro){
-        ss << "<macro " << std::quoted(this->name.value().str()) << " @ ";
+        ss << "<macro " << std::quoted(this->name.value()) << " @ ";
     }else if(this->isNative){
-        ss << "<builtin-function " << std::quoted(this->name.value().str()) << " @ ";
+        ss << "<builtin-function " << std::quoted(this->name.value()) << " @ ";
     } else{
-        ss << "<function " << std::quoted(this->name.value().str()) << " @ ";
+        ss << "<function " << std::quoted(this->name.value()) << " @ ";
     }
     ss << std::addressof(*this) << ">";
     return ss.str();
 }
-/*
-std::string Function::repr(void) const{}
-*/
+
+// -*-
+std::string Function::repr(void) const{
+    // -*-
+    struct Helper{
+        std::string to_string(const Expr& expr){
+            if(auto self = dynamic_cast<LiteralExpr*>(expr.get())){
+                return self->value->repr();
+            }else if(auto self = dynamic_cast<SymbolExpr*>(expr.get())){
+                return self->name;
+            }else if(auto self = dynamic_cast<ListExpr*>(expr.get())){
+                std::stringstream ss;
+                for(size_t i=0; i < self->elements.size(); i++){
+                    if(i > 0){ ss << " "; }
+                    ss << this->to_string(self->elements[i]);
+                }
+                return ss.str();
+            }
+            return "";
+        }
+    };
+
+    // -*-
+    std::stringstream ss;
+    if(this->is_lambda()){
+        ss << "(lambda (";
+        for(size_t i=0; i < this->params.size(); i++){
+            if(i > 0){ ss << " "; }
+            ss << this->params[i];
+        }
+        ss << ") ";
+        Helper helper{};
+        ss << helper.to_string(this->body) << ")";
+    }else if(this->isMacro){
+        ss << "(macro " << this->name.value() << "(";
+        for(size_t i=0; i < this->params.size(); i++){
+            if(i > 0){ ss << " "; }
+            ss << this->params[i];
+        }
+        ss << ") ";
+        Helper helper{};
+        ss << helper.to_string(this->body) << ")";
+    }else if(this->isNative){
+        ss << this->name.value();
+    }else{
+        ss << "(fun " << this->name.value() << "(";
+        for(size_t i=0; i < this->params.size(); i++){
+            if(i > 0){ ss << " "; }
+            ss << this->params[i];
+        }
+        ss << ") ";
+        Helper helper{};
+        ss << helper.to_string(this->body) << ")";
+    }
+    ss << "\n";
+
+    return ss.str();
+}
 
 // -------------------
 // -*- HashHandler -*-
