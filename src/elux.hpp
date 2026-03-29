@@ -958,7 +958,8 @@ private:
     std::string m_filename;     // module filename
     Context m_env;              // module environment
 
-    void setup(void);
+    void setup(const Symbol& sym);
+    void setup(const fs::path& path);
 };
 
 // ==============================

@@ -1551,18 +1551,25 @@ bool ModuleEqual::operator()(const Module& lhs, const Module& rhs) const{
     return (lhs.key()==rhs.key());
 }
 
+// -*-
+Module::Module(ELux* elux, const Symbol name)
+: m_elux{elux}
+, m_name{name}{
+    this->setup(name);
+}
+
 /*
 // -*-
 class Module final{
 public:
 
-Module::Module(ELux* elux, const Symbol name){}
 Module::Module(ELux* elux, const fs::path& modulePath){}
 Module::Module(Module&& other) noexcept{}
 Module& Module::operator=(Module&& other) noexcept{}
 const std::string& Module::key(void) const{}
 std::string Module::name_from_key(const std::string& text){}
-void Module::setup(void){}
+void Module::setup(const Symbol& sym){}
+void Module::setup(const fs::path& path){}
 
 private:
     Symbol m_name;              // module nmae
