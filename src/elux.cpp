@@ -1566,12 +1566,26 @@ Module::Module(ELux* elux, const fs::path& modulePath)
     this->setup(modulePath);
 }
 
+// -*-
+Module::Module(Module&& other) noexcept
+: m_elux{std::move(other.m_elux)}
+, m_name{std::move(other.m_name)}
+, m_fullpath{std::move(other.m_fullpath)}
+, m_filename{std::move(other.m_filename)}
+, m_env{std::move(other.m_env)}
+{
+    other.m_elux = nullptr;
+    other.m_env = nullptr;
+    other.m_filename = "";
+    other.m_fullpath = "";
+    other.m_name = Symbol("");
+}
+
 /*
 // -*-
 class Module final{
 public:
 
-Module::Module(Module&& other) noexcept{}
 Module& Module::operator=(Module&& other) noexcept{}
 const std::string& Module::key(void) const{}
 std::string Module::name_from_key(const std::string& text){}
