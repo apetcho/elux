@@ -374,7 +374,7 @@ bool Lexer::is_numeric(const std::string& str, TokenKind& kind){
 }
 
 // -*-
-Token Lexer::next(){
+Token Lexer::next_token(void){
     Token result;
     skip();
     
@@ -453,30 +453,45 @@ Token Lexer::next(){
         result.text = oss.str();
         return result;
     }
-    //! @todo
-    if(isdigit((unsigned char)c) || (c == '-' && m_pos+1 < m_src.size() && isdigit(this->peek_next()))){
-        size_t start = m_pos;
-        bool hasDot = false;
-        if(this->peek()=='-'){
-            this->advance();
-            // pos++;
-        }
-        while(!this->eof() && (isdigit(this->peek()) || this->peek()=='.')) {
-            if (this->peek()=='.'){ hasDot = true; }
-            this->advance();
-        }
-        std::string num = m_src.substr(start, m_pos - start);
-        return {hasDot ? TokenKind::FLOAT : TokenKind::INT, num};
+
+    // -*-
+    auto text = this->read_token();
+    TokenKind kind;
+    if(this->is_numeric(text, kind)){
+        result.kind = kind;
+        result.text = text;
+        return result;
     }
-    // symbol
-    size_t start = m_pos;
-    while(!this->eof() && !isspace(this->peek()) &&
-        this->peek() != '(' && this->peek() != ')' && this->peek() != '\'' &&
-        this->peek() != '`' && this->peek() != ','
-    ){
-        this->advance();
-    }
-    return {TokenKind::SYMBOL, m_src.substr(start, m_pos - start)};
+
+    result.kind = kind;
+    result.text = text;
+    return result;
+
+    // //! @todo
+    // if(isdigit((unsigned char)c) || (c == '-' && m_pos+1 < m_src.size() && isdigit(this->peek_next()))){
+    //     size_t start = m_pos;
+    //     bool hasDot = false;
+    //     if(this->peek()=='-'){
+    //         this->advance();
+    //         // pos++;
+    //     }
+    //     while(!this->eof() && (isdigit(this->peek()) || this->peek()=='.')) {
+    //         if (this->peek()=='.'){ hasDot = true; }
+    //         this->advance();
+    //     }
+    //     std::string num = m_src.substr(start, m_pos - start);
+    //     return {hasDot ? TokenKind::FLOAT : TokenKind::INT, num};
+    // }
+    // // symbol
+
+    // size_t start = m_pos;
+    // while(!this->eof() && !isspace(this->peek()) &&
+    //     this->peek() != '(' && this->peek() != ')' && this->peek() != '\'' &&
+    //     this->peek() != '`' && this->peek() != ','
+    // ){
+    //     this->advance();
+    // }
+    // return {TokenKind::SYMBOL, m_src.substr(start, m_pos - start)};
 }
 
 // -*-
@@ -514,11 +529,11 @@ void Lexer::advance(void){
 
 // -*-
 Parser::Parser(const std::string& s) : m_lexer(s) {
-    m_token = m_lexer.next();
+    m_token = m_lexer.next_token();
 }
 
 // -*-
-void Parser::advance() { m_token = m_lexer.next(); }
+void Parser::advance() { m_token = m_lexer.next_token(); }
 
 // -*-
 bool Parser::match(TokenKind kind){

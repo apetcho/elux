@@ -860,7 +860,7 @@ struct Token {
 
 struct Lexer {
     explicit Lexer(std::string s);
-    Token next();
+    Token next_token();
 
 private:
     std::string m_src;
