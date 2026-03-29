@@ -109,7 +109,7 @@ Self Env::get(const std::string& name) {
     auto it = vars.find(name);
     if(it != vars.end()){ return it->second; }
     if(parent){ return parent->get(name); }
-    throw std::runtime_error("Unbound symbol: " + name);
+    throw ELuxError(ELuxError::KeyError, "Unbound symbol: " + name);
 }
 
 // ===============================
@@ -360,7 +360,7 @@ Bool ELux::as_bool(const Self& self){
     if(ELux::is_bool(self)){
         return *dynamic_cast<Bool*>(self.get());
     }
-    throw std::runtime_error("invalid type. Expected a Bool");
+    throw ELuxError(ELuxError::TypeError, "invalid type. Expected a Bool");
 }
 
 // -*-
@@ -369,7 +369,7 @@ f64 ELux::as_float(const Self& self){
         auto num = *dynamic_cast<Number*>(self.get());
         return static_cast<f64>(num);
     }
-    throw std::runtime_error("invalid type. Expected a Number");
+    throw ELuxError(ELuxError::TypeError, "invalid type. Expected a Number");
 }
 
 // -*-
@@ -378,7 +378,7 @@ i64 ELux::as_integer(const Self& self){
         auto num = *dynamic_cast<Number*>(self.get());
         return static_cast<i64>(num);
     }
-    throw std::runtime_error("invalid type. Expected a Number");
+    throw ELuxError(ELuxError::TypeError, "invalid type. Expected a Number");
 }
 
 // -*-
@@ -387,7 +387,7 @@ Number ELux::as_number(const Self& self){
         auto num = *dynamic_cast<Number*>(self.get());
         return num;
     }
-    throw std::runtime_error("invalid type. Expected a Number");
+    throw ELuxError(ELuxError::TypeError, "invalid type. Expected a Number");
 }
 
 // -*-
@@ -396,7 +396,7 @@ String ELux::as_string(const Self& self){
         auto str = *dynamic_cast<String*>(self.get());
         return str;
     }
-    throw std::runtime_error("invalid type. Expected a String");
+    throw ELuxError(ELuxError::TypeError, "invalid type. Expected a String");
 }
 
 // -*-
@@ -405,7 +405,7 @@ Array ELux::as_array(const Self& self){
         auto ans = *dynamic_cast<Array*>(self.get());
         return ans;
     }
-    throw std::runtime_error("invalid type. Expected an Array");
+    throw ELuxError(ELuxError::TypeError, "invalid type. Expected an Array");
 }
 
 // -*-
@@ -414,7 +414,7 @@ List ELux::as_list(const Self& self){
         auto ans = *dynamic_cast<List*>(self.get());
         return ans;
     }
-    throw std::runtime_error("invalid type. Expected a List");
+    throw ELuxError(ELuxError::TypeError, "invalid type. Expected a List");
 }
 
 // -*-
@@ -423,7 +423,7 @@ HashSet ELux::as_hashset(const Self& self){
         auto ans = *dynamic_cast<HashSet*>(self.get());
         return ans;
     }
-    throw std::runtime_error("invalid type. Expected a Set");
+    throw ELuxError(ELuxError::TypeError, "invalid type. Expected a HashSet");
 }
 
 // -*-
@@ -432,7 +432,7 @@ HashMap ELux::as_hashmap(const Self& self){
         auto ans = *dynamic_cast<HashMap*>(self.get());
         return ans;
     }
-    throw std::runtime_error("invalid type. Expected a Dict");
+    throw ELuxError(ELuxError::TypeError, "invalid type. Expected a HashMap");
 }
 
 // -*-
@@ -441,7 +441,7 @@ Function ELux::as_function(const Self& self){
         auto ans = *dynamic_cast<Function*>(self.get());
         return ans;
     }
-    throw std::runtime_error("invalid type. Expected a Function");
+    throw ELuxError(ELuxError::TypeError, "invalid type. Expected a Function");
 }
 
 // -*-
@@ -454,7 +454,7 @@ Pair ELux::as_pair(const Self& self){
             std::stringstream ss;
             ss << "converting a tuple to a pair. Expect a tuple containing 2 elements but\n";
             ss << "got a tuple containing " << self->len() << " elements.";
-            throw std::runtime_error(ss.str());
+            throw ELuxError(ELuxError::SyntaxError, ss.str());
         }
         auto vec = ELux::as_tuple(self).value();
         pair.key = std::move(vec[0]);
@@ -464,7 +464,7 @@ Pair ELux::as_pair(const Self& self){
             std::stringstream ss;
             ss << "converting an array to a pair. Expect an array containing 2 elements but\n";
             ss << "got an array containing " << self->len() << " elements.";
-            throw std::runtime_error(ss.str());
+            throw ELuxError(ELuxError::SyntaxError, ss.str());
         }
         auto vec = ELux::as_array(self).value();
         pair.key = std::move(vec[0]);
@@ -474,7 +474,7 @@ Pair ELux::as_pair(const Self& self){
             std::stringstream ss;
             ss << "converting a list to a pair. Expect a list containing 2 elements but\n";
             ss << "got a list containing " << self->len() << " elements.";
-            throw std::runtime_error(ss.str());
+            throw ELuxError(ELuxError::SyntaxError, ss.str());
         }
         auto xs = ELux::as_list(self).value();
         pair.key = std::move(xs.front());
@@ -484,7 +484,7 @@ Pair ELux::as_pair(const Self& self){
             std::stringstream ss;
             ss << "converting a set to a pair. Expect a set containing 2 elements but\n";
             ss << "got a set containing " << self->len() << " elements.";
-            throw std::runtime_error(ss.str());
+            throw ELuxError(ELuxError::SyntaxError, ss.str());
         }
         auto xset = ELux::as_hashset(self).value();
         auto vec = Vec<Self>(xset.begin(), xset.end());
@@ -495,7 +495,7 @@ Pair ELux::as_pair(const Self& self){
             std::stringstream ss;
             ss << "converting a dict to a pair. Expect a dict containing 1 elements but\n";
             ss << "got a dict containing " << self->len() << " elements.";
-            throw std::runtime_error(ss.str());
+            throw ELuxError(ELuxError::SyntaxError, ss.str());
         }
         auto xdict = ELux::as_hashmap(self).value();
         Vec<Self> vec{};
@@ -510,7 +510,7 @@ Pair ELux::as_pair(const Self& self){
     }else{
         std::stringstream ss;
         ss << "cannot convert " << std::quoted(self->type().str()) << " to a pair.";
-        throw std::runtime_error(ss.str());
+        throw ELuxError(ELuxError::TypeError, ss.str());
     }
 
     return pair;
@@ -528,7 +528,7 @@ Tuple ELux::as_tuple(const Self& self){
     }else{
         std::stringstream ss;
         ss << "cannot convert " << std::quoted(self->type().str()) << " to a tuple.";
-        throw std::runtime_error(ss.str());
+        throw ELuxError(ELuxError::TypeError, ss.str());
     }
 
     return Tuple(vec);
@@ -545,6 +545,7 @@ Iterator ELux::as_iterator(const Self& self){
     }else{
         std::stringstream ss;
         ss << "type " << std::quoted(self->type().str()) << " objects are not iterable.";
+        throw ELuxError(ELuxError::TypeError, ss.str());
     }
 
     return std::make_shared<Array>(vec);
@@ -597,7 +598,7 @@ i64 ELux::len(const Self& self){
     if(ELux::is_list(self)){ return ELux::as_list(self).value().size(); }
     if(ELux::is_hashset(self)){ return ELux::as_hashset(self).value().size(); }
     if(ELux::is_hashmap(self)){ return ELux::as_array(self).value().size(); }
-    throw std::runtime_error("invalid type. Expected an dict/set/list/array/string");
+    throw ELuxError(ELuxError::SyntaxError, "invalid type. Expected an dict/set/list/array/string");
 }
 
 // -*-
@@ -708,12 +709,12 @@ void ELux::check_argc(bool pred, const std::string& message){
 // }
 
 // -*-
-Self ELux::visit(LiteralExpr& e, Context env){
-    return e.value;
+Self ELux::visit(LiteralExpr& expr, Context env){
+    return expr.value;
 }
 
-Self ELux::visit(SymbolExpr& e, Context env){
-    return env->get(e.name);
+Self ELux::visit(SymbolExpr& expr, Context env){
+    return env->get(expr.name.str());
 }
 
 Self ELux::eval(Expr expr, Context env) {
@@ -721,8 +722,8 @@ Self ELux::eval(Expr expr, Context env) {
 }
 
 
-Self ELux::visit(ListExpr& e, Context env){
-    return this->eval(e.elements, env);
+Self ELux::visit(ListExpr& expr, Context env){
+    return this->eval(expr.elements, env);
 }
 
 // quasiquote helpers
@@ -746,17 +747,17 @@ Self ELux::quasiquote(const Self& val, Context env, int depth){
             auto items = ELux::as_list(self).value();
             if(!items.empty() && ELux::str(items.front())=="unquote-splicing" && depth==1){
                 if(items.size()!=2){
-                    throw std::runtime_error("unquote-splicing i.e ',@' expect exactly 1 argument.");
+                    throw ELuxError(ELuxError::SyntaxError, "unquote-splicing i.e ',@' expect exactly 1 argument.");
                 }
                 auto obj = this->eval_as_expr(items.back(), env);
                 if(!ELux::is_list(obj)){
-                    throw std::runtime_error("unquote-splicing expects list");
+                    throw ELuxError(ELuxError::SyntaxError, "unquote-splicing expects list");
                 }
                 auto ys = ELux::as_list(obj);
                 for(auto y: ys.value()){ array.push(y); }
             }else if(!items.empty() && ELux::str(items.front())=="unquote" && depth==1){
                 if(items.size()!=2){
-                    throw std::runtime_error("unquote i.e ',' expect exactly 1 argument.");
+                    throw ELuxError(ELuxError::SyntaxError, "unquote i.e ',' expect exactly 1 argument.");
                 }
                 auto obj = this->eval_as_expr(items.back(), env);
                 array.push(obj);
@@ -820,13 +821,13 @@ Self ELux::eval(const Vec<Expr>& elems, Context env) {
     }
     // special forms if head is symbol
     if(auto sym = dynamic_cast<SymbolExpr*>(elems[0].get())) {
-        const std::string& op = sym->name;
+        const std::string& op = sym->name.str();
 
         // --------- Special forms ---------
         if(op == "quote"){ return handle_quote(elems, env); }
         if(op == "quasiquote"){ return handle_quasiquote(elems, env); }
         if(op == "unquote" || op == "unquote-splicing"){
-            throw std::runtime_error(
+            throw ELuxError(ELuxError::SyntaxError,
                 "unquote/unquote-splicing only valid inside quasiquote"
             );
         }
@@ -855,7 +856,7 @@ Self ELux::eval(const Vec<Expr>& elems, Context env) {
     // function or macro call
     // headVal must be function or macro
     if (!ELux::is_callable(headVal)){
-        throw std::runtime_error("First element is not callable: " + headVal->str());
+        throw ELuxError(ELuxError::SyntaxError, "first argum must be a callable: " + headVal->str());
     }
 
     auto fn = dynamic_cast<Function*>(headVal.get());
@@ -963,7 +964,7 @@ Vec<Self> ELux::eval_args(const Vec<Expr>& elems, Context env){
 // -*-
 Self ELux::handle_quote(const Vec<Expr>& elems, Context env){
     if (elems.size() != 2){
-        throw std::runtime_error("quote expects 1 arg");
+        throw ELuxError(ELuxError::SyntaxError, "quote expects 1 arg");
     }
     
     struct Handler{
@@ -992,7 +993,7 @@ Self ELux::handle_quote(const Vec<Expr>& elems, Context env){
 // -*-
 Self ELux::handle_quasiquote(const Vec<Expr>& elems, Context env){
     if(elems.size() != 2){
-        throw std::runtime_error("quasiquote expects 1 arg");
+        throw ELuxError(ELuxError::SyntaxError, "quasiquote expects 1 arg");
     }
     
     struct Handler{
@@ -1026,7 +1027,7 @@ Self ELux::handle_quasiquote(const Vec<Expr>& elems, Context env){
 // -*-
 Self ELux::handle_if(const Vec<Expr>& elems, Context env){
     if (elems.size() < 3 || elems.size() > 4){
-        throw std::runtime_error("if expects 2 or 3 args");
+        throw ELuxError(ELuxError::SyntaxError, "if expects 2 or 3 args");
     }
     auto cond = elems[1]->eval(*this, env);
     if(ELux::as_bool(cond)){
@@ -1041,47 +1042,47 @@ Self ELux::handle_if(const Vec<Expr>& elems, Context env){
 // -*-
 Self ELux::handle_define(const Vec<Expr>& elems, Context env){
     if(elems.size() != 3){
-        throw std::runtime_error("define expects name and value");
+        throw ELuxError(ELuxError::SyntaxError, "define expects name and value");
     }
     auto symExpr = dynamic_cast<SymbolExpr*>(elems[1].get());
     if(!symExpr){
-        throw std::runtime_error("define name must be symbol");
+        throw ELuxError(ELuxError::SyntaxError, "define name must be symbol");
     }
-    if(env->immutables.find(symExpr->name)!=env->immutables.end()){
+    if(env->immutables.find(symExpr->name.str())!=env->immutables.end()){
         std::stringstream ss;
-        ss << std::quoted(symExpr->name) << " is immutable.";
+        ss << std::quoted(symExpr->name.str()) << " is immutable.";
         ss << "Cannot redefined an immutable varibale.";
-        throw std::runtime_error(ss.str());
+        throw ELuxError(ELuxError::SyntaxError, ss.str());
     }
     auto val = elems[2]->eval(*this, env);
-    env->define(symExpr->name, val);
-    env->immutables.insert(symExpr->name);
+    env->define(symExpr->name.str(), val);
+    env->immutables.insert(symExpr->name.str());
     return val;
 }
 
 // -*-
 Self ELux::handle_var(const Vec<Expr>& elems, Context env){
     if(elems.size() != 3){
-        throw std::runtime_error("var expects name and value");
+        throw ELuxError(ELuxError::SyntaxError, "var expects name and value");
     }
     auto symExpr = dynamic_cast<SymbolExpr*>(elems[1].get());
     if(!symExpr){
-        throw std::runtime_error("var name must be symbol");
+        throw ELuxError(ELuxError::SyntaxError, "var name must be symbol");
     }
-    if(env->immutables.find(symExpr->name)!=env->immutables.end()){
+    if(env->immutables.find(symExpr->name.str())!=env->immutables.end()){
         std::stringstream ss;
-        ss << std::quoted(symExpr->name) << " is immutable. ";
+        ss << std::quoted(symExpr->name.str()) << " is immutable. ";
         ss << "Cannot update an immutable varibale.";
-        throw std::runtime_error(ss.str());
+        throw ELuxError(ELuxError::SyntaxError, ss.str());
     }
     auto val = elems[2]->eval(*this, env);
     Self old;
-    if(env->contains(symExpr->name)){
-        old = env->get(symExpr->name);
-        env->set(symExpr->name, val);
+    if(env->contains(symExpr->name.str())){
+        old = env->get(symExpr->name.str());
+        env->set(symExpr->name.str(), val);
     }else{
         old = val;
-        env->define(symExpr->name, val);
+        env->define(symExpr->name.str(), val);
     }
     return old;
 }
@@ -1089,17 +1090,17 @@ Self ELux::handle_var(const Vec<Expr>& elems, Context env){
 // -*-
 Self ELux::handle_lambda(const Vec<Expr>& elems, Context env){
     if(elems.size() < 3){
-        throw std::runtime_error("lambda expects params and body");
+        throw ELuxError(ELuxError::SyntaxError, "lambda expects params and body");
     }
     auto paramsList = dynamic_cast<ListExpr*>(elems[1].get());
     if(!paramsList){
-        throw std::runtime_error("lambda params must be list");
+        throw ELuxError(ELuxError::SyntaxError, "lambda params must be list");
     }
     std::vector<std::string> params;
     for(auto& p : paramsList->elements) {
         auto s = dynamic_cast<SymbolExpr*>(p.get());
-        if (!s){ throw std::runtime_error("lambda param must be symbol"); }
-        params.push_back(s->name);
+        if (!s){ throw ELuxError(ELuxError::SyntaxError, "lambda param must be symbol"); }
+        params.push_back(s->name.str());
     }
     // body: if multiple forms, wrap in (progn ...)
     Expr body;
@@ -1126,23 +1127,23 @@ Self ELux::handle_lambda(const Vec<Expr>& elems, Context env){
 // -*-
 Self ELux::handle_fun(const Vec<Expr>& elems, Context env){
     if(elems.size() < 4){
-        throw std::runtime_error("defun expects name, params, body");
+        throw ELuxError(ELuxError::SyntaxError, "fun expects name, params, body");
     }
     auto nameSym = dynamic_cast<SymbolExpr*>(elems[1].get());
     if(!nameSym){
-        throw std::runtime_error("defun name must be symbol");
+        throw ELuxError(ELuxError::SyntaxError, "fun name must be symbol");
     }
     auto paramsList = dynamic_cast<ListExpr*>(elems[2].get());
     if(!paramsList){
-        throw std::runtime_error("defun params must be list");
+        throw ELuxError(ELuxError::SyntaxError, "fun params must be list");
     }
     std::vector<std::string> params;
     for(auto& p : paramsList->elements) {
         auto s = dynamic_cast<SymbolExpr*>(p.get());
         if(!s){
-            throw std::runtime_error("defun param must be symbol");
+            throw ELuxError(ELuxError::SyntaxError, "fun param must be symbol");
         }
-        params.push_back(s->name);
+        params.push_back(s->name.str());
     }
     Expr body;
     if(elems.size() == 4) {
@@ -1161,31 +1162,31 @@ Self ELux::handle_fun(const Vec<Expr>& elems, Context env){
     fn->closure = env;
     fn->isMacro = false;
     fn->elux = this;
-    fn->name = nameSym->name;
-    env->define(nameSym->name, fn);
+    fn->name = nameSym->name.str();
+    env->define(nameSym->name.str(), fn);
     return fn;
 }
 
 // -*-
 Self ELux::handle_macro(const Vec<Expr>& elems, Context env){
     if(elems.size() < 4){
-        throw std::runtime_error("macro expects name, params, body");
+        throw ELuxError(ELuxError::SyntaxError, "macro expects name, params, body");
     }
     auto nameSym = dynamic_cast<SymbolExpr*>(elems[1].get());
     if(!nameSym){
-        throw std::runtime_error("macro name must be symbol");
+        throw ELuxError(ELuxError::SyntaxError, "macro name must be symbol");
     }
     auto paramsList = dynamic_cast<ListExpr*>(elems[2].get());
     if(!paramsList){
-        throw std::runtime_error("macro params must be list");
+        throw ELuxError(ELuxError::SyntaxError, "macro params must be list");
     }
     std::vector<std::string> params;
     for(auto& p : paramsList->elements){
         auto s = dynamic_cast<SymbolExpr*>(p.get());
         if(!s){
-            throw std::runtime_error("macro param must be symbol");
+            throw ELuxError(ELuxError::SyntaxError, "macro param must be symbol");
         }
-        params.push_back(s->name);
+        params.push_back(s->name.str());
     }
     Expr body;
     if(elems.size() == 4) {
@@ -1204,32 +1205,32 @@ Self ELux::handle_macro(const Vec<Expr>& elems, Context env){
     fn->closure = env;
     fn->isMacro = true;
     fn->elux = this;
-    fn->name = nameSym->name;
-    env->define(nameSym->name, fn);
+    fn->name = nameSym->name.str();
+    env->define(nameSym->name.str(), fn);
     return fn;
 }
 
 // -*-
 Self ELux::handle_let(const Vec<Expr>& elems, Context env){
     if(elems.size() < 3){
-        throw std::runtime_error("let expects bindings and body");
+        throw ELuxError(ELuxError::SyntaxError, "let expects bindings and body");
     }
     auto bindingsList = dynamic_cast<ListExpr*>(elems[1].get());
     if(!bindingsList){
-        throw std::runtime_error("let bindings must be list");
+        throw ELuxError(ELuxError::SyntaxError, "let bindings must be list");
     }
     auto newEnv = std::make_shared<Env>(env);
     for(auto& b : bindingsList->elements) {
         auto pairList = dynamic_cast<ListExpr*>(b.get());
         if(!pairList || pairList->elements.size() != 2){
-            throw std::runtime_error("let binding must be (name value)");
+            throw ELuxError(ELuxError::SyntaxError, "let binding must be (name value)");
         }
         auto nameSym = dynamic_cast<SymbolExpr*>(pairList->elements[0].get());
         if(!nameSym){
-            throw std::runtime_error("let binding name must be symbol");
+            throw ELuxError(ELuxError::SyntaxError, "let binding name must be symbol");
         }
         auto val = pairList->elements[1]->eval(*this, env);
-        newEnv->define(nameSym->name, val);
+        newEnv->define(nameSym->name.str(), val);
     }
     // body
     Self result;
@@ -1251,7 +1252,7 @@ Self ELux::handle_progn(const Vec<Expr>& elems, Context env){
 // -*-
 Self ELux::handle_while(const Vec<Expr>& elems, Context env){
     if(elems.size() < 3){
-        throw std::runtime_error("while expects condition and body");
+        throw ELuxError(ELuxError::SyntaxError, "while expects condition and body");
     }
     auto newEnv = std::make_shared<Env>(env);
     //Value result;
@@ -1270,15 +1271,15 @@ Self ELux::handle_while(const Vec<Expr>& elems, Context env){
 Self ELux::handle_for(const Vec<Expr>& elems, Context env){
     // (for (var list-expr) body...)
     if (elems.size() < 3){
-        throw std::runtime_error("for expects (var list) and body");
+        throw ELuxError(ELuxError::SyntaxError, "for expects (var list) and body");
     }
     auto binding = dynamic_cast<ListExpr*>(elems[1].get());
     if(!binding || binding->elements.size() != 2){
-        throw std::runtime_error("for binding must be (var list-expr)");
+        throw ELuxError(ELuxError::SyntaxError, "for binding must be (var list-expr)");
     }
     auto varSym = dynamic_cast<SymbolExpr*>(binding->elements[0].get());
     if(!varSym){
-        throw std::runtime_error("for var must be symbol");
+        throw ELuxError(ELuxError::SyntaxError, "for var must be symbol");
     }
     auto listVal = binding->elements[1]->eval(*this, env);
     auto failed = (
@@ -1289,14 +1290,14 @@ Self ELux::handle_for(const Vec<Expr>& elems, Context env){
         !ELux::is_string(listVal)
     );
     if(failed){
-        throw std::runtime_error("for expects list/array/set/dict/string");
+        throw ELuxError(ELuxError::SyntaxError, "for expects list/array/set/dict/string");
     }
     auto newEnv = std::make_shared<Env>(env);
     // Value result;
     if(ELux::is_list(listVal)){
         const auto& xs = *dynamic_cast<List*>(listVal.get());
         for(auto& item : xs.value()){
-            newEnv->define(varSym->name, item);
+            newEnv->define(varSym->name.str(), item);
             for (size_t i = 2; i < elems.size(); ++i) {
                 // result = elems[i]->accept(*this, newEnv);
                 [[maybe_unused]] auto _ = elems[i]->eval(*this, newEnv);
@@ -1305,7 +1306,7 @@ Self ELux::handle_for(const Vec<Expr>& elems, Context env){
     }else if(ELux::is_array(listVal)){
         const Array& array = *dynamic_cast<Array*>(listVal.get());
         for(auto& item : array.value()){
-            newEnv->define(varSym->name, item);
+            newEnv->define(varSym->name.str(), item);
             for(size_t i = 2; i < elems.size(); ++i){
                 // result = elems[i]->accept(*this, newEnv);
                 [[maybe_unused]] auto _ = elems[i]->eval(*this, newEnv);
@@ -1314,7 +1315,7 @@ Self ELux::handle_for(const Vec<Expr>& elems, Context env){
     }else if(ELux::is_hashset(listVal)){
         const HashSet& xset = *dynamic_cast<HashSet*>(listVal.get());
         for(auto& item : xset.value()) {
-            newEnv->define(varSym->name, std::make_shared<String>(item));
+            newEnv->define(varSym->name.str(), std::make_shared<String>(item));
             for(size_t i = 2; i < elems.size(); ++i){
                 // result = elems[i]->accept(*this, newEnv);
                 [[maybe_unused]] auto _ = elems[i]->eval(*this, newEnv);
@@ -1328,7 +1329,7 @@ Self ELux::handle_for(const Vec<Expr>& elems, Context env){
             kv.push_back(item.second);
             auto data = std::make_shared<Array>();
             data->value().insert(data->value().begin(), kv.begin(), kv.end());
-            newEnv->define(varSym->name, data);
+            newEnv->define(varSym->name.str(), data);
             for(size_t i = 2; i < elems.size(); ++i){
                 // result = elems[i]->accept(*this, newEnv);
                 [[maybe_unused]] auto _ = elems[i]->eval(*this, newEnv);
@@ -1337,7 +1338,7 @@ Self ELux::handle_for(const Vec<Expr>& elems, Context env){
     }else{
         const std::string& xstr = ELux::str(listVal);
         for(auto& item : xstr){
-            newEnv->define(varSym->name, std::make_shared<String>(item));
+            newEnv->define(varSym->name.str(), std::make_shared<String>(item));
             for(size_t i = 2; i < elems.size(); ++i){
                 // result = elems[i]->accept(*this, newEnv);
                 [[maybe_unused]] auto _ = elems[i]->eval(*this, newEnv);
@@ -1353,12 +1354,12 @@ Self ELux::handle_cond(const Vec<Expr>& elems, Context env){
     for(size_t i = 1; i < elems.size(); ++i){
         auto clause = dynamic_cast<ListExpr*>(elems[i].get());
         if(!clause || clause->elements.empty()){
-            throw std::runtime_error("cond clause must be list");
+            throw ELuxError(ELuxError::SyntaxError, "cond clause must be list");
         }
         auto testExpr = clause->elements[0];
         bool isElse = false;
         if(auto s = dynamic_cast<SymbolExpr*>(testExpr.get())){
-            if(s->name == "t"){ isElse = true; }
+            if(s->name.str() == "true"){ isElse = true; }
         }
         if(isElse || ELux::as_bool(testExpr->eval(*this, env))){
             Self result = ELux::share();
@@ -1376,18 +1377,18 @@ Self ELux::handle_match(const Vec<Expr>& elems, Context env){
     // very simple: (match value (pattern expr) (pattern expr) ...)
     // patterns only support literals and t as wildcard
     if(elems.size() < 3){
-        throw std::runtime_error("match expects value and clauses");
+        throw ELuxError(ELuxError::SyntaxError, "match expects value and clauses");
     }
     auto mval = elems[1]->eval(*this, env);
     for(size_t i = 2; i < elems.size(); ++i){
         auto clause = dynamic_cast<ListExpr*>(elems[i].get());
         if(!clause || clause->elements.size() < 2){
-            throw std::runtime_error("match clause must be (pattern expr)");
+            throw ELuxError(ELuxError::SyntaxError, "match clause must be (pattern expr)");
         }
         auto patExpr = clause->elements[0];
         bool wildcard = false;
         if(auto s = dynamic_cast<SymbolExpr*>(patExpr.get())){
-            if(s->name == "t"){ wildcard = true; }
+            if(s->name.str() == "true"){ wildcard = true; }
         }
         bool matched = false;
         if(wildcard){ matched = true; }
@@ -1413,11 +1414,14 @@ Self ELux::handle_try(const Vec<Expr>& elems, Context env){
     size_t catchIndex = 0;
     for(size_t i = 1; i < elems.size(); ++i){
         if(auto se = dynamic_cast<SymbolExpr*>(elems[i].get())){
-            if(se->name == "catch") { catchIndex = i; break; }
+            if(se->name.str() == "catch") {
+                catchIndex = i;
+                break;
+            }
         }
     }
     if(!catchIndex){
-        throw std::runtime_error("try must contain catch");
+        throw ELuxError(ELuxError::SyntaxError, "try must contain catch");
     }
     Self result = ELux::share();
     try{
@@ -1427,14 +1431,14 @@ Self ELux::handle_try(const Vec<Expr>& elems, Context env){
         //return result;
     }catch(const std::exception& ex){
         if(catchIndex + 2 > elems.size()){
-            throw std::runtime_error("catch must be (catch var body...)");
+            throw ELuxError(ELuxError::SyntaxError, "catch must be (catch var body...)");
         }
         auto varSym = dynamic_cast<SymbolExpr*>(elems[catchIndex+1].get());
         if(!varSym){
-            throw std::runtime_error("catch var must be symbol");
+            throw ELuxError(ELuxError::SyntaxError, "catch var must be symbol");
         }
         auto newEnv = std::make_shared<Env>(env);
-        newEnv->define(varSym->name, std::make_shared<String>(ex.what()));
+        newEnv->define(varSym->name.str(), std::make_shared<String>(ex.what()));
         for(size_t i = catchIndex+2; i < elems.size(); ++i){
             result = elems[i]->eval(*this, newEnv);
         }
@@ -1454,16 +1458,16 @@ Self ELux::handle_throw(const Vec<Expr>& elems, Context env){
 Self ELux::handle_import(const Vec<Expr>& elems, Context env){
     // (import "file.elux")
     if(elems.size() != 2){
-        throw std::runtime_error("import expects filename");
+        throw ELuxError(ELuxError::SyntaxError, "import expects filename");
     }
     auto lit = dynamic_cast<LiteralExpr*>(elems[1].get());
     if(!lit || !ELux::is_string(lit->value)){
-        throw std::runtime_error("import expects string filename");
+        throw ELuxError(ELuxError::SyntaxError, "import expects string filename");
     }
     std::string filename = dynamic_cast<String*>(lit->value.get())->str();
     std::ifstream in(filename);
     if(!in){
-        throw std::runtime_error("Cannot open module file: " + filename);
+        throw ELuxError(ELuxError::RuntimeError, "Cannot open module file: " + filename);
     }
     std::stringstream buffer;
     buffer << in.rdbuf();
@@ -1485,13 +1489,13 @@ Self ELux::handle_import(const Vec<Expr>& elems, Context env){
         return ELux::share();
     }
     if( !ELux::is_list(exportsVal)){
-        throw std::runtime_error("exports must be list of symbols (strings)");
+        throw ELuxError(ELuxError::RuntimeError, "exports must be list of symbols (strings)");
     }
     HashMap dict;
     const List& exList = *dynamic_cast<List*>(exportsVal.get());
     for(auto& symVal : exList.value()){
         if(!ELux::is_string(symVal)){
-            throw std::runtime_error("exports entries must be strings");
+            throw ELuxError(ELuxError::RuntimeError, "exports entries must be strings");
         }
         std::string name = dynamic_cast<String*>(symVal.get())->str();
         dict.m_hmap[ELux::share(name)] = moduleEnv->get(name);
@@ -1523,10 +1527,10 @@ void ELux::run(const std::string& code, Context env, const std::string& label) {
             [[maybe_unused]] auto _ = elux.eval(expr, env);
         }
         //std::cout << "Result: " << toString(last) << "\n\n";
-    }catch(const std::runtime_error& err){
-        std::cerr << "\x1b[31mELuxError\x1b[0m: " << err.what() << std::endl;
+    }catch(const ELuxError& err){
+        std::cerr << "\x1b[31m" << err.kind().str() << "\x1b[0m: " << err.str() << std::endl;
     }catch(const std::exception& err){
-        std::cerr << "\x1b[31mUnexpectedError\x1b[0m: " << err.what() << std::endl;
+        std::cerr << "\x1b[31mError\x1b[0m: " << err.what() << std::endl;
     }
 }
 

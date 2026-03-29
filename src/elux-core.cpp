@@ -2341,7 +2341,7 @@ std::string Function::repr(void) const{
             if(auto self = dynamic_cast<LiteralExpr*>(expr.get())){
                 return self->value->repr();
             }else if(auto self = dynamic_cast<SymbolExpr*>(expr.get())){
-                return self->name;
+                return self->name.str();
             }else if(auto self = dynamic_cast<ListExpr*>(expr.get())){
                 std::stringstream ss;
                 for(size_t i=0; i < self->elements.size(); i++){
