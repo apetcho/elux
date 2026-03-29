@@ -1609,7 +1609,7 @@ const std::string& Module::key(void) const{
 
 // -*-
 std::string Module::name_from_key(const std::string& modKey){
-    auto token{modKey};
+    std::string token{modKey};
     if(!Module::is_module_key(token)){
         std::stringstream ss;
         ss << token << " is not a module key.";
@@ -1619,8 +1619,22 @@ std::string Module::name_from_key(const std::string& modKey){
     token = token.substr(pos+2);
     pos = token.find("::");
     token = token.substr(pos+2);
-    
+
     return token;
+}
+
+bool Module::is_module_key(const std::string& token){
+    // Expect key = path::filename::modulename
+    auto text = std::string{token};
+    auto pos = text.find("::");
+    if(pos==std::string::npos){ return false; }
+    text = text.substr(pos+2);
+    pos = text.find("::");
+    if(pos==std::string::npos){ return false; }
+    text = text.substr(pos+2);
+    pos = text.find("::");
+    if(pos!=std::string::npos){ return false; }
+    return true;
 }
 
 /*
@@ -1630,7 +1644,6 @@ public:
 
 void Module::setup(const Symbol& sym){}
 void Module::setup(const fs::path& path){}
-bool Module::is_module_key(const std::string& token){}
 
 private:
     Symbol m_name;              // module nmae
