@@ -33,9 +33,15 @@ namespace ekasoft::klx{
 Lexer::Lexer(std::string s)
 : m_src(std::move(s)) {}
 
-void Lexer::skipSpaces() {
+void Lexer::skip() {
     while (!this->eof() && isspace(this->peek())){
         this->advance();
+    }
+    if(this->eof()){ return; }
+    if(this->peek()==';'){ // skip the comment
+        while (!this->eof() && isspace(this->peek())!='\n'){
+            this->advance();
+        }   
     }
 }
 
@@ -50,13 +56,28 @@ bool Lexer::startsWith(const std::string& s) {
 }
 
 // -*-
-Token Lexer::next(){
-    skipSpaces();
-    //skip_comment();
-    if (this->eof()){
-         return {TokenKind::END, ""};
+std::string Lexer::read_token(void){
+    auto reserved_char = [](char c){
+        static std::string specials = "()`',";
+        return (specials.find(c)!=std::string::npos);
+    };
+
+    size_t start = m_pos;
+    auto c = this->peek();
+    while(!this->eof() && !isspace(c) && !reserved_char(c)){
+        this->advance();
+        c = this->peek();
     }
+    return m_src.substr(start, m_pos - start);
+}
+
+// -*-
+Token Lexer::next(){
+    skip();
+    
+    if(this->eof()){ return {TokenKind::END, ""}; }
     char c = this->peek();
+
     if(c=='('){
         this->advance();
         return {TokenKind::LPAREN, "("};
@@ -109,7 +130,7 @@ Token Lexer::next(){
         }
         return {TokenKind::STRING, oss.str()};
     }
-    if (isdigit((unsigned char)c) || (c == '-' && m_pos+1 < m_src.size() && isdigit(this->peek_next()))){
+    if(isdigit((unsigned char)c) || (c == '-' && m_pos+1 < m_src.size() && isdigit(this->peek_next()))){
         size_t start = m_pos;
         bool hasDot = false;
         if(this->peek()=='-'){

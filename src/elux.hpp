@@ -864,12 +864,13 @@ private:
     std::string m_src;
     size_t m_pos = 0;
 
-    void skipSpaces(void);
+    void skip(void);
     bool startsWith(const std::string& s);
     bool eof(void) const;
     char peek(void) const;
     char peek_next(void) const;
     void advance(void);
+    std::string read_token(void);
     //void skip_comment(void);
 };
 
