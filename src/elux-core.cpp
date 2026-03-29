@@ -457,9 +457,7 @@ Symbol Pair::type(void) const{
 
 std::string Pair::str(void) const{
     std::stringstream ss;
-    ss << "#(" << key->str() << " ";
-    if(ELux::is_string(val)){ ss << val->repr(); }
-    else{ ss << val->str() << ")"; }
+    ss << "#(" << key->str() << " " << val->str() << ")";
 
     return ss.str();
 }
@@ -655,11 +653,7 @@ std::string Tuple::str(void) const{
     ss << "#[";
     for(size_t i=0; i < this->m_items.size(); i++){
         if(i > 0){ ss << " "; }
-        if(ELux::is_list(this->m_items[i])){
-            ss << this->m_items[i]->repr();
-        }else{
-            ss << this->m_items[i]->str();
-        }
+        ss << this->m_items[i]->str();
     }
     ss << "]";
 
@@ -823,7 +817,7 @@ ELuxError& ELuxError::operator=(ELuxError&& err) noexcept{
 // -*-
 std::string ELuxError::describe(void) const{
     std::stringstream ss;
-    ss << this->m_kind.str() << ": " << this->m_msg;
+    ss << this->m_kind.str() << ": " << String(this->m_msg).repr();
     return ss.str();
 }
 
@@ -841,7 +835,7 @@ Symbol ELuxError::type(void) const{
 }
 
 std::string ELuxError::str(void) const{
-    return this->m_msg;
+    return String(this->m_msg).str();
 }
 
 // -*-
@@ -1540,7 +1534,7 @@ Symbol String::type(void) const{
 
 // -*-
 std::string String::str(void) const{
-    return this->m_val;
+    return this->repr();
 }
 
 // -*-
@@ -1668,7 +1662,7 @@ std::string Set::str(void) const{
     size_t idx = 0;
     for(auto self: this->m_hset){
         if(idx > 0){ ss << " "; }
-        ss << std::quoted(self);
+        ss << String(self).str();
         ++idx;
     }
     ss << "}";
@@ -1682,7 +1676,7 @@ std::string Set::repr(void) const{
     size_t idx = 0;
     for(auto self: this->m_hset){
         if(idx > 0){ ss << " "; }
-        ss << std::quoted(self);
+        ss << String(self).repr();
         ++idx;
     }
     ss << "}";
@@ -1892,10 +1886,8 @@ std::string Dict::str(void) const {
     size_t idx = 0;
     for(auto& [key, val]: this->m_hmap){
         if(idx > 0){ ss << " "; }
-        ss << "[" << std::quoted(key) << " ";
-        if(ELux::is_string(val)){ ss << val->repr(); }
-        else{ ss << val->str();}
-        ss  << "]";
+        Pair entry(ELux::share(key), val);
+        ss << entry.str();
         ++idx;
     }
     ss << "}";
@@ -1909,7 +1901,8 @@ std::string Dict::repr(void) const{
     size_t idx = 0;
     for(auto& [key, val]: this->m_hmap){
         if(idx > 0){ ss << " "; }
-        ss << "[" << std::quoted(key) << " " << val->repr() << "]";
+        Pair entry(ELux::share(key), val);
+        ss << entry.repr();
         ++idx;
     }
     ss << "}";
@@ -2056,6 +2049,20 @@ std::string List::str(void) const{
     for(auto self: this->m_xs){
         if(idx > 0){ ss << " "; }
         ss << self->str();
+        ++idx;
+    }
+    ss << ")";
+    return ss.str();
+}
+
+// -*-
+std::string List::repr(void) const{
+    std::stringstream ss;
+    ss << "(";
+    size_t idx = 0;
+    for(auto self: this->m_xs){
+        if(idx > 0){ ss << " "; }
+        ss << self->repr();
         ++idx;
     }
     ss << ")";
