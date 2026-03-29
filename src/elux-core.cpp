@@ -1676,6 +1676,20 @@ std::string Set::str(void) const{
 }
 
 // -*-
+std::string Set::repr(void) const{
+    std::stringstream ss;
+    ss << "#{";
+    size_t idx = 0;
+    for(auto self: this->m_hset){
+        if(idx > 0){ ss << " "; }
+        ss << std::quoted(self);
+        ++idx;
+    }
+    ss << "}";
+    return ss.str();
+}
+
+// -*-
 HSet& Set::value(void){ return this->m_hset; }
 
 // -*-
