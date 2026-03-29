@@ -661,8 +661,9 @@ Vec<Expr> Parser::parse(){
 
 // -*-
 Expr Parser::make_symbol_expr(const std::string& text){
-    //! @todo
-    return nullptr;
+    auto expr = std::make_shared<SymbolExpr>();
+    expr->name = Symbol(text);
+    return std::move(expr);
 }
 
 // -*-
