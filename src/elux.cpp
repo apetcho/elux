@@ -1500,11 +1500,10 @@ Self ELux::handle_let(const Vec<Expr>& exprs, Context env){
 
 // -*-
 Self ELux::handle_progn(const Vec<Expr>& elems, Context env){
-    Self result = ELux::share();
     for(size_t i = 1; i < elems.size(); ++i) {
-        result = elems[i]->eval(*this, env);
+        [[maybe_unused]] auto _ = elems[i]->eval(*this, env);
     }
-    return result;
+    return ELux::share();
 }
 
 // -*-
