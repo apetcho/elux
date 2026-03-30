@@ -1499,26 +1499,42 @@ Self ELux::handle_let(const Vec<Expr>& exprs, Context env){
 }
 
 // -*-
-Self ELux::handle_progn(const Vec<Expr>& elems, Context env){
-    for(size_t i = 1; i < elems.size(); ++i) {
-        [[maybe_unused]] auto _ = elems[i]->eval(*this, env);
+Self ELux::handle_progn(const Vec<Expr>& exprs, Context env){
+    for(size_t i = 1; i < exprs.size(); ++i) {
+        [[maybe_unused]] auto _ = exprs[i]->eval(*this, env);
     }
     return ELux::share();
 }
 
 // -*-
-Self ELux::handle_while(const Vec<Expr>& elems, Context env){
-    if(elems.size() < 3){
-        throw ELuxError(ELuxError::SyntaxError, "while expects condition and body");
-    }
-    auto newEnv = std::make_shared<Env>(env);
-    //Value result;
+Self ELux::handle_while(const Vec<Expr>& exprs, Context env){
+    auto pred = (exprs.size() < 3);
+    auto msg = R"ELUX(
+    `while': malformed `while' form. The correct syntax is as follows:
+
+    Syntax
+    ------
+        (while testExpr body)
+
+    Example
+    -------
+        (var x 0)
+        (while (< x 5)
+            (println "x = " x))
+    )ELUX";
+    ELux::check_argc(pred, msg);
+    auto localEnv = std::make_shared<Env>(env);
+    
     while(true){
-        auto cond = elems[1]->eval(*this, env);
+        auto cond = exprs[1]->eval(*this, env);
+        pred = ELux::is_bool(cond);
+        std::stringstream ss;
+        ss << "`while': expect `testExpr' to evaluate to a bool, but got ";
+        ss << std::quoted(cond->type().str()) << " object.";
+        ELux::check_type(pred, ss.str());
         if(!ELux::as_bool(cond)){ break;}
-        for(size_t i = 2; i < elems.size(); ++i){
-            //result = elems[i]->accept(*this, env);
-            [[maybe_unused]] auto _ = elems[i]->eval(*this, newEnv);
+        for(size_t i = 2; i < exprs.size(); ++i){
+            [[maybe_unused]] auto _ = exprs[i]->eval(*this, localEnv);
         }
     }
     return ELux::share();
