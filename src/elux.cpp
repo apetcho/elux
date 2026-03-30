@@ -1257,47 +1257,112 @@ Self ELux::handle_lambda(const Vec<Expr>& exprs, Context env){
     return std::move(lambda);
 }
 
-// -*-
-Self ELux::handle_fun(const Vec<Expr>& elems, Context env){
-    if(elems.size() < 4){
-        throw ELuxError(ELuxError::SyntaxError, "fun expects name, params, body");
-    }
-    auto nameSym = dynamic_cast<SymbolExpr*>(elems[1].get());
-    if(!nameSym){
-        throw ELuxError(ELuxError::SyntaxError, "fun name must be symbol");
-    }
-    auto paramsList = dynamic_cast<ListExpr*>(elems[2].get());
-    if(!paramsList){
-        throw ELuxError(ELuxError::SyntaxError, "fun params must be list");
-    }
+/**
+ * @brief Define elux's `fun' special form.
+ * 
+ * Syntax
+ * ------
+ *      (fun name params body)
+ *      (fun name params doc-string body)
+ * 
+ * Example
+ * -------
+ *      (fun hello (name)
+ *          (println "Hello " name "!"))
+ * 
+ *      (fun say-bye (name)
+ *          "Say goodbye to `NAME'."
+ *          (println "Goodbye " name "!"))
+ * 
+ * @param elems 
+ * @param env 
+ * @return Self 
+ */
+Self ELux::handle_fun(const Vec<Expr>& exprs, Context env){
+    auto pred = (exprs.size() < 4);
+    auto msg = R"ELUX(
+    `fun': malformed `fun` expression. The correct syntax is as follows:
+
+    Syntax
+    ------
+        (fun name params body)
+        (fun name params doc-string body)
+
+    Examples
+    --------
+        (fun hello (name)
+            (println "Hello " name "!"))
+
+        (fun say-bye (name)
+            "Say goodbye to `NAME'."
+            (println "Goodbye " name "!"))
+    )ELUX";
+    ELux::check_syntax(pred, msg);
+    
+    auto funcsym = dynamic_cast<SymbolExpr*>(exprs[1].get());
+    pred = (funcsym!=nullptr);
+    ELux::check_type(pred, "`fun': name must be a symbol");
+    
+    auto params_ = dynamic_cast<ListExpr*>(exprs[2].get());
+    pred = (params_!=nullptr);
+    ELux::check_type(pred, "`fun': params must be a list.");
+    
     std::vector<std::string> params;
-    for(auto& p : paramsList->elements) {
-        auto s = dynamic_cast<SymbolExpr*>(p.get());
-        if(!s){
-            throw ELuxError(ELuxError::SyntaxError, "fun param must be symbol");
-        }
-        params.push_back(s->name.str());
+    for(auto& param : params_->elements) {
+        auto sym = dynamic_cast<SymbolExpr*>(param.get());
+        pred = (params_!=nullptr);
+        ELux::check_type(pred, "`fun': parameters in parameters list must be symbols.");
+        params.push_back(sym->name.str());
     }
     Expr body;
-    if(elems.size() == 4) {
-        body = elems[3];
-    }else{
-        auto le = std::make_shared<ListExpr>();
-        le->elements.push_back(std::make_shared<SymbolExpr>("progn"));
-        for(size_t i = 3; i < elems.size(); ++i){
-            le->elements.push_back(elems[i]);
+    std::string help{};
+    if(exprs.size() == 4) {
+        auto self = dynamic_cast<LiteralExpr*>(exprs[3].get());
+        pred = (
+            (self != nullptr) && ELux::is_string(self->value)
+        );
+        if(pred){ // we have a doc-string and an empty body
+            body = std::make_shared<ListExpr>(
+                Vec<Expr>{std::make_shared<SymbolExpr>("progn")} // (progn)
+            );
+            help = self->value->repr();
+        }else{ // no doc-string but some
+            body = exprs[3];
         }
-        body = le;
+    }else{
+        auto expr = std::make_shared<ListExpr>();
+        // Create: (progn expr1 expr2 ... exprN)
+        expr->elements.push_back(std::make_shared<SymbolExpr>("progn"));
+        auto self = dynamic_cast<LiteralExpr*>(exprs[3].get());
+        if(self!=nullptr && ELux::is_string(self->value)){ // we have a doc-string
+            help = self->value->repr();
+            if(exprs.size()==4){ // empty body
+                body = std::make_shared<ListExpr>(
+                    Vec<Expr>{std::make_shared<SymbolExpr>("progn")}
+                );
+            }else{ // non-exmpty body
+                for(size_t i = 4; i < exprs.size(); ++i){
+                    expr->elements.push_back(exprs[i]);
+                }
+                body = expr;
+            }
+        }else{ // no doc-string
+            for(size_t i = 3; i < exprs.size(); ++i){
+                expr->elements.push_back(exprs[i]);
+            }
+            body = expr;
+        }
     }
-    auto fn = std::make_shared<Function>();
-    fn->params = params;
-    fn->body = body;
-    fn->closure = env;
-    fn->isMacro = false;
-    fn->elux = this;
-    fn->name = nameSym->name.str();
-    env->define(nameSym->name.str(), fn);
-    return fn;
+    auto func = std::make_shared<Function>();
+    func->params = params;
+    func->body = body;
+    func->closure = env;
+    func->isMacro = false;
+    func->elux = this;
+    func->name = funcsym->name.str();
+    env->define(funcsym->name.str(), func);
+    env->add_doc(funcsym->name.str(), help);
+    return func;
 }
 
 // -*-
