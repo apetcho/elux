@@ -1702,11 +1702,16 @@ void Module::setup(const fs::path& path){
     }
 }
 
+// -*-
+void Module::setup(const Symbol& sym, const fs::path& path){
+    this->setup(path);
+    this->m_name = sym;
+}
+
 /*
 // -*-
 class Module final{
 public:
-void Module::setup(const Symbol& sym, const fs::path& path){}
 private:
     Symbol m_name;              // module nmae
     fs::path m_fullpath;        // module fullpath
