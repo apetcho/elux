@@ -1039,43 +1039,62 @@ Self ELux::handle_quasiquote(const Vec<Expr>& elems, Context env){
 //     throw std::runtime_error("unquote/unquote-splicing only valid inside quasiquote");
 // }
 
-// -*-
-Self ELux::handle_if(const Vec<Expr>& elems, Context env){
-    if (elems.size() < 3 || elems.size() > 4){
-        throw ELuxError(ELuxError::SyntaxError, "`if': expects 2 or 3 args");
-    }
-    auto cond = elems[1]->eval(*this, env);
-    if(!ELux::is_bool(cond)){
-        throw ELuxError(
-            ELuxError::SyntaxError,
-            "`if': test condition must evaluate to boolean value"
-        );
-    }
+/**
+ * @brief Define elux's `if' special form.
+ * 
+ * @param elems 
+ * @param env 
+ * @return Self 
+ */
+Self ELux::handle_if(const Vec<Expr>& exprs, Context env){
+    auto pred = (exprs.size()==3 || exprs.size()==4);
+    std::string msg = R"ELUX(
+    `if': invalid use of `if'. The correct syntax is one of the following:
+
+    Example
+    -------
+        (if test expr)
+        (if test okExpr noExpr)
+    )ELUX";
+    auto cond = exprs[1]->eval(*this, env);
+    pred = ELux::is_bool(cond);
+    ELux::check_argc(pred, msg);
+    msg = R"ELUX(
+    `if': test condition must evaluate to a bool.
+
+    Example:
+    --------
+        (if (= 1 1) (println "1 is equal to 1"))
+        (if (= 1 0) (println "1 is equal to 0") (println "1 is not equal to 0"))
+    )ELUX";
+    
+    
     if(ELux::as_bool(cond)){
-        return elems[2]->eval(*this, env);
-    }else if(elems.size() == 4){
-        return elems[3]->eval(*this, env);
-    }else{
-        return ELux::share();
+        [[maybe_unused]] auto _ = exprs[2]->eval(*this, env);
+    }else if(exprs.size() == 4){
+        [[maybe_unused]] auto _ = exprs[3]->eval(*this, env);
     }
+
+    return ELux::share();
 }
 
-// -*-
+/**
+ * @brief Define elux's `define' special form.
+ * 
+ * @param exprs 
+ * @param env 
+ * @return Self 
+ */
 Self ELux::handle_define(const Vec<Expr>& exprs, Context env){
     auto pred = (exprs.size()==3 || exprs.size()==4);
     std::string msg = R"ELUX(
-    `define': invalid use is one of the following:
+    `define': invalid use of `define'. The correct syntax is one of the following:
 
     Example
     -------
         (define name value)
         (define name value "documentation string")
     )ELUX";
-    // {
-    //     "`define': invalid use is one of the following:\n\n"
-    //     "    (define name value)\n"
-    //     "    (define name value \"documentation string\")\n"
-    // };
     ELux::check_argc(pred, msg);
     auto sym = dynamic_cast<SymbolExpr*>(exprs[1].get());
     msg = R"ELUX(
@@ -1108,31 +1127,56 @@ Self ELux::handle_define(const Vec<Expr>& exprs, Context env){
     return ELux::share();
 }
 
-// -*-
-Self ELux::handle_var(const Vec<Expr>& elems, Context env){
-    if(elems.size() != 3){
-        throw ELuxError(ELuxError::SyntaxError, "var expects name and value");
-    }
-    auto symExpr = dynamic_cast<SymbolExpr*>(elems[1].get());
-    if(!symExpr){
-        throw ELuxError(ELuxError::SyntaxError, "var name must be symbol");
-    }
-    if(env->immutables.find(symExpr->name.str())!=env->immutables.end()){
+/**
+ * @brief Define elux's `var' special form.
+ * 
+ * @param exprs 
+ * @param env 
+ * @return Self 
+ */
+Self ELux::handle_var(const Vec<Expr>& exprs, Context env){
+    auto pred = (exprs.size()==3 || exprs.size()==4);
+    std::string msg = R"ELUX(
+    `var': invalid use is one of the following:
+
+    Example
+    -------
+        (var name value)
+        (var name value "documentation string")
+    )ELUX";
+    ELux::check_argc(pred, msg);
+    auto sym = dynamic_cast<SymbolExpr*>(exprs[1].get());
+    msg = R"ELUX(
+    `var': first argument must a symbol.
+
+    Example:
+    --------
+        (var PI 3.14)
+        (var E 2.71828 "Euler's number")
+    )ELUX";
+    ELux::check_syntax(pred, msg);
+    
+    if(env->immutables.find(sym->name.str())!=env->immutables.end()){
         std::stringstream ss;
-        ss << std::quoted(symExpr->name.str()) << " is immutable. ";
-        ss << "Cannot update an immutable varibale.";
+        ss << "`var': " << std::quoted(sym->name.str()) << " is immutable.";
+        ss << "Cannot redefined an immutable varibale.";
         throw ELuxError(ELuxError::SyntaxError, ss.str());
     }
-    auto val = elems[2]->eval(*this, env);
-    Self old;
-    if(env->contains(symExpr->name.str())){
-        old = env->get(symExpr->name.str());
-        env->set(symExpr->name.str(), val);
+    auto val = exprs[2]->eval(*this, env);
+    if(env->contains(sym->name.str())){
+        env->set(sym->name.str(), val);
     }else{
-        old = val;
-        env->define(symExpr->name.str(), val);
+        env->define(sym->name.str(), val);
     }
-    return old;
+    if(exprs.size()==4){
+        auto self = dynamic_cast<LiteralExpr*>(exprs[3].get());
+        pred = ((self!=nullptr) && ELux::is_string(self->value));
+        ELux::check_type(
+            pred, "`var': expect the third optional argument to be a string if provided"
+        );
+        env->add_doc(sym->name.str(), self->value->str());
+    }
+    return ELux::share();
 }
 
 // -*-
