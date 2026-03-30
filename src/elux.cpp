@@ -1641,7 +1641,28 @@ bool Module::is_module_key(const std::string& token){
 bool Module::is_builtin_module(void) const{
     auto myKey = this->key();
     auto path = myKey.substr(0, myKey.find("::"));
-    return (path=="@elux");
+    return (this->m_fullpath=="@elux");
+}
+
+// -*-
+void Module::setup(const Symbol& sym){
+    this->m_name = sym;
+    this->m_fullpath = "@elux";
+    this->m_filename = ("__elux__" + sym.str());
+    bool found{false};
+    for(auto& mymod: ELux::myModules){
+        if(mymod.key()==this->key()){
+            this->m_env = mymod.m_env;
+            found = true;
+            break;
+        }
+    }
+
+    if(!found){
+        std::stringstream ss;
+        ss << "Module " << std::quoted(sym.str()) << "not found";
+        throw ELuxError(ELuxError::RuntimeError, ss.str());
+    }
 }
 
 /*
@@ -1650,7 +1671,6 @@ class Module final{
 public:
 
 
-void Module::setup(const Symbol& sym){}
 void Module::setup(const fs::path& path){}
 
 private:

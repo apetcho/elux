@@ -950,6 +950,7 @@ public:
 
     const std::string& key(void) const;
     static std::string name_from_key(const std::string& modKey);
+    bool is_builtin_module(void) const;
 
 private:
     ELux* m_elux;               // the interpreter
@@ -961,7 +962,6 @@ private:
     void setup(const Symbol& sym);
     void setup(const fs::path& path);
     static bool is_module_key(const std::string& token);
-    bool is_builtin_module(void) const;
 };
 
 // ==============================
@@ -981,9 +981,11 @@ public:
     //! @todo add `myIntegerMode'
     //! @todo add `myFormatWidth'
     //! @todo add `myModules'
+    static std::unordered_set<Module, ModuleHash, ModuleEqual> myModules;
     //! @todo add `myPrelude'
     
     //! @todo: implement the following two methods
+    static void run(const fs::path& modulePath, const Vec<Self>& args);
     static void repl(const Vec<std::string>& args);
     static void setup(void);
 
