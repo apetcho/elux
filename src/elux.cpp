@@ -272,6 +272,13 @@ bool ELux::is_string(const Self& self){
 }
 
 // -*-
+bool ELux::is_symbol(const Self& self){
+    auto ptr = dynamic_cast<Symbol*>(self.get());
+    if(ptr==nullptr){ return false; }
+    return true;
+}
+
+// -*-
 bool ELux::is_list(const Self& self){
     auto ptr = dynamic_cast<List*>(self.get());
     if(ptr==nullptr){ return false; }
@@ -419,6 +426,15 @@ String ELux::as_string(const Self& self){
         return str;
     }
     throw ELuxError(ELuxError::TypeError, "invalid type. Expected a String");
+}
+
+// -*-
+Symbol ELux::as_symbol(const Self& self){
+    if(ELux::is_symbol(self)){
+        auto sym = *dynamic_cast<Symbol*>(self.get());
+        return sym;
+    }
+    throw ELuxError(ELuxError::TypeError, "invalid type. Expected a Symbol");
 }
 
 // -*-
@@ -899,73 +915,8 @@ Self ELux::eval(const Vec<Expr>& elems, Context env) {
     fn->elux = this;
     auto argv = this->eval_args(Vec<Expr>(elems.begin()+1, elems.end()), env);
     
-    // // macro: receive unevaluated args as Values (AST->Value), expand, then eval
-    // if(fn->isMacro || ELux::is_macro(headVal)){
-    //     //auto expr = valueToExpr(expand(elems, env));
-    //     return fn->call(argv, env);
-    // }
-    // // normal function
-    // // Vec<Self> argv;
-    // // for(size_t i = 1; i < elems.size(); ++i){
-    // //     argv.push_back(elems[i]->eval(*this, env));
-    // // }
-
-    // if(fn->isNative){ return fn->native(argv, env); }
-
-    // if(argv.size() != fn->params.size()){
-    //     throw std::runtime_error("function arg count mismatch");
-    // }
-    // auto callEnv = std::make_shared<Env>(fn->closure);
-    // for(size_t i = 0; i < fn->params.size(); ++i){
-    //     callEnv->define(fn->params[i], argv[i]);
-    // }
-    // return fn->body->eval(*this, callEnv);
     return fn->call(argv, env);
 }
-
-// // -*-
-// Self ELux::expand(const Vec<Expr>& elems, Context env){
-//     auto headVal = elems[0]->eval(*this, env);
-//     // function or macro call
-//     // headVal must be function or macro
-//     // if (!ELux::is_callable(headVal)){
-//     //     throw std::runtime_error("First element is not callable: " + headVal->str());
-//     // }
-//     auto fn = *dynamic_cast<Function*>(headVal.get());
-//     struct Handler{
-//         Self handle(Expr expr){
-//             if(auto self = dynamic_cast<LiteralExpr*>(expr.get())){
-//                 return self->value;
-//             }
-//             if(auto self = dynamic_cast<SymbolExpr*>(expr.get())){
-//                 return ELux::share(self->name);
-//             }
-//             if(auto le = dynamic_cast<ListExpr*>(expr.get())){
-//                 Array array{};
-//                 for(auto& elem : le->elements){
-//                     array.push(this->handle(elem));
-//                 }
-
-//                 return ELux::share(List(array));
-//             }
-//             return ELux::share();
-//         }
-//     };
-//     Vec<Self> argv;
-//     Handler handler;
-//     for(size_t i = 1; i < elems.size(); ++i){
-//         argv.push_back(handler.handle(elems[i]));
-//     }
-//     if(argv.size() != fn.params.size()){
-//         throw std::runtime_error("macro arg count mismatch");
-//     }
-//     auto callEnv = std::make_shared<Env>(fn.closure);
-//     for(size_t i = 0; i < fn.params.size(); ++i){
-//         callEnv->define(fn.params[i], argv[i]);
-//     }
-//     // macro body returns Value representing code
-//     return fn.body->eval(*this, callEnv);
-// }
 
 // -*-
 Vec<Self> ELux::eval_args(const Vec<Expr>& elems, Context env){
@@ -1055,10 +1006,6 @@ Self ELux::handle_quasiquote(const Vec<Expr>& elems, Context env){
     return quasiquote(Handler().handle(expr), env, 1);
 }
 
-// -*-
-// Self ELux::handle_unquote(const Vec<Expr>& elems, Context env){
-//     throw std::runtime_error("unquote/unquote-splicing only valid inside quasiquote");
-// }
 
 /**
  * @brief Define elux's `if' special form.
@@ -1854,25 +1801,8 @@ Self ELux::handle_match(const Vec<Expr>& exprs, Context env){
             for(auto j=1; j < clause->elements.size(); j++){
                 [[maybe_unused]] auto _ = clause->elements[j]->eval(*this, localEnv);
             }
+            break;
         }
-        // auto patExpr = clause->elements[0];
-        // bool wildcard = false;
-        // if(auto s = dynamic_cast<SymbolExpr*>(patExpr.get())){
-        //     if(s->name.str() == "_"){ wildcard = true; }
-        // }
-        // bool matched = false;
-        // if(wildcard){ matched = true; }
-        // else{
-        //     auto patVal = patExpr->eval(*this, env);
-        //     matched = ((patVal->str() == mval->str()));
-        // }
-        // if(matched){
-        //     Self result = ELux::share();
-        //     for(size_t j = 1; j < clause->elements.size(); ++j){
-        //         result = clause->elements[j]->eval(*this, env);
-        //     }
-        //     return result;
-        // }
     }
     return ELux::share();
 }
@@ -1987,8 +1917,32 @@ Self ELux::handle_try(const Vec<Expr>& exprs, Context env){
 
 // -*-
 bool ELux::match_exception(const Self& self, Context env){
-    //! @todo: implement this
-    throw ELuxError(ELuxError::RuntimeError, "`catch' is not implemented yet.");
+    auto pred = (ELux::is_list(self) && ELux::as_list(self).len()==2);
+    ELux::check_syntax(
+        pred,
+        "`try': invalid 'catch'-expression. Expect a list of two elements or the wildcar `_'"
+    );
+    
+    auto xs = ELux::as_list(self);
+    auto err = xs.value().front();
+    auto type = xs.value().back();
+    pred = (ELux::is_symbol(err) && ELux::is_symbol(type));
+    auto error = ELux::as_error(err);
+    auto kind = ELux::as_symbol(type);
+    if(error.kind()==kind){
+        if(this->m_ErrorStack.empty()){
+            std::stringstream ss;
+            ss << "Undefined error `" << std::quoted(kind.str()) << "' found in the error stack.";
+            ELux::check_runtime(false, ss.str());
+        }
+        auto topError = this->m_ErrorStack.top();
+        if(error.equal(ELux::share(topError).get())){
+            this->m_ErrorStack.pop();
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // -*-

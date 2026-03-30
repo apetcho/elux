@@ -1026,6 +1026,7 @@ public:
     static bool is_float(const Self& self);
     static bool is_number(const Self& self);
     static bool is_string(const Self& self);
+    static bool is_symbol(const Self& self);
     static bool is_list(const Self& self);
     static bool is_array(const Self& self);
     static bool is_hashset(const Self& self);
@@ -1052,6 +1053,7 @@ public:
     static i64 as_integer(const Self& self);
     static Number as_number(const Self& self);
     static String as_string(const Self& self);
+    static Symbol as_symbol(const Self& self);
     static Array as_array(const Self& self);
     static List as_list(const Self& self);
     static HashSet as_hashset(const Self& self);
