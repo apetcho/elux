@@ -911,7 +911,7 @@ Self ELux::eval(const Vec<Expr>& elems, Context env) {
         if(op == "try"){ return handle_try(elems, env); }
         if(op == "throw"){ return handle_throw(elems, env); }
         if(op == "import"){ return handle_import(elems, env); }
-        if(op == "export"){ return handle_export(elems, env); }
+        //if(op == "export"){ return handle_export(elems, env); }
         // --------- End special forms ---------
     }
 
@@ -1939,19 +1939,18 @@ bool ELux::match_exception(const Self& self, Context env){
     auto err = xs.value().front();
     auto type = xs.value().back();
     pred = (ELux::is_symbol(err) && ELux::is_symbol(type));
-    auto error = ELux::as_error(err);
+    auto sym = ELux::as_symbol(err);
     auto kind = ELux::as_symbol(type);
-    if(error.kind()==kind){
-        if(this->m_ErrorStack.empty()){
-            std::stringstream ss;
-            ss << "Undefined error `" << std::quoted(kind.str()) << "' found in the error stack.";
-            ELux::check_runtime(false, ss.str());
-        }
-        auto topError = this->m_ErrorStack.top();
-        if(error.equal(ELux::share(topError).get())){
-            this->m_ErrorStack.pop();
-            return true;
-        }
+    // -*-
+    if(this->m_ErrorStack.empty()){
+        std::stringstream ss;
+        ss << "Undefined error `" << std::quoted(kind.str()) << "' found in the error stack.";
+        ELux::check_runtime(false, ss.str());
+    }
+    auto topError = this->m_ErrorStack.top();
+    if(topError.kind()==kind){
+        env->define(sym.str(), ELux::share(topError));
+        return true;
     }
 
     return false;
@@ -1973,8 +1972,25 @@ Self ELux::handle_throw(const Vec<Expr>& exprs, Context env){
     )ELUX";
     ELux::check_argc(pred, msg);
     auto self = dynamic_cast<ListExpr*>(exprs[0].get());
-    pred = (self!=nullptr);
-    ELux::check_argc(pred, msg);
+    pred = (self!=nullptr && self->elements.size()==2);
+    ELux::check_syntax(pred, msg);
+    auto sym = dynamic_cast<SymbolExpr*>(self->elements[0].get());
+    auto emsg = dynamic_cast<LiteralExpr*>(self->elements[1].get());
+    pred = (sym!=nullptr && emsg!=nullptr);
+    ELux::check_syntax(pred, msg);
+
+    auto errmsg = dynamic_cast<String*>(emsg->value.get());
+    pred = (errmsg!=nullptr);
+    ELux::check_syntax(pred, msg);
+    auto kind = sym->name;
+    pred = env->contains(kind.str());
+    std::stringstream ss;
+    ss << std::quoted(kind.str()) << " is not defined.";
+    ELux::check_runtime(pred, ss.str());
+
+    auto error = ELuxError(kind, errmsg->str());
+    this->m_ErrorStack.push(error);
+    return ELux::share(error);
 }
 
 // -*-
@@ -2028,10 +2044,10 @@ Self ELux::handle_import(const Vec<Expr>& elems, Context env){
 }
 
 // -*-
-Self ELux::handle_export(const Vec<Expr>& elems, Context env){
-    //! @todo: implement this
-    throw ELuxError(ELuxError::RuntimeError, "`export' is not implemented yet.");
-}
+// Self ELux::handle_export(const Vec<Expr>& elems, Context env){
+//     //! @todo: implement this
+//     throw ELuxError(ELuxError::RuntimeError, "`export' is not implemented yet.");
+// }
 
 // -*-
 //! @todo: refactor & reimplement this method
