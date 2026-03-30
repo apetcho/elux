@@ -1541,81 +1541,44 @@ Self ELux::handle_while(const Vec<Expr>& exprs, Context env){
 }
 
 // -*-
-Self ELux::handle_for(const Vec<Expr>& elems, Context env){
+Self ELux::handle_for(const Vec<Expr>& exprs, Context env){
     // (for (var list-expr) body...)
-    if (elems.size() < 3){
-        throw ELuxError(ELuxError::SyntaxError, "for expects (var list) and body");
-    }
-    auto binding = dynamic_cast<ListExpr*>(elems[1].get());
-    if(!binding || binding->elements.size() != 2){
-        throw ELuxError(ELuxError::SyntaxError, "for binding must be (var list-expr)");
-    }
-    auto varSym = dynamic_cast<SymbolExpr*>(binding->elements[0].get());
-    if(!varSym){
-        throw ELuxError(ELuxError::SyntaxError, "for var must be symbol");
-    }
-    auto listVal = binding->elements[1]->eval(*this, env);
-    auto failed = (
-        !ELux::is_list(listVal) &&
-        !ELux::is_array(listVal) &&
-        !ELux::is_hashset(listVal) &&
-        !ELux::is_hashmap(listVal) &&
-        !ELux::is_string(listVal)
-    );
-    if(failed){
-        throw ELuxError(ELuxError::SyntaxError, "for expects list/array/set/dict/string");
-    }
-    auto newEnv = std::make_shared<Env>(env);
-    // Value result;
-    if(ELux::is_list(listVal)){
-        const auto& xs = *dynamic_cast<List*>(listVal.get());
-        for(auto& item : xs.value()){
-            newEnv->define(varSym->name.str(), item);
-            for (size_t i = 2; i < elems.size(); ++i) {
-                // result = elems[i]->accept(*this, newEnv);
-                [[maybe_unused]] auto _ = elems[i]->eval(*this, newEnv);
-            }
-        }
-    }else if(ELux::is_array(listVal)){
-        const Array& array = *dynamic_cast<Array*>(listVal.get());
-        for(auto& item : array.value()){
-            newEnv->define(varSym->name.str(), item);
-            for(size_t i = 2; i < elems.size(); ++i){
-                // result = elems[i]->accept(*this, newEnv);
-                [[maybe_unused]] auto _ = elems[i]->eval(*this, newEnv);
-            }
-        }
-    }else if(ELux::is_hashset(listVal)){
-        const HashSet& xset = *dynamic_cast<HashSet*>(listVal.get());
-        for(auto& item : xset.value()) {
-            newEnv->define(varSym->name.str(), std::make_shared<String>(item));
-            for(size_t i = 2; i < elems.size(); ++i){
-                // result = elems[i]->accept(*this, newEnv);
-                [[maybe_unused]] auto _ = elems[i]->eval(*this, newEnv);
-            }
-        }
-    }else if(ELux::is_hashmap(listVal)){
-        const HashMap& dict = *dynamic_cast<HashMap*>(listVal.get());
-        for(auto& item : dict.value()) {
-            std::vector<Self> kv{};
-            kv.push_back(item.first);
-            kv.push_back(item.second);
-            auto data = std::make_shared<Array>();
-            data->value().insert(data->value().begin(), kv.begin(), kv.end());
-            newEnv->define(varSym->name.str(), data);
-            for(size_t i = 2; i < elems.size(); ++i){
-                // result = elems[i]->accept(*this, newEnv);
-                [[maybe_unused]] auto _ = elems[i]->eval(*this, newEnv);
-            }
-        }
-    }else{
-        const std::string& xstr = ELux::str(listVal);
-        for(auto& item : xstr){
-            newEnv->define(varSym->name.str(), std::make_shared<String>(item));
-            for(size_t i = 2; i < elems.size(); ++i){
-                // result = elems[i]->accept(*this, newEnv);
-                [[maybe_unused]] auto _ = elems[i]->eval(*this, newEnv);
-            }
+    auto pred = (exprs.size() < 3);
+    auto msg = R"ELUX(
+    `for': malformed `for' expression. The correct  syntax is as follows:
+
+    Syntax
+    ------
+        (for (var iterable) body)
+
+    Example
+    -------
+        (var xs (List 1 2 3 4 5 6))
+        (for (x xs)
+            (println "x = " x))
+    )ELUX";
+    ELux::check_argc(pred, msg);
+    
+    auto binding = dynamic_cast<ListExpr*>(exprs[1].get());
+    ELux::check_type(pred, "`for': the first argument must be a (var iterable) pair.");
+    pred = (binding != nullptr || binding->elements.size() != 2);
+    ELux::check_type(pred, "`for': the second element of the first argument must be an iterable.");
+    
+    auto varsym = dynamic_cast<SymbolExpr*>(binding->elements[0].get());
+    pred = (varsym != nullptr);
+    ELux::check_type(pred, "`for': the first element of the first argument must be an symbol.");
+    
+    auto data = binding->elements[1]->eval(*this, env);
+    auto iterator = dynamic_cast<Iterable*>(data.get());
+    auto localEnv = std::make_shared<Env>(env);
+    auto var = varsym->name.str();
+    localEnv->define(var, ELux::share());
+    while(!iterator->done()){
+        auto self = iterator->next();
+        localEnv->set(var, self);
+        // Evaluate the body of the for-loop
+        for(size_t i=2; i < exprs.size(); i++){
+            [[maybe_unused]] auto _ = exprs[i]->eval(*this, localEnv);
         }
     }
     return ELux::share();
