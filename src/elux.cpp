@@ -1061,24 +1061,51 @@ Self ELux::handle_if(const Vec<Expr>& elems, Context env){
 }
 
 // -*-
-Self ELux::handle_define(const Vec<Expr>& elems, Context env){
-    if(elems.size() != 3){
-        throw ELuxError(ELuxError::SyntaxError, "define expects name and value");
-    }
-    auto symExpr = dynamic_cast<SymbolExpr*>(elems[1].get());
-    if(!symExpr){
-        throw ELuxError(ELuxError::SyntaxError, "define name must be symbol");
-    }
-    if(env->immutables.find(symExpr->name.str())!=env->immutables.end()){
+Self ELux::handle_define(const Vec<Expr>& exprs, Context env){
+    auto pred = (exprs.size()==3 || exprs.size()==4);
+    std::string msg = R"ELUX(
+    `define': invalid use is one of the following:
+
+    Example
+    -------
+        (define name value)
+        (define name value "documentation string")
+    )ELUX";
+    // {
+    //     "`define': invalid use is one of the following:\n\n"
+    //     "    (define name value)\n"
+    //     "    (define name value \"documentation string\")\n"
+    // };
+    ELux::check_argc(pred, msg);
+    auto sym = dynamic_cast<SymbolExpr*>(exprs[1].get());
+    msg = R"ELUX(
+    `define': first argument must a symbol.
+
+    Example:
+    --------
+        (define PI 3.14)
+        (define E 2.71828 "Euler's number")
+    )ELUX";
+    ELux::check_syntax(pred, msg);
+    
+    if(env->immutables.find(sym->name.str())!=env->immutables.end()){
         std::stringstream ss;
-        ss << std::quoted(symExpr->name.str()) << " is immutable.";
+        ss << "`define': " << std::quoted(sym->name.str()) << " is immutable.";
         ss << "Cannot redefined an immutable varibale.";
         throw ELuxError(ELuxError::SyntaxError, ss.str());
     }
-    auto val = elems[2]->eval(*this, env);
-    env->define(symExpr->name.str(), val);
-    env->immutables.insert(symExpr->name.str());
-    return val;
+    auto val = exprs[2]->eval(*this, env);
+    env->define(sym->name.str(), val);
+    env->immutables.insert(sym->name.str());
+    if(exprs.size()==4){
+        auto self = dynamic_cast<LiteralExpr*>(exprs[3].get());
+        pred = ((self!=nullptr) && ELux::is_string(self->value));
+        ELux::check_type(
+            pred, "`define': expect the third optional argument to be a string if provided"
+        );
+        env->add_doc(sym->name.str(), self->value->str());
+    }
+    return ELux::share();
 }
 
 // -*-
