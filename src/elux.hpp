@@ -742,7 +742,6 @@ struct Function final: public Object {
     bool isNative = false;
     NativeFunc native = nullptr;
     ELux* elux;
-    //! @todo: add `docstr` field to store optional doc-string
 
     Symbol type(void) const override;
 
@@ -983,7 +982,7 @@ public:
     //! @todo add `myFloatMode'
     //! @todo add `myIntegerMode'
     //! @todo add `myFormatWidth'
-    
+
     //! @todo
     static std::unordered_set<ModulePtr> myModules;
     static Context myPrelude;

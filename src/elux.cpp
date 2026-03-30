@@ -1042,6 +1042,11 @@ Self ELux::handle_quasiquote(const Vec<Expr>& elems, Context env){
 /**
  * @brief Define elux's `if' special form.
  * 
+ * Syntax
+ * ------
+ *      (if test yesExpr)
+ *      (if test yesEypr noExpr)
+ * 
  * @param elems 
  * @param env 
  * @return Self 
@@ -1080,6 +1085,11 @@ Self ELux::handle_if(const Vec<Expr>& exprs, Context env){
 
 /**
  * @brief Define elux's `define' special form.
+ * 
+ * Syntax
+ * ------
+ *      (define name value)
+ *      (define name value doc-string)
  * 
  * @param exprs 
  * @param env 
@@ -1130,6 +1140,11 @@ Self ELux::handle_define(const Vec<Expr>& exprs, Context env){
 /**
  * @brief Define elux's `var' special form.
  * 
+ * Syntax
+ * ------
+ *      (var name value)
+ *      (var name value doc-string)
+ * 
  * @param exprs 
  * @param env 
  * @return Self 
@@ -1179,41 +1194,67 @@ Self ELux::handle_var(const Vec<Expr>& exprs, Context env){
     return ELux::share();
 }
 
-// -*-
-Self ELux::handle_lambda(const Vec<Expr>& elems, Context env){
-    if(elems.size() < 3){
-        throw ELuxError(ELuxError::SyntaxError, "lambda expects params and body");
-    }
-    auto paramsList = dynamic_cast<ListExpr*>(elems[1].get());
-    if(!paramsList){
-        throw ELuxError(ELuxError::SyntaxError, "lambda params must be list");
-    }
-    std::vector<std::string> params;
-    for(auto& p : paramsList->elements) {
-        auto s = dynamic_cast<SymbolExpr*>(p.get());
-        if (!s){ throw ELuxError(ELuxError::SyntaxError, "lambda param must be symbol"); }
-        params.push_back(s->name.str());
+/**
+ * @brief Define elux's `lambda' special form.
+ * 
+ * Syntax
+ * ------
+ *      (lambda params body)
+ * 
+ * @param elems 
+ * @param env 
+ * @return Self 
+ */
+Self ELux::handle_lambda(const Vec<Expr>& exprs, Context env){
+    auto pred = (exprs.size() < 3);
+    auto msg = R"ELUX(
+    `lambda': malformed lambda expression. The correct way is as follows:
+
+    Syntax:
+    -------
+        (lambda params body)
+
+    Example
+    -------
+        (lambda (name) (println "Hello " name "!"))
+    )ELUX";
+    ELux::check_argc(pred, msg);
+    
+    auto params_ = dynamic_cast<ListExpr*>(exprs[1].get());
+    pred = (params_!=nullptr);
+    ELux::check_type(pred, "`lambda': params must be a list.");
+    Vec<std::string> params;
+    for(auto& param : params_->elements) {
+        auto sym = dynamic_cast<SymbolExpr*>(param.get());
+        if (!sym){
+            std::stringstream ss;
+            ss << "`lambda': invalid parameter in the parameters list.\n";
+            ss << "Parameters must by symbols literal but got ";
+            ss << std::quoted(sym->name.type().str()) << " object.";
+            throw ELuxError(ELuxError::TypeError, ss.str());
+        }
+        params.push_back(sym->name.str());
     }
     // body: if multiple forms, wrap in (progn ...)
     Expr body;
-    if(elems.size() == 3){
-        body = elems[2];
+    if(exprs.size() == 3){
+        body = exprs[2];
     }else{
         auto le = std::make_shared<ListExpr>();
         le->elements.push_back(std::make_shared<SymbolExpr>("progn"));
-        for(size_t i = 2; i < elems.size(); ++i){
-            le->elements.push_back(elems[i]);
+        for(size_t i = 2; i < exprs.size(); ++i){
+            le->elements.push_back(exprs[i]);
         }
         body = le;
     }
-    auto fn = std::make_shared<Function>();
-    fn->params = params;
-    fn->body = body;
-    fn->closure = env;
-    fn->isMacro = false;
-    fn->elux = this;
-    fn->name = std::nullopt;
-    return std::move(fn);
+    auto lambda = std::make_shared<Function>();
+    lambda->params = params;
+    lambda->body = body;
+    lambda->closure = env;
+    lambda->isMacro = false;
+    lambda->elux = this;
+    lambda->name = std::nullopt;
+    return std::move(lambda);
 }
 
 // -*-
