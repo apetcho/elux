@@ -912,6 +912,7 @@ Self ELux::eval(const Vec<Expr>& elems, Context env) {
         if(op == "throw"){ return handle_throw(elems, env); }
         if(op == "import"){ return handle_import(elems, env); }
         //if(op == "export"){ return handle_export(elems, env); }
+        //if(op == "use"){ return handle_use(elems, env); }
         // --------- End special forms ---------
     }
 
@@ -1994,7 +1995,7 @@ Self ELux::handle_throw(const Vec<Expr>& exprs, Context env){
 }
 
 // -*-
-//! @todo: refactor this functions
+//! @todo: refactor this functions taking into account `use' and `export' forms
 Self ELux::handle_import(const Vec<Expr>& exprs, Context env){
     /*
         (import symbol)
@@ -2059,35 +2060,43 @@ Self ELux::handle_import(const Vec<Expr>& exprs, Context env){
 //     throw ELuxError(ELuxError::RuntimeError, "`export' is not implemented yet.");
 // }
 
-// -*-
-//! @todo: refactor & reimplement this method
-void ELux::run(const std::string& code, Context env, const std::string& label) {
-    auto len = 4 + label.length() + 4;
-    std::string line(len, '=');
-    std::cout << line << std::endl;
-    std::cout << "=*= " << label << " =*=" << std::endl;
-    std::cout << line << std::endl;
+// // -*-
+// //! @todo: refactor & reimplement this method
+// void ELux::run(const std::string& code, Context env, const std::string& label) {
+//     auto len = 4 + label.length() + 4;
+//     std::string line(len, '=');
+//     std::cout << line << std::endl;
+//     std::cout << "=*= " << label << " =*=" << std::endl;
+//     std::cout << line << std::endl;
 
-    try{
-        Parser p(code);
-        auto exprs = p.parse();
-        ELux elux;
-        Self last = ELux::share();
-        for(auto& expr : exprs) {
-            [[maybe_unused]] auto _ = elux.eval(expr, env);
-        }
-        //std::cout << "Result: " << toString(last) << "\n\n";
-    }catch(const ELuxError& err){
-        std::cerr << "\x1b[31m" << err.kind().str() << "\x1b[0m: " << err.str() << std::endl;
-    }catch(const std::exception& err){
-        std::cerr << "\x1b[31mError\x1b[0m: " << err.what() << std::endl;
-    }
-}
+//     try{
+//         Parser p(code);
+//         auto exprs = p.parse();
+//         ELux elux;
+//         Self last = ELux::share();
+//         for(auto& expr : exprs) {
+//             [[maybe_unused]] auto _ = elux.eval(expr, env);
+//         }
+//         //std::cout << "Result: " << toString(last) << "\n\n";
+//     }catch(const ELuxError& err){
+//         std::cerr << "\x1b[31m" << err.kind().str() << "\x1b[0m: " << err.str() << std::endl;
+//     }catch(const std::exception& err){
+//         std::cerr << "\x1b[31mError\x1b[0m: " << err.what() << std::endl;
+//     }
+// }
 
 //! @todo
 /*
+void ELux::run(const fs::path& modulePath, const Vec<Self>& args);
 void ELux::repl(const Vec<std::string>& args){}
 void ELux::setup(void){}
+bool ELux::is_loaded(const Module& mymod) const;
+bool ELux::is_loaded(const Symbol& myname) const;
+bool ELux::is_loaded(const fs::path& mypath) const;
+bool ELux::is_builtin_module(const Symbol& name) const;
+void ELux::add_builtin(const std::string& name, NativeFunc func, int minArgc, int maxArgc);
+void ELux::add_builtin(const std::string& name, Self self);
+
 */
 
 // -*-

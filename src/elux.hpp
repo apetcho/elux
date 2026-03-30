@@ -742,6 +742,8 @@ struct Function final: public Object {
     bool isMacro = false;
     bool isNative = false;
     NativeFunc native = nullptr;
+    int minArgc = -1;
+    int maxArgc = -1;
     ELux* elux;
 
     Symbol type(void) const override;
@@ -970,8 +972,8 @@ private:
 class ELux : public ExprVisitor {
 public:
 
-    //! @todo: refactor & reimplement this method
-    static void run(const std::string& code, Context env, const std::string& label);
+    // //! @todo: refactor & reimplement this method
+    // static void run(const std::string& code, Context env, const std::string& label);
     
     static std::string myExt;
     //! @todo add `myLicense'
@@ -983,7 +985,6 @@ public:
     //! @todo add `myIntegerMode'
     //! @todo add `myFormatWidth'
 
-    //! @todo
     using ModuleSet = std::unordered_set<ModulePtr, ModuleHash, ModuleEqual>;
     static ModuleSet myModules;
     static Context myPrelude;
@@ -1113,6 +1114,7 @@ public:
     bool is_loaded(const Module& mymod) const;
     bool is_loaded(const Symbol& myname) const;
     bool is_loaded(const fs::path& mypath) const;
+    bool is_builtin_module(const Symbol& name) const;
 
 private:
     
@@ -1139,14 +1141,15 @@ private:
     Self handle_try(const Vec<Expr>& elems, Context env);
     bool match_exception(const Self& self, Context env);
     Self handle_import(const Vec<Expr>& elems, Context env);
-
-    //!@todo add `handle_throw' method to handle throw-expressions
     Self handle_throw(const Vec<Expr>& elems, Context env);
+
     //! @todo add `handle_export' method to handle export-expressions
-    Self handle_export(const Vec<Expr>& elems, Context env);
+    //Self handle_export(const Vec<Expr>& elems, Context env);
+    //Self handle_use(const Vec<Expr>& elems, Context env);
+    
     //! @todo : implement the followings.
     static void initialize_prelude(void);
-    static void add_builtin(const std::string& name, NativeFunc func);
+    static void add_builtin(const std::string& name, NativeFunc func, int minArgc, int maxArgc);
     static void add_builtin(const std::string& name, Self self);
 
     //-------------------------------------------------------------

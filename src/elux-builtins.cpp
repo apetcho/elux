@@ -33,7 +33,6 @@ SOFTWARE.
 // -*----------------------------------------------------------------*-
 namespace ekasoft::klx{
 // -
-/*
 Self fn_add(const Vec<Self>& args, Context ctx);
 Self fn_sub(const Vec<Self>& args, Context ctx);
 Self fn_mul(const Vec<Self>& args, Context ctx);
@@ -101,11 +100,13 @@ Self fn_format(const Vec<Self>& args, Context ctx);
 Self fn_docstr(const Vec<Self>& args, Context ctx);
 Self fn_help(const Vec<Self>& args, Context ctx);
 Self fn_lookfor(const Vec<Self>& args, Context ctx);
+Self fn_get_argc(const Vec<Self>& args, Context ctx);
+Self fn_get_args(const Vec<Self>& args, Context ctx);
+Self fn_version(const Vec<Self>& args, Context ctx);
+Self fn_quit(const Vec<Self>& args, Context ctx);
+Self fn_bye(const Vec<Self>& args, Context ctx);
+Self fn_exit(const Vec<Self>& args, Context ctx);
 
-void ELux::initialize_prelude(void){}
-
-
-*/
 
 Self add(const Vec<Self>& args) {
     if(args.empty()){ return std::make_shared<Number>();}
@@ -1130,6 +1131,84 @@ Context makeGlobalEnv() {
     return env;
 }
 
+//! @todo
+void ELux::initialize_prelude(void){
+    // -
+    ELux::add_builtin("+", fn_add, 2, -1);                      // [001]
+    ELux::add_builtin("-", fn_sub, 1, -1);                      // [002]
+    ELux::add_builtin("*", fn_mul, 2, -1);                      // [003]
+    ELux::add_builtin("/", fn_div, 2, -1);                      // [004]
+    ELux::add_builtin("%", fn_mod, 2, -1);                      // [005]
+    ELux::add_builtin("and", fn_logical_and, 2, -1);            // [006]
+    ELux::add_builtin("or", fn_logical_or, 2, -1);              // [007]
+    ELux::add_builtin("not", fn_logical_not, 2, -1);            // [008]
+    ELux::add_builtin("&", fn_bit_and, 2, 2);                   // [009]
+    ELux::add_builtin("|", fn_bit_or, 2, 2);                    // [010]
+    ELux::add_builtin("~", fn_bit_not, 1, 1);                   // [011]
+    ELux::add_builtin("^", fn_bit_xor, 2, 2);                   // [012]
+    ELux::add_builtin("<<", fn_bit_lshift, 2, 2);               // [013]
+    ELux::add_builtin(">>", fn_bit_rshift, 2, 2);               // [014]
+    ELux::add_builtin("println", fn_println, -1, -1);           // [015]
+    ELux::add_builtin("print", fn_print, -1, -1);               // [016]
+    ELux::add_builtin("eprintln", fn_eprintln, -1, -1);         // [017]
+    ELux::add_builtin("eprint", fn_eprint, -1, -1);             // [018]
+    ELux::add_builtin("panic", fn_panic, -1, -1);               // [019]
+    ELux::add_builtin("input", fn_input, 0, 1);                 // [020]
+    ELux::add_builtin("Bool", fn_bool, 1, 1);                   // [021]
+    ELux::add_builtin("Integer", fn_integer, 1, 1);             // [022]
+    ELux::add_builtin("Float", fn_float, 1, 1);                 // [023]
+    ELux::add_builtin("String", fn_string, 0, 1);               // [024]
+    ELux::add_builtin("Pair", fn_pair, 2, 2);                   // [025]
+    ELux::add_builtin("Tuple", fn_tuple, 0, -1);                // [026]
+    ELux::add_builtin("Array", fn_array, 1, 1);                 // [027]
+    ELux::add_builtin("List", fn_list, 0, -1);                  // [028]
+    ELux::add_builtin("HashSet", fn_hashset, 0, -1);            // [029]
+    ELux::add_builtin("HashMap", fn_hashmap, 0, -1);            // [030]
+    ELux::add_builtin("define-error", fn_define_error, 2, 2);   // [031]
+    ELux::add_builtin("len", fn_len, 1, 1);                     // [032]
+    ELux::add_builtin("map", fn_map, 2, 2);                     // [033]
+    ELux::add_builtin("filter", fn_filter, 2, 2);               // [034]
+    ELux::add_builtin("reduce", fn_reduce, 3, 3);               // [035]
+    ELux::add_builtin("zip", fn_zip, 2, -1);                    // [036]
+    ELux::add_builtin("chain", fn_chain, 2, -1);                // [037]
+    ELux::add_builtin("take", fn_take, 2, 2);                   // [038]
+    ELux::add_builtin("drop", fn_drop, 2, 2);                   // [040]
+    ELux::add_builtin("enumerate", fn_enumerate, 1, 1);         // [041]
+    ELux::add_builtin("drop-while", fn_drop_while, 2, 2);       // [042]
+    ELux::add_builtin("take-while", fn_take_while, 2, 2);       // [043]
+    ELux::add_builtin("any", fn_any, 2, 2);                     // [044]
+    ELux::add_builtin("all", fn_all, 2, 2);                     // [045]
+    ELux::add_builtin("reverse", fn_reverse, 1, 1);             // [046]
+    ELux::add_builtin("collect", fn_collect, 2, 2);             // [047]
+    ELux::add_builtin("sort", fn_sort, 1, 2);                   // [048]
+    ELux::add_builtin("range", fn_range, 1, 3);                 // [049]
+    ELux::add_builtin("linspace", fn_linspace, 2, 2);           // [050]
+    ELux::add_builtin("seed", fn_seed, 1, 1);                   // [051]
+    ELux::add_builtin("random", fn_random, 0, 3);               // [052]
+    ELux::add_builtin("next-integer", fn_nextInteger, 2, 2);    // [053]
+    ELux::add_builtin("next-float", fn_nextFloat, 2, 2);        // [054]
+    ELux::add_builtin("push", fn_push, 2, 2);                   // [055]
+    ELux::add_builtin("pop", fn_pop, 1, 2);                     // [056]
+    ELux::add_builtin("get", fn_get, 2, 2);                     // [057]
+    ELux::add_builtin("insert", fn_insert, 3, 3);               // [058]
+    ELux::add_builtin("find", fn_find, 2, 3);                   // [059]
+    ELux::add_builtin("find-all", fn_find_all, 2, 2);           // [060]
+    ELux::add_builtin("contains", fn_contains, 2, 2);           // [061]
+    ELux::add_builtin("typeof", fn_typeof, 1, 1);               // [062]
+    ELux::add_builtin("replace", fn_replace, 3, 4);             // [063]
+    ELux::add_builtin("replace-all", fn_replace_all, 3, 3);     // [064]
+    ELux::add_builtin("format", fn_format, 1, 1);               // [065]
+    ELux::add_builtin("documentation", fn_docstr, 1, 1);        // [066]
+    ELux::add_builtin("help", fn_help, 1, 1);                   // [067]
+    ELux::add_builtin("lookfor", fn_lookfor, 1, 1);             // [068]
+    ELux::add_builtin("arg-count", fn_get_argc, 0, 0);          // [069]
+    ELux::add_builtin("arg-value", fn_get_args, 1, 1);          // [070]
+    ELux::add_builtin("version", fn_version, 0, 0);             // [071]
+    ELux::add_builtin("quit", fn_quit, 0, 0);                   // [072]
+    ELux::add_builtin("bye", fn_bye, 1, 1);                     // [073]
+    ELux::add_builtin("exit", fn_exit, 1, 1);                   // [074]
+    
+}
 
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::klx                                          -*-
