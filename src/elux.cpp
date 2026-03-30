@@ -1641,36 +1641,217 @@ Self ELux::handle_cond(const Vec<Expr>& exprs, Context env){
 }
 
 // -*-
-Self ELux::handle_match(const Vec<Expr>& elems, Context env){
+Self ELux::handle_match(const Vec<Expr>& exprs, Context env){
     // very simple: (match value (pattern expr) (pattern expr) ...)
     // patterns only support literals and t as wildcard
-    if(elems.size() < 3){
+    
+    struct Matcher{
+        bool match(ExprVisitor* visitor, Expr pattern, Self self, Context ctx){
+            if(auto expr = dynamic_cast<LiteralExpr*>(pattern.get())){
+                return this->match(visitor, expr, self, ctx);
+            }
+            if(auto expr = dynamic_cast<SymbolExpr*>(pattern.get())){
+                return this->match(visitor, expr, self, ctx);
+            }
+            if(auto expr = dynamic_cast<ListExpr*>(pattern.get())){
+                return this->match(visitor, expr, self, ctx);
+            }
+            return false;
+        }
+
+    private:
+        bool match(ExprVisitor* visitor, LiteralExpr* expr, Self rhs, Context ctx){
+            auto lhs = visitor->visit(*expr, ctx);
+            return ELux::as_bool(lhs==rhs);
+        }
+
+        bool match(ExprVisitor* visitor, SymbolExpr* expr, Self rhs, Context ctx){
+            if(expr->name.str()=="_"){ return true; }
+            auto key = expr->name.str();
+            ctx->define(key, rhs);
+            return true;
+        }
+
+        bool match(ExprVisitor* visitor, ListExpr* expr, Self rhs, Context ctx){
+            auto pred = (expr->elements.size() > 1);
+            auto msg = R"ELUX(
+            `match': malformed mathc-clause for list-pattern.
+
+            List pattern must be one of the following:
+                
+                ((Pair key val) body)
+                ((Tuple ...) body)
+                ((Array ...) body)
+                ((List ...) body)
+
+            Example
+            -------
+                (var xs (Pair "Hello world!" "Bonjour le monde!"))
+
+                (match xs
+                    (3 (println "xs = 3"))
+                    ((Array x _) (println "x = " x))
+                    ((Pair key val) (println "(key=" key ", val=" val ")"))
+                    (_ (println "Matched none!")))
+            )ELUX";
+
+            ELux::check_type(pred, msg);
+            auto sym = dynamic_cast<SymbolExpr*>(expr->elements[0].get());
+            pred = (sym!=nullptr);
+            ELux::check_type(pred, msg);
+            ListExpr xs{};
+            xs.elements = {};
+            for(auto i=1; i < expr->elements.size(); i++){
+                xs.elements.push_back(expr->elements[i]);
+            }
+            std::set<std::string> types{"Pair", "Tuple", "Array", "List", };
+            auto name = sym->name.str();
+            if(types.find(name)==types.end()){
+                msg = R"ELUX(
+            `match': malformed list-pattern.
+
+            The first element in the list-pattern must be one of `Pair', `Tuple', `Array',
+            or `List'.
+
+            Examples
+            --------
+                (Pair key val)
+                (Tuple ...)
+                (Array ...)
+                (List ...)
+
+            )ELUX";
+                ELux::check_syntax(false, msg);
+            }
+            if(name=="Pair"){ return this->_match_pair(visitor, xs, rhs, ctx); }
+            if(name=="Tuple"){ return this->_match_tuple(visitor, xs, rhs, ctx); }
+            if(name=="Array"){ return this->_match_array(visitor, xs, rhs, ctx); }
+            if(name=="List"){ return this->_match_list(visitor, xs, rhs, ctx); }
+            return false;
+        }
+        
+        bool _match_pair(ExprVisitor* visitor, ListExpr expr, Self self, Context ctx){
+            bool matched{true};
+            auto pred = (expr.elements.size()==2);
+            std::string msg{
+                "`match': malformed pair-pattern. The correct syntax is as follow:\n\n"
+                "    (Pair key val)"
+            };
+            ELux::check_syntax(pred, msg);
+            auto pattern = expr.elements[0];
+            matched = matched && this->match(visitor, pattern, self, ctx);
+            if(!matched){ return false; }
+            pattern = expr.elements[1];
+            matched = matched && this->match(visitor, pattern, self, ctx);
+            return matched;
+        }
+
+        bool _match_tuple(ExprVisitor* visitor, ListExpr expr, Self self, Context ctx){
+            if(!ELux::is_tuple(self)){ return false; }
+            if(expr.elements.empty() && ELux::is_tuple(self)){
+                auto tuple = ELux::as_tuple(self);
+                return (tuple.len()==0);
+            }
+            bool matched{true};
+            for(auto pattern: expr.elements){
+                matched = matched && this->match(visitor, pattern, self, ctx);
+                if(!matched){ return false; }
+            }
+            return matched;
+        }
+        
+        bool _match_array(ExprVisitor* visitor, ListExpr expr, Self self, Context ctx){
+            if(!ELux::is_array(self)){ return false; }
+            if(expr.elements.empty() && ELux::is_array(self)){
+                auto tuple = ELux::as_array(self);
+                return (tuple.len()==0);
+            }
+            bool matched{true};
+            for(auto pattern: expr.elements){
+                matched = matched && this->match(visitor, pattern, self, ctx);
+                if(!matched){ return false; }
+            }
+            return matched;
+        }
+
+        bool _match_list(ExprVisitor* visitor, ListExpr expr, Self self, Context ctx){
+            if(!ELux::is_list(self)){ return false; }
+            if(expr.elements.empty() && ELux::is_list(self)){
+                auto tuple = ELux::as_array(self);
+                return (tuple.len()==0);
+            }
+            bool matched{true};
+            for(auto pattern: expr.elements){
+                matched = matched && this->match(visitor, pattern, self, ctx);
+                if(!matched){ return false; }
+            }
+            return matched;
+        }
+
+
+        /*
+        (1) Matching literal pattern-expression pair
+            (literal expr)
+            Examples
+            --------
+            (1 (println "..."))
+            (3.12 (progn ....))
+            ("my-fancy-literal-text" (progn ...))
+
+        (2) Matching symbol pattern-expression pair
+            (symbol expr)
+            Example
+            -------
+            (x (println "x = " x))
+
+        (3) Matching list pattern-expression pair.
+            ((symbol ....) expr)
+            Examples
+            --------
+            ((Array x _ y _ ) (println "x = " x ", y = " y))
+            ((List x _ y _ ) (println "x = " x ", y = " y))
+            ((Tuple x _ y _ ) (println "x = " x ", y = " y))
+            ((Pair key val) (println "key = " key ", val = " val))
+        */
+    };
+
+    if(exprs.size() < 3){
         throw ELuxError(ELuxError::SyntaxError, "match expects value and clauses");
     }
-    auto mval = elems[1]->eval(*this, env);
-    for(size_t i = 2; i < elems.size(); ++i){
-        auto clause = dynamic_cast<ListExpr*>(elems[i].get());
+
+    Matcher matcher{};
+    auto localEnv = std::make_shared<Env>(env);
+    auto rhs = exprs[1]->eval(*this, env);
+    for(size_t i = 2; i < exprs.size(); ++i){
+        auto clause = dynamic_cast<ListExpr*>(exprs[i].get());
         if(!clause || clause->elements.size() < 2){
             throw ELuxError(ELuxError::SyntaxError, "match clause must be (pattern expr)");
         }
-        auto patExpr = clause->elements[0];
-        bool wildcard = false;
-        if(auto s = dynamic_cast<SymbolExpr*>(patExpr.get())){
-            if(s->name.str() == "true"){ wildcard = true; }
-        }
-        bool matched = false;
-        if(wildcard){ matched = true; }
-        else{
-            auto patVal = patExpr->eval(*this, env);
-            matched = ((patVal->str() == mval->str()));
-        }
+        auto pattern = clause->elements[0];
+        auto matched = matcher.match(this, pattern, rhs, localEnv);
         if(matched){
-            Self result = ELux::share();
-            for(size_t j = 1; j < clause->elements.size(); ++j){
-                result = clause->elements[j]->eval(*this, env);
+            for(auto j=1; j < clause->elements.size(); j++){
+                [[maybe_unused]] auto _ = clause->elements[j]->eval(*this, localEnv);
             }
-            return result;
         }
+        // auto patExpr = clause->elements[0];
+        // bool wildcard = false;
+        // if(auto s = dynamic_cast<SymbolExpr*>(patExpr.get())){
+        //     if(s->name.str() == "_"){ wildcard = true; }
+        // }
+        // bool matched = false;
+        // if(wildcard){ matched = true; }
+        // else{
+        //     auto patVal = patExpr->eval(*this, env);
+        //     matched = ((patVal->str() == mval->str()));
+        // }
+        // if(matched){
+        //     Self result = ELux::share();
+        //     for(size_t j = 1; j < clause->elements.size(); ++j){
+        //         result = clause->elements[j]->eval(*this, env);
+        //     }
+        //     return result;
+        // }
     }
     return ELux::share();
 }
