@@ -1585,25 +1585,57 @@ Self ELux::handle_for(const Vec<Expr>& exprs, Context env){
 }
 
 // -*-
-Self ELux::handle_cond(const Vec<Expr>& elems, Context env){
+Self ELux::handle_cond(const Vec<Expr>& exprs, Context env){
     // (cond (test expr...) (test expr...) (t expr...))
-    for(size_t i = 1; i < elems.size(); ++i){
-        auto clause = dynamic_cast<ListExpr*>(elems[i].get());
-        if(!clause || clause->elements.empty()){
-            throw ELuxError(ELuxError::SyntaxError, "cond clause must be list");
+    // flag used to check whether at least a test-expression of a clause evaluate to true.
+    [[maybe_unused]] auto msg = R"ELUX(
+    `cond': malformed `cond' clause. The correct syntax is as follows:
+    
+    Syntax
+    ------
+        (cond
+            (clause-1)
+            (clause-2)
+            ...
+            (clause-N))
+
+    Example
+    -------
+        (cond
+            ((< 2 1) (println "2 < 1"))
+            ((> 2 1) (println "2 > 1"))
+            (true)  (println "Weird ordering logic. :)"))
+    )ELUX";
+    bool passed{false};
+    for(size_t i = 1; i < exprs.size(); ++i){
+        auto clause = dynamic_cast<ListExpr*>(exprs[i].get());
+        auto pred = (clause != nullptr || clause->elements.empty());
+        ELux::check_syntax(pred, msg);
+        auto test = clause->elements[0];
+        bool otherwise{false};
+        if(auto sym = dynamic_cast<SymbolExpr*>(test.get())){
+            if(sym->name.str() == "true"){ otherwise = true; }
         }
-        auto testExpr = clause->elements[0];
-        bool isElse = false;
-        if(auto s = dynamic_cast<SymbolExpr*>(testExpr.get())){
-            if(s->name.str() == "true"){ isElse = true; }
-        }
-        if(isElse || ELux::as_bool(testExpr->eval(*this, env))){
+        auto self = test->eval(*this, env);
+        pred = ELux::is_bool(self);
+        std::stringstream ss;
+        ss << "`cond': malformed `cond' clause. Expect the each clause be a list\n";
+        ss << "such that the first element of each clause evaluate to bool, but got\n";
+        ss << std::quoted(self->type().str()) << " object.";
+        ELux::check_type(pred, ss.str());
+        if(otherwise || ELux::as_bool(self)){
+            passed = true;
             Self result = ELux::share();
             for(size_t j = 1; j < clause->elements.size(); ++j){
                 result = clause->elements[j]->eval(*this, env);
             }
             return result;
         }
+    }
+    if(!passed){
+        std::cerr << "None of the test-expression in `cond' clause has been evaluated to true.\n";
+        std::cerr << "Expect at least one test-expression of `cond' clause evaluate to true.";
+        std::cerr << std::endl;
     }
     return ELux::share();
 }
