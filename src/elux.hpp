@@ -790,8 +790,9 @@ Self operator&&(const Self& lhs, const Self& rhs);
 struct Env : std::enable_shared_from_this<Env> {
     std::map<std::string, Self> vars;
     std::set<std::string> immutables;
-    //! @todo: std::map<std::string, std::string> docstrings;
-    //! @todo std::set<std::string> exceptions;
+    //! @todo:
+    std::map<std::string, std::string> docstrings;
+    std::set<std::string> exceptions;
     std::shared_ptr<Env> parent;
 
     Env() = default;
@@ -802,8 +803,9 @@ struct Env : std::enable_shared_from_this<Env> {
     bool contains(const std::string& name) const;
     bool is_immutable(const std::string& name) const;
     Self get(const std::string& name);
-    //! @todo: std::string get_doc(const std::string&) const;
-    //! @todo: void add_doc(const std::string&, const std::string& doc);
+    //! @todo:
+    bool has_doc(const std::string&, std::string& docstr) const;
+    void add_doc(const std::string&, const std::string& docstr);
 };
 
 // =========================
@@ -944,8 +946,8 @@ public:
     const Context& load(void) const{ return this->m_env; }
     const Symbol& name(void) const{ return this->m_name; }
     Symbol& name(void){ return this->m_name; }
-    const fs::path& fullpath() const{ return this->m_fullpath; }
-    fs::path& fullpath(){ return this->m_fullpath; }
+    const fs::path& path() const{ return this->m_path; }
+    fs::path& path(){ return this->m_path; }
     const std::string& filename(void) const{ return this->m_filename; }
     std::string& filename(void){ return this->m_filename; }
 
@@ -956,7 +958,7 @@ public:
 private:
     ELux* m_elux;               // the interpreter
     Symbol m_name;              // module nmae
-    fs::path m_fullpath;        // module fullpath
+    fs::path m_path;        // module fullpath
     std::string m_filename;     // module filename
     Context m_env;              // module environment
 
@@ -1095,9 +1097,15 @@ public:
 
     const Context& runtime(void) const{ return this->m_runtime; }
     Context& runtime(void){ return this->m_runtime; }
+    //! @todo
+    bool is_loaded(const Module& mymod) const;
+    bool is_loaded(const Symbol& myname) const;
+    bool is_loaded(const fs::path& mypath) const;
 
 private:
     Context m_runtime;
+    std::unordered_set<Module, ModuleHash, ModuleEqual> m_loaded;
+
     //Self handle_expand(const Vec<Expr>& elems, Context env);
     Self handle_quote(const Vec<Expr>& elems, Context env);
     Self handle_quasiquote(const Vec<Expr>& elems, Context env);

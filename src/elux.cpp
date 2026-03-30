@@ -112,6 +112,21 @@ Self Env::get(const std::string& name) {
     throw ELuxError(ELuxError::KeyError, "Unbound symbol: " + name);
 }
 
+// -*-
+bool Env::has_doc(const std::string& name, std::string& docstr) const{
+    auto entry = this->docstrings.find(name);
+    if(entry==this->docstrings.end()){
+        return false;
+    }
+    docstr = entry->second;
+    return true;
+}
+
+/*
+void Env::add_doc(const std::string&, const std::string& docstr){}
+
+*/
+
 // ===============================
 // ELux (Visitor): the interpreter
 // ===============================
@@ -1577,14 +1592,14 @@ Module::Module(ELux* elux, const Symbol& sym, const fs::path& modulePath)
 Module::Module(Module&& other) noexcept
 : m_elux{std::move(other.m_elux)}
 , m_name{std::move(other.m_name)}
-, m_fullpath{std::move(other.m_fullpath)}
+, m_path{std::move(other.m_path)}
 , m_filename{std::move(other.m_filename)}
 , m_env{std::move(other.m_env)}
 {
     other.m_elux = nullptr;
     other.m_env = nullptr;
     other.m_filename = "";
-    other.m_fullpath = "";
+    other.m_path = "";
     other.m_name = Symbol("");
 }
 
@@ -1593,13 +1608,13 @@ Module& Module::operator=(Module&& other) noexcept{
     if(this != &other){
         this->m_elux = std::move(other.m_elux);
         this->m_name = std::move(other.m_name);
-        this->m_fullpath = std::move(other.m_fullpath);
+        this->m_path = std::move(other.m_path);
         this->m_filename = std::move(other.m_filename);
         this->m_env = std::move(other.m_env);
         other.m_elux = nullptr;
         other.m_env = nullptr;
         other.m_filename = "";
-        other.m_fullpath = "";
+        other.m_path = "";
         other.m_name = Symbol("");
     }
     return *this;
@@ -1608,7 +1623,7 @@ Module& Module::operator=(Module&& other) noexcept{
 // -*-
 const std::string& Module::key(void) const{
     std::stringstream ss;
-    ss << this->m_fullpath.string() << "::";
+    ss << this->m_path.string() << "::";
     ss << this->m_filename << "::";
     ss << this->m_name.str();
     return ss.str();
@@ -1648,13 +1663,13 @@ bool Module::is_module_key(const std::string& token){
 bool Module::is_builtin_module(void) const{
     auto myKey = this->key();
     auto path = myKey.substr(0, myKey.find("::"));
-    return (this->m_fullpath=="@elux");
+    return (this->m_path=="@elux");
 }
 
 // -*-
 void Module::setup(const Symbol& sym){
     this->m_name = sym;
-    this->m_fullpath = "@elux";
+    this->m_path = "@elux";
     this->m_filename = ("__elux__" + sym.str());
     bool found{false};
     for(auto& mymod: ELux::myModules){
@@ -1674,8 +1689,8 @@ void Module::setup(const Symbol& sym){
 
 // -*-
 void Module::setup(const fs::path& path){
-    this->m_fullpath = fs::absolute(path);
-    this->m_filename = this->m_fullpath.filename();
+    this->m_path = path;
+    this->m_filename = this->m_path.filename();
     auto pos = this->m_filename.find(ELux::myExt);
     if(pos==std::string::npos){
         std::stringstream ss;
@@ -1708,20 +1723,6 @@ void Module::setup(const Symbol& sym, const fs::path& path){
     this->m_name = sym;
 }
 
-/*
-// -*-
-class Module final{
-public:
-private:
-    Symbol m_name;              // module nmae
-    fs::path m_fullpath;        // module fullpath
-    std::string m_filename;     // module filename
-    Context m_env;              // module environment
-    ELux* m_elux;               // the interpreter
-
-
-};
-*/
 
 // -*----------------------------------------------------------------*-
 }//-*- end::namespace::klx                                          -*-
