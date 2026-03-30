@@ -38,6 +38,7 @@ SOFTWARE.
 #include<memory>
 #include<vector>
 #include<string>
+#include<stack>
 #include<list>
 #include<map>
 #include<set>
@@ -1035,6 +1036,7 @@ public:
     static bool is_callable(const Self& self);
     static bool is_pair(const Self& self);
     static bool is_tuple(const Self& self);
+    static bool is_error(const Self& self);
     static bool is_iterable(const Self& self);
     static bool is_hashable(const Self& self);
     static bool is_equalable(const Self& self);
@@ -1055,6 +1057,7 @@ public:
     static HashSet as_hashset(const Self& self);
     static HashMap as_hashmap(const Self& self);
     static Function as_function(const Self& self);
+    static ELuxError as_error(const Self& self);
 
     static Pair as_pair(const Self& self);
     static Tuple as_tuple(const Self& self);
@@ -1077,6 +1080,8 @@ public:
     static void check_index(bool pred, const std::string& message);
     static void check(bool pred, const std::string& message);
     static void check_argc(bool pred, const std::string& message);
+
+    using ErrorStack = std::stack<ELuxError>;
     
 public:
     Self visit(LiteralExpr& e, Context env) override;
@@ -1099,14 +1104,19 @@ public:
     const Context& runtime(void) const{ return this->m_runtime; }
     Context& runtime(void){ return this->m_runtime; }
 
+    const ErrorStack& errors(void) const{ return this->m_ErrorStack; }
+    ErrorStack& errors(void){ return this->m_ErrorStack; }
+
     //! @todo
     bool is_loaded(const Module& mymod) const;
     bool is_loaded(const Symbol& myname) const;
     bool is_loaded(const fs::path& mypath) const;
 
 private:
+    
     Context m_runtime;
     ModuleSet m_cache;
+    ErrorStack m_ErrorStack;
 
     //Self handle_expand(const Vec<Expr>& elems, Context env);
     Self handle_quote(const Vec<Expr>& elems, Context env);
@@ -1125,6 +1135,7 @@ private:
     Self handle_cond(const Vec<Expr>& elems, Context env);
     Self handle_match(const Vec<Expr>& elems, Context env);
     Self handle_try(const Vec<Expr>& elems, Context env);
+    bool match_exception(const Self& self, Context env);
     Self handle_import(const Vec<Expr>& elems, Context env);
 
     //!@todo add `handle_throw' method to handle throw-expressions

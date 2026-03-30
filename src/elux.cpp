@@ -30,6 +30,7 @@ SOFTWARE.
 #include<random>
 #include<thread> // std::sleep_for
 #include<chrono>
+#include<queue>
 #include<stack>
 
 // -*----------------------------------------------------------------*-
@@ -341,6 +342,12 @@ bool ELux::is_tuple(const Self& self){
 }
 
 // -*-
+bool ELux::is_error(const Self& self){
+    auto ptr = dynamic_cast<ELuxError*>(self.get());
+    return (ptr==nullptr ? false : true);
+}
+
+// -*-
 bool ELux::is_iterable(const Self& self){
     auto ptr = dynamic_cast<Iterable*>(self.get());
     return (ptr==nullptr ? false : true);
@@ -547,6 +554,20 @@ Tuple ELux::as_tuple(const Self& self){
     }
 
     return Tuple(vec);
+}
+
+// -*-
+ELuxError ELux::as_error(const Self& self){
+    ELuxError error{};
+    if(ELux::is_error(self)){
+        error = *dynamic_cast<ELuxError*>(self.get());
+    }else{
+        std::stringstream ss;
+        ss << "cannot convert " << std::quoted(self->type().str()) << " to an error type.";
+        throw ELuxError(ELuxError::TypeError, ss.str());
+    }
+
+    return error;
 }
 
 // -*-
@@ -1816,7 +1837,7 @@ Self ELux::handle_match(const Vec<Expr>& exprs, Context env){
     };
 
     if(exprs.size() < 3){
-        throw ELuxError(ELuxError::SyntaxError, "match expects value and clauses");
+        throw ELuxError(ELuxError::SyntaxError, "`match': expect value and clauses");
     }
 
     Matcher matcher{};
@@ -1825,7 +1846,7 @@ Self ELux::handle_match(const Vec<Expr>& exprs, Context env){
     for(size_t i = 2; i < exprs.size(); ++i){
         auto clause = dynamic_cast<ListExpr*>(exprs[i].get());
         if(!clause || clause->elements.size() < 2){
-            throw ELuxError(ELuxError::SyntaxError, "match clause must be (pattern expr)");
+            throw ELuxError(ELuxError::SyntaxError, "`match': clause must be (pattern expr)");
         }
         auto pattern = clause->elements[0];
         auto matched = matcher.match(this, pattern, rhs, localEnv);
@@ -1857,43 +1878,117 @@ Self ELux::handle_match(const Vec<Expr>& exprs, Context env){
 }
 
 // -*-
-Self ELux::handle_try(const Vec<Expr>& elems, Context env){
-    // (try body... (catch var body...))
-    // find catch clause
-    size_t catchIndex = 0;
-    for(size_t i = 1; i < elems.size(); ++i){
-        if(auto se = dynamic_cast<SymbolExpr*>(elems[i].get())){
-            if(se->name.str() == "catch") {
-                catchIndex = i;
-                break;
+Self ELux::handle_try(const Vec<Expr>& exprs, Context env){
+    auto pred = (exprs.size()> 1);
+    auto msg = R"ELUX(
+    `try': malformed `try' expression. The correct syntax is as follow:
+
+    Syntax
+    ------
+        (try
+            body
+            ((catch err-1)
+                catch-body-1)
+            ((catch err-2)
+                catch-body-2)
+            ...
+            ((catch err-N)
+                catch-body-N))
+
+    Example
+    -------
+        (try
+            (progn
+                ;; read user input
+                (var x (input "Guess a number: "))
+                ;; convert numeric string to integer
+                (var x (Integer x))
+                (if (< x 0)
+                    (throw (ValueError "cannot compute square root of negative number."))
+                    (println "square root of x=" x " is " (Math.sqrt x))))
+            ((catch (err ValueError))
+                (eprintln (show-error err)))
+            ((catch (err SyntaxError))
+                (describe-error err)
+            ((catch _)
+                (eprintln "We caught any other exception that may have been thrown"))))
+    )ELUX";
+
+    ELux::check_argc(pred, msg);
+    auto localEnv = std::make_shared<Env>(env);
+    auto body = exprs[0];
+    [[maybe_unused]] auto _ = body->eval(*this, localEnv);
+    for(size_t i=1; i < exprs.size(); i++){
+        // ((catch error-expr) catch-body)
+        auto expr = dynamic_cast<ListExpr*>(exprs[i].get());
+        if(expr==nullptr){
+            ELux::check_syntax(false, "`try': expect `catch' expression inside a try-expression block.");
+        }
+        if(expr->elements.size() > 1){
+            auto catchExpr = expr->elements[0];
+            auto catchBody = std::make_shared<ListExpr>();
+            for(size_t j=1; j < expr->elements.size(); j++){
+                catchBody->elements.push_back(expr->elements[j]);
             }
+            // (catch error-expr)
+            auto self = dynamic_cast<ListExpr*>(catchExpr.get());
+            if(self==nullptr){
+                ELux::check_syntax(false, "`try': `catch'-expression must be a list.");
+            }
+            if(self->elements.size()!=2){
+                ELux::check_syntax(false, "`try': expect `catch' expression inside a try-expression block.");
+            }
+            if(auto sym = dynamic_cast<SymbolExpr*>(self->elements[0].get())){
+                if(sym->name.str()!="catch"){
+                    ELux::check_syntax(false, "`try': expect `catch' expression inside a try-expression block.");
+                }
+                if(auto arg = dynamic_cast<SymbolExpr*>(self->elements[1].get())){
+                    if(arg->name.str()=="_"){ // catch all
+                        [[maybe_unused]] auto _ = catchBody->eval(*this, localEnv);
+                        break;
+                    }else{
+                        ELux::check_syntax(
+                            false, "`try': invalid `catch' expression. Expect a wildcar `_` or a list\n"
+                            "in the form (err ErrorType)."
+                        );
+                    }
+                }else if(auto arg = dynamic_cast<ListExpr*>(self->elements[0].get())){
+                    if(arg->elements.size()!=2){
+                        ELux::check_syntax(
+                            false, "`try': invalid `catch' expression. Expect a wildcar `_` or a list\n"
+                            "in the form (err ErrorType)."
+                        );
+                    }
+                    auto pair = arg->eval(*this, localEnv);
+                    if(this->match_exception(pair, localEnv)){
+                        [[maybe_unused]] auto _ = catchBody->eval(*this, localEnv);
+                        break;
+                    }
+                    continue;
+                }else{
+                    ELux::check_syntax(
+                        false, "`try': invalid `catch' expression. Expect a wildcar `_` or a list\n"
+                        "in the form (err ErrorType)."
+                    );
+                }
+            }else{
+                ELux::check_syntax(
+                    false, "`try': expect `catch' expression inside a try-expression block."
+                );
+            }
+        }else{
+            ELux::check_syntax(
+                false, "`try': expect `catch' expression inside a try-expression block."
+            );
         }
     }
-    if(!catchIndex){
-        throw ELuxError(ELuxError::SyntaxError, "try must contain catch");
-    }
-    Self result = ELux::share();
-    try{
-        for(size_t i = 1; i < catchIndex; ++i){
-            result = elems[i]->eval(*this, env);
-        }
-        //return result;
-    }catch(const std::exception& ex){
-        if(catchIndex + 2 > elems.size()){
-            throw ELuxError(ELuxError::SyntaxError, "catch must be (catch var body...)");
-        }
-        auto varSym = dynamic_cast<SymbolExpr*>(elems[catchIndex+1].get());
-        if(!varSym){
-            throw ELuxError(ELuxError::SyntaxError, "catch var must be symbol");
-        }
-        auto newEnv = std::make_shared<Env>(env);
-        newEnv->define(varSym->name.str(), std::make_shared<String>(ex.what()));
-        for(size_t i = catchIndex+2; i < elems.size(); ++i){
-            result = elems[i]->eval(*this, newEnv);
-        }
-        //return result;
-    }
-    return result;
+    return ELux::share();
+}
+
+// -*-
+bool ELux::match_exception(const Self& self, Context env){
+    //! @todo: implement this
+    throw ELuxError(ELuxError::RuntimeError, "`catch' is not implemented yet.");
 }
 
 // -*-
