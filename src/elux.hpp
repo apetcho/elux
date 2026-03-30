@@ -97,7 +97,7 @@ using Vec = std::vector<T>;
 using Expr = std::shared_ptr<ExprBase>;
 using NativeFunc = std::function<Self(const Vec<Self>&, Context)>;
 using Iterator = std::shared_ptr<Iterable>;
-
+using ModulePtr = std::shared_ptr<Module>;
 // -*-
 struct HashHandler final{
     usize operator()(const Self& self) const;
@@ -918,13 +918,13 @@ private:
 // =====================
 // -*- Module System -*-
 // =====================
-// struct ModuleHash final{
-//     size_t operator()(const Module& self) const;
-// };
+struct ModuleHash final{
+    size_t operator()(const ModulePtr& self) const;
+};
 
-// struct ModuleEqual final{
-//     bool operator()(const Module& lhs, const Module& rhs) const;
-// };
+struct ModuleEqual final{
+    bool operator()(const ModulePtr& lhs, const ModulePtr& rhs) const;
+};
 
 // -*-
 class Module final{
@@ -968,7 +968,6 @@ private:
 // ==============================
 class ELux : public ExprVisitor {
 public:
-    using ModulePtr = std::shared_ptr<Module>;
 
     //! @todo: refactor & reimplement this method
     static void run(const std::string& code, Context env, const std::string& label);
@@ -984,7 +983,8 @@ public:
     //! @todo add `myFormatWidth'
 
     //! @todo
-    static std::unordered_set<ModulePtr> myModules;
+    using ModuleSet = std::unordered_set<ModulePtr, ModuleHash, ModuleEqual>;
+    static ModuleSet myModules;
     static Context myPrelude;
     
     //! @todo: implement the following two methods
@@ -1106,7 +1106,7 @@ public:
 
 private:
     Context m_runtime;
-    std::unordered_set<ModulePtr> m_cache;
+    ModuleSet m_cache;
 
     //Self handle_expand(const Vec<Expr>& elems, Context env);
     Self handle_quote(const Vec<Expr>& elems, Context env);

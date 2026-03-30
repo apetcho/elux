@@ -1458,33 +1458,44 @@ Self ELux::handle_macro(const Vec<Expr>& exprs, Context env){
 }
 
 // -*-
-Self ELux::handle_let(const Vec<Expr>& elems, Context env){
-    if(elems.size() < 3){
-        throw ELuxError(ELuxError::SyntaxError, "let expects bindings and body");
-    }
-    auto bindingsList = dynamic_cast<ListExpr*>(elems[1].get());
-    if(!bindingsList){
-        throw ELuxError(ELuxError::SyntaxError, "let bindings must be list");
-    }
-    auto newEnv = std::make_shared<Env>(env);
-    for(auto& b : bindingsList->elements) {
-        auto pairList = dynamic_cast<ListExpr*>(b.get());
-        if(!pairList || pairList->elements.size() != 2){
-            throw ELuxError(ELuxError::SyntaxError, "let binding must be (name value)");
-        }
-        auto nameSym = dynamic_cast<SymbolExpr*>(pairList->elements[0].get());
-        if(!nameSym){
-            throw ELuxError(ELuxError::SyntaxError, "let binding name must be symbol");
-        }
-        auto val = pairList->elements[1]->eval(*this, env);
-        newEnv->define(nameSym->name.str(), val);
+Self ELux::handle_let(const Vec<Expr>& exprs, Context env){
+    auto pred = (exprs.size() < 3);
+    auto msg = R"ELUX(
+    `let': malformed `let' expression. The correct syntax is as follows
+
+    Syntax
+    ------
+        (let bindings body)
+
+    Example
+    -------
+        (let ((x 2) (y 5))
+            (println x " + " y " = " (+ x y) ))
+    )ELUX";
+    ELux::check_argc(pred, msg);
+    
+    auto bindings = dynamic_cast<ListExpr*>(exprs[1].get());
+    pred = (bindings != nullptr);
+    ELux::check_type(pred, "`let': bindings must be a list.");
+    
+    auto localEnv = std::make_shared<Env>(env);
+    for(auto& binding : bindings->elements) {
+        auto keyval = dynamic_cast<ListExpr*>(binding.get());
+        pred = (keyval != nullptr || keyval->elements.size() != 2);
+        ELux::check_syntax(pred, "`let': bindings element must be (name value) pairs.");
+        auto sym = dynamic_cast<SymbolExpr*>(keyval->elements[0].get());
+        pred = (sym!=nullptr);
+        ELux::check_type(
+            pred, "`let': first element of each binding must be a symbol"
+        );
+        auto val = keyval->elements[1]->eval(*this, env);
+        localEnv->define(sym->name.str(), val);
     }
     // body
-    Self result;
-    for(size_t i = 2; i < elems.size(); ++i) {
-        result = elems[i]->eval(*this, newEnv);
+    for(size_t i = 2; i < exprs.size(); ++i){
+        [[maybe_unused]] auto _ = exprs[i]->eval(*this, localEnv);
     }
-    return result;
+    return ELux::share();
 }
 
 // -*-
@@ -1787,16 +1798,16 @@ void ELux::repl(const Vec<std::string>& args){}
 void ELux::setup(void){}
 */
 
-// // -*-
-// size_t ModuleHash::operator()(const Module& self) const{
-//     auto key = self.key();
-//     return std::hash<std::string>{}(key);
-// }
+// -*-
+size_t ModuleHash::operator()(const ModulePtr& self) const{
+    auto key = self->key();
+    return std::hash<std::string>{}(key);
+}
 
-// // -*-
-// bool ModuleEqual::operator()(const Module& lhs, const Module& rhs) const{
-//     return (lhs.key()==rhs.key());
-// }
+// -*-
+bool ModuleEqual::operator()(const ModulePtr& lhs, const ModulePtr& rhs) const{
+    return (lhs->key()==rhs->key());
+}
 
 // -*-
 Module::Module(ELux* elux, const Symbol& name)
