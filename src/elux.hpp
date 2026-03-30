@@ -801,7 +801,7 @@ struct Env : std::enable_shared_from_this<Env> {
     Self get(const std::string& name);
     bool has_doc(const std::string&, std::string& docstr) const;
     void add_doc(const std::string&, const std::string& docstr);
-    void is_exception(const std::string& name) const;
+    bool is_exception(const std::string& name) const;
 };
 
 // =========================

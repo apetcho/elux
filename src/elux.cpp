@@ -127,6 +127,18 @@ void Env::add_doc(const std::string& name, const std::string& docstr){
     this->docstrings[name] = docstr;
 }
 
+// -*-
+bool Env::is_exception(const std::string& name) const{
+    if(this->exceptions.find(name)!=this->exceptions.end()){
+        return true;
+    }else{
+        if(this->parent!=nullptr){
+            return this->parent->is_exception(name);
+        }else{
+            return false;
+        }
+    }
+}
 
 // ===============================
 // ELux (Visitor): the interpreter
@@ -1946,9 +1958,23 @@ bool ELux::match_exception(const Self& self, Context env){
 }
 
 // -*-
-Self ELux::handle_throw(const Vec<Expr>& elems, Context env){
-    //! @todo: implement this
-    throw ELuxError(ELuxError::RuntimeError, "`throw' is not implemented yet.");
+Self ELux::handle_throw(const Vec<Expr>& exprs, Context env){
+    auto pred = (exprs.size()==1);
+    auto msg = R"ELUX(
+    `throw': invalid throw-expression. The correct syntax is as follows:
+
+    Syntax
+    ------
+        (throw (ErrorType "message"))
+
+    Example
+    -------
+        (throw (ValueError "invalid value found."))
+    )ELUX";
+    ELux::check_argc(pred, msg);
+    auto self = dynamic_cast<ListExpr*>(exprs[0].get());
+    pred = (self!=nullptr);
+    ELux::check_argc(pred, msg);
 }
 
 // -*-
