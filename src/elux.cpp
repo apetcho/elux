@@ -122,10 +122,10 @@ bool Env::has_doc(const std::string& name, std::string& docstr) const{
     return true;
 }
 
-/*
-void Env::add_doc(const std::string&, const std::string& docstr){}
+void Env::add_doc(const std::string& name, const std::string& docstr){
+    this->docstrings[name] = docstr;
+}
 
-*/
 
 // ===============================
 // ELux (Visitor): the interpreter
@@ -1042,9 +1042,15 @@ Self ELux::handle_quasiquote(const Vec<Expr>& elems, Context env){
 // -*-
 Self ELux::handle_if(const Vec<Expr>& elems, Context env){
     if (elems.size() < 3 || elems.size() > 4){
-        throw ELuxError(ELuxError::SyntaxError, "if expects 2 or 3 args");
+        throw ELuxError(ELuxError::SyntaxError, "`if': expects 2 or 3 args");
     }
     auto cond = elems[1]->eval(*this, env);
+    if(!ELux::is_bool(cond)){
+        throw ELuxError(
+            ELuxError::SyntaxError,
+            "`if': test condition must evaluate to boolean value"
+        );
+    }
     if(ELux::as_bool(cond)){
         return elems[2]->eval(*this, env);
     }else if(elems.size() == 4){
@@ -1555,16 +1561,16 @@ void ELux::repl(const Vec<std::string>& args){}
 void ELux::setup(void){}
 */
 
-// -*-
-size_t ModuleHash::operator()(const Module& self) const{
-    auto key = self.key();
-    return std::hash<std::string>{}(key);
-}
+// // -*-
+// size_t ModuleHash::operator()(const Module& self) const{
+//     auto key = self.key();
+//     return std::hash<std::string>{}(key);
+// }
 
-// -*-
-bool ModuleEqual::operator()(const Module& lhs, const Module& rhs) const{
-    return (lhs.key()==rhs.key());
-}
+// // -*-
+// bool ModuleEqual::operator()(const Module& lhs, const Module& rhs) const{
+//     return (lhs.key()==rhs.key());
+// }
 
 // -*-
 Module::Module(ELux* elux, const Symbol& name)
@@ -1673,8 +1679,8 @@ void Module::setup(const Symbol& sym){
     this->m_filename = ("__elux__" + sym.str());
     bool found{false};
     for(auto& mymod: ELux::myModules){
-        if(mymod.key()==this->key()){
-            this->m_env = mymod.m_env;
+        if(mymod->key()==this->key()){
+            this->m_env = mymod->m_env;
             found = true;
             break;
         }

@@ -782,15 +782,11 @@ Self operator&&(const Self& lhs, const Self& rhs);
 // =========================
 // Environment
 // =========================
-//! @todo add `exceptions' field for storing exceptions 
-//! @todo add `docstrings' field to handle doctstring define in `var', `define', `fun'
-// and `macro' special forms
 //! @todo add `types' to store type names defined in the current environment
 //! @todo add `modules` to store modules imported in the current environment
 struct Env : std::enable_shared_from_this<Env> {
     std::map<std::string, Self> vars;
     std::set<std::string> immutables;
-    //! @todo:
     std::map<std::string, std::string> docstrings;
     std::set<std::string> exceptions;
     std::shared_ptr<Env> parent;
@@ -803,9 +799,9 @@ struct Env : std::enable_shared_from_this<Env> {
     bool contains(const std::string& name) const;
     bool is_immutable(const std::string& name) const;
     Self get(const std::string& name);
-    //! @todo:
     bool has_doc(const std::string&, std::string& docstr) const;
     void add_doc(const std::string&, const std::string& docstr);
+    void is_exception(const std::string& name) const;
 };
 
 // =========================
@@ -923,13 +919,13 @@ private:
 // =====================
 // -*- Module System -*-
 // =====================
-struct ModuleHash final{
-    size_t operator()(const Module& self) const;
-};
+// struct ModuleHash final{
+//     size_t operator()(const Module& self) const;
+// };
 
-struct ModuleEqual final{
-    bool operator()(const Module& lhs, const Module& rhs) const;
-};
+// struct ModuleEqual final{
+//     bool operator()(const Module& lhs, const Module& rhs) const;
+// };
 
 // -*-
 class Module final{
@@ -973,6 +969,8 @@ private:
 // ==============================
 class ELux : public ExprVisitor {
 public:
+    using ModulePtr = std::shared_ptr<Module>;
+
     //! @todo: refactor & reimplement this method
     static void run(const std::string& code, Context env, const std::string& label);
     
@@ -985,16 +983,20 @@ public:
     //! @todo add `myFloatMode'
     //! @todo add `myIntegerMode'
     //! @todo add `myFormatWidth'
-    //! @todo add `myModules'
-    static std::unordered_set<Module, ModuleHash, ModuleEqual> myModules;
-    //! @todo add `myPrelude'
+    
+    //! @todo
+    static std::unordered_set<ModulePtr> myModules;
+    static Context myPrelude;
     
     //! @todo: implement the following two methods
     static void run(const fs::path& modulePath, const Vec<Self>& args);
     static void repl(const Vec<std::string>& args);
     static void setup(void);
 
-    // --- {File, Path, System, Regex, ...}
+    // ----------------------------------------
+    // -*- Sample ELux Modules              -*-
+    // --- {File, Path, System, Regex, ...} ---
+    // ----------------------------------------
     
     static Self share(void);
     static Self share(i64 val);
@@ -1097,6 +1099,7 @@ public:
 
     const Context& runtime(void) const{ return this->m_runtime; }
     Context& runtime(void){ return this->m_runtime; }
+
     //! @todo
     bool is_loaded(const Module& mymod) const;
     bool is_loaded(const Symbol& myname) const;
@@ -1104,7 +1107,7 @@ public:
 
 private:
     Context m_runtime;
-    std::unordered_set<Module, ModuleHash, ModuleEqual> m_loaded;
+    std::unordered_set<ModulePtr> m_cache;
 
     //Self handle_expand(const Vec<Expr>& elems, Context env);
     Self handle_quote(const Vec<Expr>& elems, Context env);
