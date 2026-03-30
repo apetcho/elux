@@ -1995,52 +1995,62 @@ Self ELux::handle_throw(const Vec<Expr>& exprs, Context env){
 
 // -*-
 //! @todo: refactor this functions
-Self ELux::handle_import(const Vec<Expr>& elems, Context env){
-    // (import "file.elux")
-    if(elems.size() != 2){
-        throw ELuxError(ELuxError::SyntaxError, "import expects filename");
+Self ELux::handle_import(const Vec<Expr>& exprs, Context env){
+    /*
+        (import symbol)
+        (import "path")
+    */
+    auto pred = (exprs.size()==1);
+    auto msg = R"ELUX(
+    `import': invalid import-expression. The correct syntax is as follows:
+
+    Syntax
+    ------
+        (import module-name)        ; import builtin module
+        (import "module-path")      ; import user-define module from path.
+    )ELUX";
+    ELux::check_argc(pred, msg);
+    auto expr = dynamic_cast<LiteralExpr*>(exprs[0].get());
+    pred = (expr!=nullptr);
+    ELux::check_syntax(pred, msg);
+    pred = (ELux::is_symbol(expr->value) || ELux::is_string(expr->value));
+    ELux::check_syntax(pred, msg);
+    if(ELux::is_symbol(expr->value)){
+        auto sym = ELux::as_symbol(expr->value);
+        if(!this->is_builtin_module(sym)){
+            std::stringstream ss;
+            ss << "no builtin module " << std::quoted(sym.str()) << " found.";
+            ELux::check_runtime(false, ss.str());
+        }
+        if(this->is_loaded(sym)){
+            return ELux::share();
+        }
+
+        for(auto mymod: ELux::myModules){
+            if(mymod->name()==sym){
+                for(const auto& [key, val]: mymod->load()->vars){
+                    env->define(key, val);
+                }
+                this->m_cache.insert(mymod);
+                return ELux::share();
+            }
+        }
     }
-    auto lit = dynamic_cast<LiteralExpr*>(elems[1].get());
-    if(!lit || !ELux::is_string(lit->value)){
-        throw ELuxError(ELuxError::SyntaxError, "import expects string filename");
-    }
-    std::string filename = dynamic_cast<String*>(lit->value.get())->str();
-    std::ifstream in(filename);
-    if(!in){
-        throw ELuxError(ELuxError::RuntimeError, "Cannot open module file: " + filename);
-    }
-    std::stringstream buffer;
-    buffer << in.rdbuf();
-    Parser parser(buffer.str());
-    in.close();
-    auto exprs = parser.parse();
-    auto moduleEnv = std::make_shared<Env>(env);
-    ELux elux;
-    Self last = ELux::share();
-    for(auto& expr : exprs){
-        last = elux.eval(expr, moduleEnv);
-    }
-    // collect exports: module must define (exports 'a 'b ...)
-    Self exportsVal;
-    try{
-        exportsVal = moduleEnv->get("exports");
-    }catch(...){
-        // no exports, return nil
+
+    if(ELux::is_string(expr->value)){
+        auto path = fs::path(ELux::as_string(expr->value).repr());
+        if(this->is_loaded(path)){
+            return ELux::share();
+        }
+        auto mymod = std::make_shared<Module>(this, path);
+        for(auto [key, val]: mymod->load()->vars){
+            env->define(key, val);
+        }
+        this->m_cache.insert(mymod);
         return ELux::share();
     }
-    if( !ELux::is_list(exportsVal)){
-        throw ELuxError(ELuxError::RuntimeError, "exports must be list of symbols (strings)");
-    }
-    HashMap dict;
-    const List& exList = *dynamic_cast<List*>(exportsVal.get());
-    for(auto& symVal : exList.value()){
-        if(!ELux::is_string(symVal)){
-            throw ELuxError(ELuxError::RuntimeError, "exports entries must be strings");
-        }
-        std::string name = dynamic_cast<String*>(symVal.get())->str();
-        dict.m_hmap[ELux::share(name)] = moduleEnv->get(name);
-    }
-    return std::make_shared<HashMap>(dict);
+
+    return ELux::share();
 }
 
 // -*-
