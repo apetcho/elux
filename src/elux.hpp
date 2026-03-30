@@ -932,8 +932,9 @@ struct ModuleEqual final{
 // -*-
 class Module final{
 public:
-    explicit Module(ELux* elux, const Symbol name);
+    explicit Module(ELux* elux, const Symbol& sym);
     explicit Module(ELux* elux, const fs::path& modulePath);
+    explicit Module(ELux* elux, const Symbol& sym, const fs::path& modulePath);
     Module(const Module&) noexcept = delete;
     Module& operator=(const Module&) noexcept = delete;
     Module(Module&& other) noexcept;
@@ -961,6 +962,7 @@ private:
 
     void setup(const Symbol& sym);
     void setup(const fs::path& path);
+    void setup(const Symbol& sym, const fs::path& path);
     static bool is_module_key(const std::string& token);
 };
 
@@ -972,6 +974,7 @@ public:
     //! @todo: refactor & reimplement this method
     static void run(const std::string& code, Context env, const std::string& label);
     
+    static std::string myExt;
     //! @todo add `myLicense'
     //! @todo add `myVersion'
     //! @todo add `myAuthors'
@@ -1090,7 +1093,11 @@ public:
     Expr to_expr(const List& xs);
     Self eval_as_expr(const Self& self, Context env);
 
+    const Context& runtime(void) const{ return this->m_runtime; }
+    Context& runtime(void){ return this->m_runtime; }
+
 private:
+    Context m_runtime;
     //Self handle_expand(const Vec<Expr>& elems, Context env);
     Self handle_quote(const Vec<Expr>& elems, Context env);
     Self handle_quasiquote(const Vec<Expr>& elems, Context env);

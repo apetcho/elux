@@ -1552,7 +1552,7 @@ bool ModuleEqual::operator()(const Module& lhs, const Module& rhs) const{
 }
 
 // -*-
-Module::Module(ELux* elux, const Symbol name)
+Module::Module(ELux* elux, const Symbol& name)
 : m_elux{elux}
 , m_name{name}{
     this->setup(name);
@@ -1564,6 +1564,13 @@ Module::Module(ELux* elux, const fs::path& modulePath)
 , m_name{Symbol("")}
 {
     this->setup(modulePath);
+}
+// -*-
+Module::Module(ELux* elux, const Symbol& sym, const fs::path& modulePath)
+: m_elux{elux}
+, m_name{Symbol("")}
+{
+    this->setup(sym, modulePath);
 }
 
 // -*-
@@ -1665,14 +1672,41 @@ void Module::setup(const Symbol& sym){
     }
 }
 
+// -*-
+void Module::setup(const fs::path& path){
+    this->m_fullpath = fs::absolute(path);
+    this->m_filename = this->m_fullpath.filename();
+    auto pos = this->m_filename.find(ELux::myExt);
+    if(pos==std::string::npos){
+        std::stringstream ss;
+        ss << "ELux script filename must always have " << std::quoted(ELux::myExt);
+        ss << " extension.";
+        throw ELuxError(ELuxError::RuntimeError, ss.str());
+    }
+    if(!fs::exists(path)){
+        std::stringstream ss;
+        ss << "Module " << std::quoted(path.string()) << "not found";
+        throw ELuxError(ELuxError::RuntimeError, ss.str());
+    }
+
+    auto size = fs::file_size(path);
+    std::ifstream fin(path, std::ios::binary);
+    std::string src(size, '\0');
+    fin.read(&src[0], size);
+    fin.close();
+
+    auto program = Parser(src).parse();
+    this->m_env = std::make_shared<Env>(this->m_elux->runtime());
+    for(auto expr: program){
+        [[maybe_unused]] auto _ = this->m_elux->eval({expr}, this->m_env);
+    }
+}
+
 /*
 // -*-
 class Module final{
 public:
-
-
-void Module::setup(const fs::path& path){}
-
+void Module::setup(const Symbol& sym, const fs::path& path){}
 private:
     Symbol m_name;              // module nmae
     fs::path m_fullpath;        // module fullpath
